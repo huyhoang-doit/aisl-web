@@ -1,12 +1,12 @@
 import { Route, Routes } from "react-router-dom";
-import LandingPage from "./pages/landing/LandingPage";
-import { UnAuthorizedRoute } from "./routes/UnAuthorizedRoute";
-import { ProtectedRoute } from "./routes/ProtectedRoute";
-import { roles } from "./configs/role";
-import { RoleRoutes } from "./routes/RoleRoutes";
-import AdminRoutes from "./routes/AdminRoutes";
-import StaffRoutes from "./routes/StaffRoutes";
-import NotFoundPage from "./pages/404/NotFoundPage";
+import LandingPage from "./features/landing/pages/LandingPage";
+import { UnAuthorizedRoute } from "./shared/routes/guards/UnAuthorizedRoute";
+import { ProtectedRoute } from "./shared/routes/guards/ProtectedRoute";
+import { roles } from "./shared/configs/role";
+import { RoleRoutes } from "./shared/routes/guards/RoleRoutes";
+import AdminRoutes from "./features/admin/routes/AdminRoutes";
+import StaffRoutes from "./features/staff/routes/StaffRoutes";
+import NotFoundPage from "./shared/pages/NotFoundPage";
 
 function App() {
   return (
