@@ -10,56 +10,56 @@ interface FeaturesProps {
 const featureList: FeaturesProps[] = [
   {
     icon: "ScanFace",
-    title: "Multi-Factor Security & Biometrics",
+    title: "Bảo Mật Đa Lớp & Sinh Trắc Học",
     description:
-      "Face recognition technology for secure, contactless package retrieval with multi-layer authentication.",
+      "Công nghệ nhận diện khuôn mặt để nhận hàng an toàn, không tiếp xúc với xác thực nhiều lớp. Hỗ trợ FaceID và phương thức dự phòng (Password/OTP).",
   },
   {
     icon: "Wallet",
-    title: "Wallet & Automated Billing",
+    title: "Ví Điện Tử & Thanh Toán Tự Động",
     description:
-      "Time-based billing automatically calculates storage fees and deducts from your pre-loaded wallet.",
+      "Tính phí dựa trên thời gian lưu trữ thực tế, tự động trừ vào ví đã nạp trước. Không cần thao tác thanh toán thủ công.",
   },
   {
     icon: "Package",
-    title: "Smart Locker Allocation",
+    title: "Phân Bổ Tủ Thông Minh",
     description:
-      "Automatically assigns optimal locker compartments based on package size and availability.",
+      "Tự động phân bổ tủ tối ưu dựa trên kích cỡ gói hàng và tình trạng sẵn có. Hỗ trợ Load Balancing để giảm hao mòn cục bộ.",
   },
   {
     icon: "Activity",
-    title: "Real-time IoT Monitoring",
+    title: "Giám Sát IoT Theo Thời Gian Thực",
     description:
-      "Continuous monitoring of locker status, package conditions, and system health via IoT sensors.",
+      "Giám sát liên tục trạng thái tủ, điều kiện gói hàng và sức khỏe hệ thống qua cảm biến IoT. Cảnh báo tức thì khi có sự cố.",
   },
   {
     icon: "Calendar",
-    title: "Slot Reservation System",
+    title: "Hệ Thống Đặt Chỗ Trước",
     description:
-      "Reserve locker slots in advance for scheduled deliveries with secure space allocation.",
+      "Đặt trước slot tủ cho các giao hàng đã lên lịch với phân bổ không gian an toàn. Hỗ trợ đặt lịch linh hoạt.",
   },
   {
     icon: "Users",
-    title: "Smart Delegation & Liability Transfer",
+    title: "Ủy Quyền Thông Minh & Chuyển Trách Nhiệm",
     description:
-      "Delegate package pickup with automatic liability transfer and access management.",
+      "Ủy quyền nhận hàng với chuyển trách nhiệm tài chính tự động. Hỗ trợ ủy quyền cho người dùng hệ thống hoặc người ngoài hệ thống.",
   },
 ];
 
 export const FeaturesSection = () => {
   return (
-    <section id="features" className="container py-18 sm:py-32">
+    <section id="features" className="container py-8 sm:py-12">
       <h2 className="text-lg text-primary text-center mb-2 tracking-wider">
-        Features
+        Tính Năng
       </h2>
 
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Powerful Features for Modern Living
+        Tính Năng Mạnh Mẽ Cho Cuộc Sống Hiện Đại
       </h2>
 
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
-        Experience the next generation of smart locker technology. From AI-powered face recognition 
-        to automated billing, Lockerly delivers convenience and security in one seamless solution.
+        Trải nghiệm thế hệ tiếp theo của công nghệ tủ thông minh. Từ nhận diện khuôn mặt AI 
+        đến thanh toán tự động, Lockerly mang lại sự tiện lợi và an toàn trong một giải pháp hoàn chỉnh.
       </h3>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

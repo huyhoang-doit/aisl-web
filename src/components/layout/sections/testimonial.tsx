@@ -26,64 +26,64 @@ interface ReviewProps {
 const reviewList: ReviewProps[] = [
   {
     image: "https://github.com/shadcn.png",
-    name: "Nguyen Van A",
-    userName: "Apartment Resident",
+    name: "Nguyễn Văn A",
+    userName: "Cư dân chung cư",
     comment:
-      "Lockerly has completely transformed how I receive packages. No more waiting at the front desk or asking neighbors. The face recognition is incredibly fast and reliable!",
+      "Lockerly đã thay đổi hoàn toàn cách tôi nhận hàng. Không còn phải chờ ở quầy lễ tân hoặc nhờ hàng xóm. Nhận diện khuôn mặt cực kỳ nhanh và đáng tin cậy!",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Tran Thi B",
-    userName: "Office Manager",
+    name: "Trần Thị B",
+    userName: "Quản lý văn phòng",
     comment:
-      "As someone who manages deliveries for our office building, Lockerly has eliminated all the administrative burden. The automated billing and smart allocation features are game-changers.",
+      "Là người quản lý giao hàng cho tòa nhà văn phòng, Lockerly đã loại bỏ hoàn toàn gánh nặng hành chính. Tính năng thanh toán tự động và phân bổ thông minh thực sự thay đổi cuộc chơi.",
     rating: 4.9,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Le Van C",
-    userName: "Dormitory Resident",
+    name: "Lê Văn C",
+    userName: "Sinh viên ký túc xá",
     comment:
-      "The best part is not needing my phone! I can grab packages even when my battery is dead. The hands-free experience is exactly what I needed for my busy schedule.",
+      "Phần tốt nhất là không cần điện thoại! Tôi có thể lấy hàng ngay cả khi pin hết. Trải nghiệm không cần thiết bị chính xác là thứ tôi cần cho lịch trình bận rộn.",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Pham Thi D",
-    userName: "Frequent Online Shopper",
+    name: "Phạm Thị D",
+    userName: "Người mua sắm trực tuyến thường xuyên",
     comment:
-      "I love how the system automatically calculates storage fees. No more surprise charges or manual payments. The wallet integration makes everything seamless.",
+      "Tôi yêu cách hệ thống tự động tính phí lưu trữ. Không còn phí bất ngờ hoặc thanh toán thủ công. Tích hợp ví làm mọi thứ trở nên mượt mà.",
     rating: 4.8,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Hoang Van E",
-    userName: "Security Officer",
+    name: "Hoàng Văn E",
+    userName: "Nhân viên bảo vệ",
     comment:
-      "The real-time monitoring and audit trail features give us complete visibility. We can track every package and access event, ensuring maximum security for residents.",
+      "Tính năng giám sát thời gian thực và lịch sử kiểm tra cho chúng tôi tầm nhìn hoàn chỉnh. Chúng tôi có thể theo dõi mọi gói hàng và sự kiện truy cập, đảm bảo an ninh tối đa cho cư dân.",
     rating: 5.0,
   },
   {
     image: "https://github.com/shadcn.png",
-    name: "Nguyen Thi F",
-    userName: "Property Manager",
+    name: "Nguyễn Thị F",
+    userName: "Quản lý tài sản",
     comment:
-      "Lockerly has reduced package-related complaints by 90%. Residents love the convenience, and we love the reduced workload. It's a win-win solution.",
+      "Lockerly đã giảm 90% khiếu nại liên quan đến gói hàng. Cư dân yêu thích sự tiện lợi, và chúng tôi yêu thích khối lượng công việc giảm. Đó là giải pháp đôi bên cùng có lợi.",
     rating: 4.9,
   },
 ];
 
 export const TestimonialSection = () => {
   return (
-    <section id="testimonials" className="container py-18 sm:py-32">
+    <section id="testimonials" className="container py-8 sm:py-12">
       <div className="text-center mb-8">
         <h2 className="text-lg text-primary text-center mb-2 tracking-wider">
-          Testimonials
+          Đánh Giá
         </h2>
 
         <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-          Trusted by Residents & Property Managers
+          Được Tin Tưởng Bởi Cư Dân & Quản Lý Tài Sản
         </h2>
       </div>
 

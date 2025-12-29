@@ -57,26 +57,26 @@ export const ContactSection = () => {
   }
 
   return (
-    <section id="contact" className="container py-18 sm:py-32">
+    <section id="contact" className="container py-8 sm:py-12">
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <div className="mb-4">
             <h2 className="text-lg text-primary mb-2 tracking-wider">
-              Contact
+              Liên Hệ
             </h2>
 
-            <h2 className="text-3xl md:text-4xl font-bold">Get In Touch</h2>
+            <h2 className="text-3xl md:text-4xl font-bold">Liên Hệ Với Chúng Tôi</h2>
           </div>
           <p className="mb-8 text-muted-foreground lg:w-5/6">
-            Have questions about Lockerly? Want to bring smart lockers to your property? 
-            We're here to help. Reach out to our team for support, partnerships, or inquiries.
+            Có câu hỏi về Lockerly? Muốn mang tủ thông minh đến tài sản của bạn? 
+            Chúng tôi ở đây để hỗ trợ. Liên hệ với đội ngũ của chúng tôi để được hỗ trợ, hợp tác hoặc tư vấn.
           </p>
 
           <div className="flex flex-col gap-4">
             <div>
               <div className="flex gap-2 mb-1">
                 <Building2 />
-                <div className="font-bold">Project Information</div>
+                <div className="font-bold">Thông Tin Dự Án</div>
               </div>
 
               <div>AI-Powered Smart Locker (GSP26SE20)</div>
@@ -86,7 +86,7 @@ export const ContactSection = () => {
             <div>
               <div className="flex gap-2 mb-1">
                 <Mail />
-                <div className="font-bold">Email Us</div>
+                <div className="font-bold">Email</div>
               </div>
 
               <div>Dotntse181697@fpt.edu.vn</div>
@@ -95,12 +95,12 @@ export const ContactSection = () => {
             <div>
               <div className="flex gap-2">
                 <Clock />
-                <div className="font-bold">Support Hours</div>
+                <div className="font-bold">Giờ Hỗ Trợ</div>
               </div>
 
               <div>
-                <div>Monday - Friday</div>
-                <div>9AM - 6PM (GMT+7)</div>
+                <div>Thứ Hai - Thứ Sáu</div>
+                <div>9:00 - 18:00 (GMT+7)</div>
               </div>
             </div>
           </div>
@@ -120,9 +120,9 @@ export const ContactSection = () => {
                     name="firstName"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>First Name</FormLabel>
+                        <FormLabel>Họ</FormLabel>
                         <FormControl>
-                          <Input placeholder="Leopoldo" {...field} />
+                          <Input placeholder="Nguyễn" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -133,9 +133,9 @@ export const ContactSection = () => {
                     name="lastName"
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>Last Name</FormLabel>
+                        <FormLabel>Tên</FormLabel>
                         <FormControl>
-                          <Input placeholder="Miranda" {...field} />
+                          <Input placeholder="Văn A" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -153,7 +153,7 @@ export const ContactSection = () => {
                         <FormControl>
                           <Input
                             type="email"
-                            placeholder="leomirandadev@gmail.com"
+                            placeholder="nguyenvana@email.com"
                             {...field}
                           />
                         </FormControl>
@@ -169,29 +169,29 @@ export const ContactSection = () => {
                     name="subject"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Subject</FormLabel>
+                        <FormLabel>Chủ Đề</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select a subject" />
+                              <SelectValue placeholder="Chọn chủ đề" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="General Inquiry">
-                              General Inquiry
+                              Câu Hỏi Chung
                             </SelectItem>
                             <SelectItem value="Partnership">
-                              Partnership
+                              Hợp Tác
                             </SelectItem>
                             <SelectItem value="Technical Support">
-                              Technical Support
+                              Hỗ Trợ Kỹ Thuật
                             </SelectItem>
-                            <SelectItem value="Billing">Billing</SelectItem>
+                            <SelectItem value="Billing">Thanh Toán</SelectItem>
                             <SelectItem value="Feature Request">
-                              Feature Request
+                              Yêu Cầu Tính Năng
                             </SelectItem>
                           </SelectContent>
                         </Select>
@@ -207,11 +207,11 @@ export const ContactSection = () => {
                     name="message"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Message</FormLabel>
+                        <FormLabel>Tin Nhắn</FormLabel>
                         <FormControl>
                           <Textarea
                             rows={5}
-                            placeholder="Your message..."
+                            placeholder="Tin nhắn của bạn..."
                             className="resize-none"
                             {...field}
                           />
@@ -223,7 +223,7 @@ export const ContactSection = () => {
                   />
                 </div>
 
-                <Button className="mt-4">Send message</Button>
+                <Button className="mt-4">Gửi Tin Nhắn</Button>
               </form>
             </Form>
           </CardContent>

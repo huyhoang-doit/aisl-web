@@ -3,7 +3,7 @@ import { RotateCcwKeyIcon } from "lucide-react";
 
 export const FooterSection = () => {
   return (
-    <footer id="footer" className="container py-18 sm:py-32">
+    <footer id="footer" className="container py-8 sm:py-12">
       <div className="p-10 bg-card border border-secondary rounded-2xl">
         <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-x-12 gap-y-8">
           <div className="col-span-full xl:col-span-2">
@@ -15,7 +15,7 @@ export const FooterSection = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <h3 className="font-bold text-lg">Contact</h3>
+            <h3 className="font-bold text-lg">Liên Hệ</h3>
             <div>
               <a href="#" className="opacity-60 hover:opacity-100">
                 Github
@@ -24,76 +24,76 @@ export const FooterSection = () => {
 
             <div>
               <a href="#" className="opacity-60 hover:opacity-100">
+                Email
+              </a>
+            </div>
+
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                Liên Hệ Hỗ Trợ
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-lg">Nền Tảng</h3>
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                Ứng Dụng Web
+              </a>
+            </div>
+
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                Ứng Dụng Di Động
+              </a>
+            </div>
+
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                Bảng Điều Khiển IoT
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-lg">Hỗ Trợ</h3>
+            <div>
+              <a href="#contact" className="opacity-60 hover:opacity-100">
+                Liên Hệ Chúng Tôi
+              </a>
+            </div>
+
+            <div>
+              <a href="#faq" className="opacity-60 hover:opacity-100">
+                Câu Hỏi Thường Gặp
+              </a>
+            </div>
+
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                Phản Hồi
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <h3 className="font-bold text-lg">Mạng Xã Hội</h3>
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                Facebook
+              </a>
+            </div>
+
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
+                LinkedIn
+              </a>
+            </div>
+
+            <div>
+              <a href="#" className="opacity-60 hover:opacity-100">
                 Twitter
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Instagram
-              </a>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <h3 className="font-bold text-lg">Platforms</h3>
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Web Application
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Mobile App
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                IoT Dashboard
-              </a>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <h3 className="font-bold text-lg">Help</h3>
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Contact Us
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                FAQ
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Feedback
-              </a>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <h3 className="font-bold text-lg">Socials</h3>
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Twitch
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Discord
-              </a>
-            </div>
-
-            <div>
-              <a href="#" className="opacity-60 hover:opacity-100">
-                Dribbble
               </a>
             </div>
           </div>

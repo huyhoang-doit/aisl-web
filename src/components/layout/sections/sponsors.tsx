@@ -17,31 +17,31 @@ interface sponsorsProps {
 const sponsors: sponsorsProps[] = [
   {
     icon: "Building2",
-    name: "Apartment Complexes",
+    name: "Khu Chung Cư",
   },
   {
     icon: "Building2",
-    name: "Office Buildings",
+    name: "Tòa Nhà Văn Phòng",
   },
   {
     icon: "Building2",
-    name: "Dormitories",
+    name: "Ký Túc Xá",
   },
   {
     icon: "Building2",
-    name: "Residential Areas",
+    name: "Khu Dân Cư",
   },
   {
     icon: "Building2",
-    name: "Property Management",
+    name: "Quản Lý Tài Sản",
   },
   {
     icon: "Building2",
-    name: "Logistics Partners",
+    name: "Đối Tác Logistics",
   },
   {
     icon: "Building2",
-    name: "Smart City Solutions",
+    name: "Giải Pháp Thành Phố Thông Minh",
   },
 ];
 
@@ -59,9 +59,9 @@ export const SponsorsSection = () => {
   }, [api]);
 
   return (
-    <section id="sponsors" className="max-w-[75%] mx-auto pb-24 sm:pb-32">
+    <section id="sponsors" className="max-w-[75%] mx-auto pb-8 sm:pb-12">
             <h2 className="text-lg md:text-xl text-center mb-6">
-              Trusted by Leading Properties
+              Đối Tượng Hợp Tác
             </h2>
 
       <div className="mx-auto">

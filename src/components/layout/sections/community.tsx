@@ -7,19 +7,39 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import communityImage1 from "@/assets/landing-4.jpg";
+import communityImage2 from "@/assets/landing-5.jpg";
 
 export const CommunitySection = () => {
   return (
-    <section id="community" className="py-12 ">
+    <section id="community" className="py-8">
       <hr className="border-secondary" />
-      <div className="container py-20 sm:py-20">
+      <div className="container py-8 sm:py-10">
+        {/* Images Section */}
+        <div className="grid md:grid-cols-2 gap-6 mb-12 max-w-5xl mx-auto">
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-border/50 group hover:shadow-2xl transition-all duration-500">
+            <img
+              src={communityImage1}
+              alt="Lockerly Community Experience"
+              className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          </div>
+          <div className="rounded-2xl overflow-hidden shadow-xl border border-border/50 group hover:shadow-2xl transition-all duration-500">
+            <img
+              src={communityImage2}
+              alt="Lockerly Smart Locker System"
+              className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700"
+            />
+          </div>
+        </div>
+
         <div className="lg:w-[60%] mx-auto">
           <Card className="bg-background border-none shadow-none text-center flex flex-col items-center justify-center">
             <CardHeader>
               <CardTitle className="text-4xl md:text-5xl font-bold flex flex-col items-center">
-                <DiscordIcon />
+                {/* <DiscordIcon /> */}
                 <div>
-                  Ready to experience
+                  Sẵn sàng trải nghiệm
                   <span className="text-transparent pl-2 bg-gradient-to-r from-[#D247BF] to-primary bg-clip-text">
                     Lockerly?
                   </span>
@@ -27,14 +47,14 @@ export const CommunitySection = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="lg:w-[80%] text-xl text-muted-foreground">
-              Transform how you receive packages. Join thousands of residents and property managers 
-              who have already upgraded to smart, hands-free package delivery. Get started today! 🚀
+              Thay đổi cách bạn nhận hàng. Tham gia cùng hàng nghìn cư dân và quản lý tài sản 
+              đã nâng cấp lên giao nhận hàng thông minh, không cần thiết bị. Bắt đầu ngay hôm nay! 🚀
             </CardContent>
 
             <CardFooter>
               <Button asChild>
                 <a href="#contact" rel="noopener noreferrer">
-                  Get Started Now
+                  Bắt Đầu Ngay
                 </a>
               </Button>
             </CardFooter>

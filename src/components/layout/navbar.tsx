@@ -33,12 +33,16 @@ interface FeatureProps {
 
 const routeList: RouteProps[] = [
   {
+    href: "#pricing",
+    label: "Bảng Giá",
+  },
+  {
     href: "#testimonials",
-    label: "Testimonials",
+    label: "Đánh Giá",
   },
   {
     href: "#contact",
-    label: "Contact",
+    label: "Liên Hệ",
   },
   {
     href: "#faq",
@@ -48,21 +52,24 @@ const routeList: RouteProps[] = [
 
 const featureList: FeatureProps[] = [
   {
-    title: "Multi-Factor Security & Biometrics",
-    description: "Advanced face recognition technology ensures secure, contactless package retrieval with multi-layer authentication.",
+    title: "Bảo Mật Đa Lớp & Sinh Trắc Học",
+    description: "Công nghệ nhận diện khuôn mặt tiên tiến đảm bảo nhận hàng an toàn, không tiếp xúc với xác thực nhiều lớp.",
     href: "#features",
   },
   {
-    title: "Hands-Free Convenience",
-    description:
-      "Retrieve packages without carrying your phone. Simply approach the locker and let AI recognize your face for instant access.",
-    href: "#benefits",
+    title: "Ví Điện Tử & Thanh Toán Tự Động",
+    description: "Tính phí dựa trên thời gian lưu trữ thực tế, tự động trừ vào ví đã nạp trước. Không cần thao tác thanh toán thủ công.",
+    href: "#features",
   },
   {
-    title: "Face Recognition Setup",
-    description:
-      "One-time registration of your face data for instant, hands-free package retrieval at any locker.",
-    href: "#services",
+    title: "Phân Bổ Tủ Thông Minh",
+    description: "Tự động phân bổ tủ tối ưu dựa trên kích cỡ gói hàng và tình trạng sẵn có. Hỗ trợ Load Balancing để giảm hao mòn cục bộ.",
+    href: "#features",
+  },
+  {
+    title: "Giám Sát IoT Theo Thời Gian Thực",
+    description: "Giám sát liên tục trạng thái tủ, điều kiện gói hàng và sức khỏe hệ thống qua cảm biến IoT. Cảnh báo tức thì khi có sự cố.",
+    href: "#features",
   },
 ];
 
@@ -99,15 +106,72 @@ export const Navbar = () => {
               </SheetHeader>
 
               <div className="flex flex-col gap-2">
+                <Button
+                  onClick={() => {
+                    setIsOpen(false);
+                    const element = document.querySelector("#benefits");
+                    if (element) {
+                      element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  variant="ghost"
+                  className="justify-start text-base"
+                >
+                  Lợi Ích
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsOpen(false);
+                    const element = document.querySelector("#features");
+                    if (element) {
+                      element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  variant="ghost"
+                  className="justify-start text-base"
+                >
+                  Tính Năng
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsOpen(false);
+                    const element = document.querySelector("#how-it-works");
+                    if (element) {
+                      element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  variant="ghost"
+                  className="justify-start text-base"
+                >
+                  Cách Thức Hoạt Động
+                </Button>
+                <Button
+                  onClick={() => {
+                    setIsOpen(false);
+                    const element = document.querySelector("#services");
+                    if (element) {
+                      element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  variant="ghost"
+                  className="justify-start text-base"
+                >
+                  Dịch Vụ
+                </Button>
                 {routeList.map(({ href, label }) => (
                   <Button
                     key={href}
-                    onClick={() => setIsOpen(false)}
-                    asChild
+                    onClick={() => {
+                      setIsOpen(false);
+                      const element = document.querySelector(href);
+                      if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
                     variant="ghost"
                     className="justify-start text-base"
                   >
-                    <a href={href}>{label}</a>
+                    {label}
                   </Button>
                 ))}
               </div>
@@ -127,18 +191,85 @@ export const Navbar = () => {
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuTrigger className="bg-card text-base">
-              Features
+              Giới Thiệu
             </NavigationMenuTrigger>
             <NavigationMenuContent>
-              <div className="grid w-[600px] grid-cols-2 gap-5 p-4">
-                <img
-                  src="https://avatars.githubusercontent.com/u/75042455?v=4"
-                  alt="RadixLogo"
-                  className="h-full w-full rounded-md object-cover"
-                  width={600}
-                  height={600}
-                />
-                <ul className="flex flex-col gap-2">
+              <div className="grid w-[400px] grid-cols-1 gap-5 p-4">
+                <div className="flex flex-col gap-2">
+                  <a
+                    href="#benefits"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const element = document.querySelector("#benefits");
+                      if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className="block rounded-md p-3 text-sm hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <p className="mb-1 font-semibold leading-none text-foreground">
+                      Lợi Ích
+                    </p>
+                    <p className="line-clamp-2 text-muted-foreground">
+                      Tại sao chọn Lockerly? Trải nghiệm tương lai của giao nhận hàng hóa với công nghệ AI tiên tiến.
+                    </p>
+                  </a>
+                  <a
+                    href="#features"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const element = document.querySelector("#features");
+                      if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className="block rounded-md p-3 text-sm hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <p className="mb-1 font-semibold leading-none text-foreground">
+                      Tính Năng
+                    </p>
+                    <p className="line-clamp-2 text-muted-foreground">
+                      Tính năng mạnh mẽ cho cuộc sống hiện đại. Từ nhận diện khuôn mặt AI đến thanh toán tự động.
+                    </p>
+                  </a>
+                  <a
+                    href="#how-it-works"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const element = document.querySelector("#how-it-works");
+                      if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className="block rounded-md p-3 text-sm hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <p className="mb-1 font-semibold leading-none text-foreground">
+                      Cách Thức Hoạt Động
+                    </p>
+                    <p className="line-clamp-2 text-muted-foreground">
+                      Tìm hiểu quy trình gửi hàng, nhận hàng và thuê tủ cá nhân một cách chi tiết và dễ hiểu.
+                    </p>
+                  </a>
+                  <a
+                    href="#services"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const element = document.querySelector("#services");
+                      if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }}
+                    className="block rounded-md p-3 text-sm hover:bg-muted transition-colors cursor-pointer"
+                  >
+                    <p className="mb-1 font-semibold leading-none text-foreground">
+                      Dịch Vụ
+                    </p>
+                    <p className="line-clamp-2 text-muted-foreground">
+                      Dịch vụ tủ thông minh toàn diện cho các khu chung cư, văn phòng và ký túc xá hiện đại.
+                    </p>
+                  </a>
+                </div>
+                {/* <ul className="flex flex-col gap-2">
                   {featureList.map(({ title, description, href }) => (
                     <li key={title}>
                       <a
@@ -161,20 +292,30 @@ export const Navbar = () => {
                       </a>
                     </li>
                   ))}
-                </ul>
+                </ul> */}
               </div>
             </NavigationMenuContent>
           </NavigationMenuItem>
 
-          <NavigationMenuItem>
-            {routeList.map(({ href, label }) => (
-              <NavigationMenuLink key={href} asChild>
-                <a href={href} className="text-base px-2">
+          {routeList.map(({ href, label }) => (
+            <NavigationMenuItem key={href}>
+              <NavigationMenuLink asChild>
+                <a 
+                  href={href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const element = document.querySelector(href);
+                    if (element) {
+                      element.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                  }}
+                  className="text-base px-2"
+                >
                   {label}
                 </a>
               </NavigationMenuLink>
-            ))}
-          </NavigationMenuItem>
+            </NavigationMenuItem>
+          ))}
         </NavigationMenuList>
       </NavigationMenu>
 

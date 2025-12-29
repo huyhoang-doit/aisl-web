@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { HeroCards } from "./hero-cards";
+import HeroRight from "./hero-right";
 
 export const HeroSection = () => {
   return (
@@ -15,7 +15,7 @@ export const HeroSection = () => {
         }}
       />
 
-      <div className="grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center py-8 sm:py-12 md:py-20 lg:py-18 relative z-10 px-4 sm:px-6">
+      <div className="grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 items-center py-6 sm:py-10 md:py-12 lg:py-10 relative z-10 px-4 sm:px-6">
         {/* Left side: Text content and CTA */}
         <div className="space-y-4 sm:space-y-6 md:space-y-8 text-center lg:text-left order-2 lg:order-1">
           <Badge
@@ -25,22 +25,22 @@ export const HeroSection = () => {
             <span className="mr-1.5 sm:mr-2 text-primary">
               <Badge className="text-xs">AI-Powered</Badge>
             </span>
-            <span className="text-xs sm:text-sm"> Smart Locker Solution </span>
+            <span className="text-xs sm:text-sm"> Giải Pháp Tủ Thông Minh </span>
           </Badge>
 
           <div className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight px-2 sm:px-0">
             <h1 className="whitespace-normal break-words">
-              Experience
+              Trải Nghiệm
               <span className="text-transparent px-1 sm:px-2 bg-gradient-to-r from-[#D247BF] to-primary bg-clip-text block sm:inline">
                 Lockerly
               </span>
-              <span className="block sm:inline"> Smart Delivery</span>
+              <span className="block sm:inline"> Giao Nhận Thông Minh</span>
             </h1>
           </div>
 
           <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 px-4 sm:px-0">
-            {`The future of package delivery. Hands-free retrieval with AI Face Recognition. 
-            No smartphone needed. Secure, automated, and convenient for modern living.`}
+            {`Tương lai của giao nhận hàng hóa. Với công nghệ nhận diện khuôn mặt AI. 
+            An toàn, tự động hóa và tiện lợi cho cuộc sống hiện đại.`}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start px-4 sm:px-0">
@@ -48,7 +48,7 @@ export const HeroSection = () => {
               size="lg"
               className="font-bold group/arrow text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto"
             >
-              Start Using Lockerly
+              Bắt Đầu Sử Dụng
               <ArrowRight className="size-4 sm:size-5 ml-2 group-hover/arrow:translate-x-1 transition-transform" />
             </Button>
             <Button
@@ -56,14 +56,14 @@ export const HeroSection = () => {
               variant="outline"
               className="font-bold text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto"
             >
-              Learn More
+              Tìm Hiểu Thêm
             </Button>
           </div>
         </div>
 
-        {/* Right side: Hero Cards */}
+        {/* Right side: Hero Image */}
         <div className="flex justify-center lg:justify-end items-center order-1 lg:order-2 px-2 sm:px-0">
-          <HeroCards />
+          <HeroRight />
         </div>
       </div>
       <div className="absolute bottom-0 left-0 w-full h-16 sm:h-20 md:h-28 bg-gradient-to-b from-background/0 via-background/50 to-background rounded-lg"></div>

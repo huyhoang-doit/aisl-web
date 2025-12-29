@@ -21,66 +21,69 @@ interface PlanProps {
 
 const plans: PlanProps[] = [
   {
-    title: "Basic",
+    title: "Miễn Phí",
     popular: 0,
     price: 0,
     description:
-      "Perfect for occasional package recipients. Pay-as-you-go with standard storage rates.",
-    buttonText: "Get Started",
+      "Hoàn hảo cho người nhận hàng không thường xuyên. Trả phí theo sử dụng với mức giá tiêu chuẩn.",
+    buttonText: "Bắt Đầu",
     benefitList: [
-      "Face recognition setup",
-      "Pay-per-use billing",
-      "Standard storage rates",
-      "Email notifications",
-      "Basic support",
+      "Thiết lập nhận diện khuôn mặt",
+      "Thanh toán theo sử dụng",
+      "Mức giá lưu trữ tiêu chuẩn",
+      "Thông báo qua email",
+      "Hỗ trợ cơ bản",
+      "Tối đa 2 tủ active cùng lúc",
     ],
   },
   {
     title: "Premium",
     popular: 1,
-    price: 29,
+    price: 299,
     description:
-      "Ideal for frequent online shoppers. Monthly subscription with discounted rates and priority features.",
-    buttonText: "Subscribe Now",
+      "Lý tưởng cho người mua sắm trực tuyến thường xuyên. Đăng ký hàng tháng với giá giảm và tính năng ưu tiên.",
+    buttonText: "Đăng Ký Ngay",
     benefitList: [
-      "Unlimited face recognition",
-      "20% storage discount",
-      "Priority locker allocation",
-      "Advanced delegation features",
-      "24/7 priority support",
+      "Nhận diện khuôn mặt không giới hạn",
+      "Giảm giá 20% phí lưu trữ",
+      "Phân bổ tủ ưu tiên",
+      "Tính năng ủy quyền nâng cao",
+      "Đặt lịch trước (Reservation)",
+      "Hỗ trợ ưu tiên 24/7",
     ],
   },
   {
-    title: "Enterprise",
+    title: "Doanh Nghiệp",
     popular: 0,
-    price: 99,
+    price: 999,
     description:
-      "Custom solutions for property managers and businesses. Volume pricing and dedicated support.",
-    buttonText: "Contact Sales",
+      "Giải pháp tùy chỉnh cho quản lý tài sản và doanh nghiệp. Giá theo khối lượng và hỗ trợ chuyên dụng.",
+    buttonText: "Liên Hệ Bán Hàng",
     benefitList: [
-      "Custom subscription plans",
-      "Volume pricing discounts",
-      "Dedicated account manager",
-      "API access & integration",
-      "Custom billing solutions",
+      "Gói đăng ký tùy chỉnh",
+      "Giảm giá theo khối lượng",
+      "Quản lý tài khoản chuyên dụng",
+      "Truy cập API & Tích hợp",
+      "Giải pháp thanh toán tùy chỉnh",
+      "Thuê tủ cố định theo tháng",
     ],
   },
 ];
 
 export const PricingSection = () => {
   return (
-    <section className="container py-18 sm:py-32">
+    <section id="pricing" className="container py-8 sm:py-12">
       <h2 className="text-lg text-primary text-center mb-2 tracking-wider">
-        Pricing
+        Bảng Giá
       </h2>
 
       <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Choose Your Plan
+        Chọn Gói Của Bạn
       </h2>
 
       <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground pb-14">
-        Flexible pricing options for individuals, frequent users, and businesses. 
-        Start with pay-as-you-go or subscribe for maximum savings.
+        Tùy chọn giá linh hoạt cho cá nhân, người dùng thường xuyên và doanh nghiệp. 
+        Bắt đầu với trả phí theo sử dụng hoặc đăng ký để tiết kiệm tối đa.
       </h3>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-4">
@@ -102,8 +105,8 @@ export const PricingSection = () => {
                 </CardDescription>
 
                 <div>
-                  <span className="text-3xl font-bold">${price}</span>
-                  <span className="text-muted-foreground"> /month</span>
+                  <span className="text-3xl font-bold">{price === 0 ? "Miễn phí" : `${price.toLocaleString('vi-VN')}đ`}</span>
+                  {price > 0 && <span className="text-muted-foreground"> /tháng</span>}
                 </div>
               </CardHeader>
 

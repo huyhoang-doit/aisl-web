@@ -28,33 +28,32 @@ export const HeroCards = () => {
           </Avatar>
 
           <div className="flex flex-col">
-            <CardTitle className="text-lg">Nguyen Van A</CardTitle>
-            <CardDescription>Apartment Resident</CardDescription>
+            <CardTitle className="text-lg">Nguyễn Văn A</CardTitle>
+            <CardDescription>Cư dân chung cư</CardDescription>
           </div>
         </CardHeader>
 
-          <CardContent>Lockerly has completely transformed how I receive packages. The face recognition is incredibly fast!</CardContent>
+          <CardContent>Lockerly đã thay đổi hoàn toàn cách tôi nhận hàng. Nhận diện khuôn mặt cực kỳ nhanh!</CardContent>
         </Card>
 
         {/* Pricing */}
         <Card className="drop-shadow-xl shadow-black/10 dark:shadow-white/10">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              Basic Plan
+              Gói Miễn Phí
               <Badge
                 variant="secondary"
                 className="text-sm text-primary"
               >
-                Most popular
+                Phổ biến nhất
               </Badge>
             </CardTitle>
             <div>
-              <span className="text-3xl font-bold">$0</span>
-              <span className="text-muted-foreground"> /month</span>
+              <span className="text-3xl font-bold">Miễn phí</span>
             </div>
 
             <CardDescription>
-              Pay-as-you-go with standard storage rates. Perfect for occasional users.
+              Trả phí theo sử dụng với mức giá tiêu chuẩn. Hoàn hảo cho người dùng không thường xuyên.
             </CardDescription>
           </CardHeader>
 
@@ -66,7 +65,7 @@ export const HeroCards = () => {
 
           <CardFooter className="flex">
             <div className="space-y-4">
-              {["Face Recognition", "Automated Billing", "24/7 Access"].map(
+              {["Nhận diện khuôn mặt", "Thanh toán tự động", "Truy cập 24/7"].map(
                 (benefit: string) => (
                   <span
                     key={benefit}
@@ -88,10 +87,10 @@ export const HeroCards = () => {
               <Lightbulb className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <CardTitle>Hands-Free Access</CardTitle>
+            <CardTitle>Truy Cập Không Cần Điện Thoại</CardTitle>
               <CardDescription className="text-md mt-2">
-                No smartphone needed! Retrieve packages using only face recognition. 
-                Register once and enjoy seamless, device-free convenience.
+              Không cần điện thoại thông minh! Nhận hàng chỉ bằng nhận diện khuôn mặt. 
+              Đăng ký một lần và tận hưởng sự tiện lợi không cần thiết bị.
               </CardDescription>
             </div>
           </CardHeader>
@@ -124,20 +123,20 @@ export const HeroCards = () => {
         <Card className="absolute right-[-50px] top-12 w-80 flex flex-col justify-center items-center drop-shadow-xl shadow-black/10 dark:shadow-white/10 z-20">
           <CardHeader className="mt-8 flex justify-center items-center pb-2">
             <img
-              src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop"
-              alt="Smart Locker"
+              src="https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=400&fit=crop"
+              alt="Tủ Thông Minh"
               className="absolute grayscale-0 -top-12 rounded-full w-24 h-24 aspect-square object-cover border-4 border-primary/20"
             />
-            <CardTitle className="text-center">Smart Locker</CardTitle>
+            <CardTitle className="text-center">Tủ Thông Minh</CardTitle>
             <CardDescription className="font-normal text-primary">
-              AI-Powered System
+              Hệ Thống AI
             </CardDescription>
           </CardHeader>
 
           <CardContent className="text-center pb-2">
             <p>
-              Secure, automated package storage with face recognition technology
-              for modern living spaces
+              Lưu trữ gói hàng an toàn, tự động với công nghệ nhận diện khuôn mặt
+              cho không gian sống hiện đại
             </p>
           </CardContent>
 
@@ -148,7 +147,7 @@ export const HeroCards = () => {
             </Badge>
             <Badge variant="secondary" className="gap-1">
               <Check className="w-4 h-4" />
-              24/7 Access
+              Truy cập 24/7
             </Badge>
           </CardFooter>
         </Card>
@@ -157,33 +156,32 @@ export const HeroCards = () => {
         <Card className="absolute top-[200px] left-[-50px] w-72 drop-shadow-xl shadow-black/10 dark:shadow-white/10 z-30">
         <CardHeader>
           <CardTitle className="flex item-center justify-between">
-            Basic Plan
+            Gói Miễn Phí
             <Badge
               variant="secondary"
               className="text-sm text-primary"
             >
-              Most popular
+              Phổ biến nhất
             </Badge>
           </CardTitle>
           <div>
-            <span className="text-3xl font-bold">$0</span>
-            <span className="text-muted-foreground"> /month</span>
+            <span className="text-3xl font-bold">Miễn phí</span>
           </div>
 
           <CardDescription>
-            Pay-as-you-go with standard storage rates. Perfect for occasional users.
+            Trả phí theo sử dụng với mức giá tiêu chuẩn. Hoàn hảo cho người dùng không thường xuyên.
           </CardDescription>
         </CardHeader>
 
         <CardContent>
-          <Button className="w-full">Get Started</Button>
+          <Button className="w-full">Bắt Đầu</Button>
         </CardContent>
 
         <hr className="w-4/5 m-auto mb-4" />
 
         <CardFooter className="flex">
           <div className="space-y-4">
-            {["Face Recognition", "Automated Billing", "24/7 Access"].map(
+            {["Nhận diện khuôn mặt", "Thanh toán tự động", "Truy cập 24/7"].map(
               (benefit: string) => (
                 <span
                   key={benefit}
@@ -205,10 +203,10 @@ export const HeroCards = () => {
             <Lightbulb className="w-6 h-6 text-primary" />
           </div>
           <div>
-            <CardTitle>Hands-Free Access</CardTitle>
+            <CardTitle>Truy Cập Không Cần Điện Thoại</CardTitle>
             <CardDescription className="text-md mt-2">
-              No smartphone needed! Retrieve packages using only face recognition. 
-              Register once and enjoy seamless, device-free convenience.
+              Không cần điện thoại thông minh! Nhận hàng chỉ bằng nhận diện khuôn mặt. 
+              Đăng ký một lần và tận hưởng sự tiện lợi không cần thiết bị.
             </CardDescription>
           </div>
           </CardHeader>

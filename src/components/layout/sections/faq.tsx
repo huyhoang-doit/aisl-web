@@ -13,46 +13,56 @@ interface FAQProps {
 
 const FAQList: FAQProps[] = [
   {
-    question: "Do I need a smartphone to retrieve packages?",
-    answer: "No! That's the key advantage of Lockerly. Once you register your face and top up your wallet via the web app, you can retrieve packages using only face recognition—no phone, keys, or access cards needed at the locker.",
+    question: "Tôi có cần điện thoại thông minh để nhận hàng không?",
+    answer: "Không! Đó là lợi thế chính của Lockerly. Khi bạn đã đăng ký khuôn mặt và nạp tiền vào ví qua ứng dụng web, bạn có thể nhận hàng chỉ bằng nhận diện khuôn mặt—không cần điện thoại, chìa khóa hay thẻ truy cập tại tủ.",
     value: "item-1",
   },
   {
-    question: "How does the automated billing work?",
+    question: "Hệ thống thanh toán tự động hoạt động như thế nào?",
     answer:
-      "The system automatically calculates storage fees based on the actual time your package stays in the locker. Fees are deducted from your pre-loaded wallet balance, so you only pay for what you use—no manual payment steps required.",
+      "Hệ thống tự động tính phí lưu trữ dựa trên thời gian thực tế gói hàng ở trong tủ. Phí được trừ từ số dư ví đã nạp trước của bạn, vì vậy bạn chỉ trả cho những gì bạn sử dụng—không cần thao tác thanh toán thủ công.",
     value: "item-2",
   },
   {
     question:
-      "Is my face data secure?",
+      "Dữ liệu khuôn mặt của tôi có an toàn không?",
     answer:
-      "Yes. Lockerly uses advanced biometric encryption and does not store raw face images. Only encrypted biometric templates are stored, ensuring your privacy and security.",
+      "Có. Lockerly sử dụng mã hóa sinh trắc học tiên tiến và không lưu trữ ảnh khuôn mặt gốc. Chỉ các template sinh trắc học đã mã hóa được lưu trữ, đảm bảo quyền riêng tư và an toàn của bạn.",
     value: "item-3",
   },
   {
-    question: "Can I delegate package pickup to someone else?",
-    answer: "Yes! You can delegate pickup to family members or friends. For system users, they assume financial liability. For non-users, you can share an OTP/QR code, but you retain financial liability.",
+    question: "Tôi có thể ủy quyền cho người khác nhận hàng không?",
+    answer: "Có! Bạn có thể ủy quyền nhận hàng cho thành viên gia đình hoặc bạn bè. Đối với người dùng hệ thống, họ chịu trách nhiệm tài chính. Đối với người không phải người dùng, bạn có thể chia sẻ mã OTP/QR, nhưng bạn vẫn giữ trách nhiệm tài chính.",
     value: "item-4",
   },
   {
     question:
-      "What payment methods are accepted?",
-    answer: "Lockerly uses digital wallet integration. You can top up your wallet using e-wallets or online payment methods. Cash payments are not supported.",
+      "Các phương thức thanh toán nào được chấp nhận?",
+    answer: "Lockerly sử dụng tích hợp ví điện tử. Bạn có thể nạp tiền vào ví bằng ví điện tử hoặc phương thức thanh toán trực tuyến. Không hỗ trợ thanh toán bằng tiền mặt.",
     value: "item-5",
+  },
+  {
+    question: "Chuyện gì xảy ra nếu tôi quên lấy hàng?",
+    answer: "Nếu quá thời gian thuê mà hàng chưa được lấy, hệ thống sẽ tính phí phạt quá hạn (Overdue Fee). Tủ sẽ chuyển sang trạng thái OVERDUE nhưng vẫn khóa để bảo vệ tài sản. Bạn cần thanh toán đủ phí (gốc + phạt) để mở tủ.",
+    value: "item-6",
+  },
+  {
+    question: "Gói Miễn Phí có những giới hạn gì?",
+    answer: "Gói Miễn Phí cho phép tối đa 2 tủ active cùng lúc, không hỗ trợ đặt lịch trước (Reservation) và không hỗ trợ thuê tủ theo tháng. Khi đăng ký gói trả phí, gói Miễn Phí sẽ tạm ngưng tự động.",
+    value: "item-7",
   },
 ];
 
 export const FAQSection = () => {
   return (
-    <section id="faq" className="container md:w-[700px] py-18 sm:py-32">
+    <section id="faq" className="container md:w-[700px] py-8 sm:py-12">
       <div className="text-center mb-8">
         <h2 className="text-lg text-primary text-center mb-2 tracking-wider">
-          FAQS
+          Câu Hỏi Thường Gặp
         </h2>
 
         <h2 className="text-3xl md:text-4xl text-center font-bold">
-          Frequently Asked Questions
+          Câu Hỏi Thường Gặp
         </h2>
       </div>
 
