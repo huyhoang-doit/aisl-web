@@ -50,7 +50,7 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
   const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
-    <div className="flex h-16 items-center justify-between gap-4 px-4">
+    <div className="flex h-16 items-center justify-between gap-4">
       <div className="flex-1" />
       
       <div className="flex items-center gap-2">
@@ -60,12 +60,12 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
         {/* Notifications */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative hover:bg-accent transition-colors">
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="absolute right-0 top-0 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center"
+                  className="absolute right-0 top-0 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center shadow-sm shadow-primary/20"
                 >
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </Badge>
@@ -134,7 +134,7 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="flex items-center gap-2 px-2 py-1.5 h-auto"
+              className="flex items-center gap-2 px-2 py-1.5 h-auto hover:bg-accent transition-colors"
             >
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user.avatar} alt={user.name} />

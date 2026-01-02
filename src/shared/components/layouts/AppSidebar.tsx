@@ -56,22 +56,31 @@ export function AppSidebar({
 
   return (
     <Sidebar variant="inset" collapsible="icon" {...props}>
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to={logo.href}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{logo.title}</span>
-                  <span className="truncate text-xs">{logo.subtitle}</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="relative overflow-hidden border-b border-sidebar-border/50">
+        {/* Gradient background */}
+        <div 
+          className="absolute inset-0 opacity-100 dark:opacity-100"
+          style={{
+            background: "linear-gradient(135deg, oklch(0.7686 0.1647 70.0804 / 0.08), oklch(0.7686 0.1647 70.0804 / 0.03))",
+          }}
+        />
+        <div className="relative z-10">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild className="hover:bg-sidebar-accent/50 transition-colors">
+                <Link to={logo.href}>
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/80 text-sidebar-primary-foreground shadow-sm shadow-sidebar-primary/20">
+                    <Command className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{logo.title}</span>
+                    <span className="truncate text-xs text-sidebar-foreground/70">{logo.subtitle}</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </div>
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={navMainWithActive} />

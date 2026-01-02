@@ -35,10 +35,10 @@ export function AppLayout({
     <SidebarProvider>
       <AppSidebar className="relative z-0" {...sidebarProps} />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b border-sidebar-border/60 px-4 relative bg-[var(--navbar)] backdrop-blur-sm">
           <div className="flex items-center gap-2 justify-between w-full">
             <div>
-              <SidebarTrigger className="-ml-1" />
+              <SidebarTrigger className="-ml-1 hover:bg-accent transition-colors" />
               <Separator orientation="vertical" className="mr-2 h-4" />
             </div>
             <Navbar user={user} notifications={notifications} />

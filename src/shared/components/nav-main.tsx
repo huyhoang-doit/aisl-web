@@ -36,14 +36,21 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Hệ thống</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-sidebar-foreground/80 font-semibold uppercase tracking-wider text-[10px]">
+        Hệ thống
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={item.title}>
-                <Link to={item.url}>
-                  <item.icon />
+              <SidebarMenuButton 
+                asChild 
+                tooltip={item.title}
+                isActive={item.isActive}
+                className={item.isActive ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/10 border-l-2 border-sidebar-primary" : ""}
+              >
+                <Link to={item.url} className="w-full">
+                  <item.icon className={item.isActive ? "text-sidebar-primary" : ""} />
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>

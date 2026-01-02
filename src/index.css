@@ -40,6 +40,8 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-header-gradient: var(--sidebar-header-gradient);
+  --color-navbar: var(--navbar);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -104,14 +106,16 @@
     --chart-3: oklch(0.5553 0.1455 48.9975);
     --chart-4: oklch(0.4732 0.1247 46.2007);
     --chart-5: oklch(0.4137 0.1054 45.9038);
-    --sidebar: oklch(0.9846 0.0017 247.8389);
+    --sidebar: oklch(0.9800 0.0080 70.0804);
     --sidebar-foreground: oklch(0.2686 0 0);
     --sidebar-primary: oklch(0.7686 0.1647 70.0804);
     --sidebar-primary-foreground: oklch(1.0000 0 0);
-    --sidebar-accent: oklch(0.9869 0.0214 95.2774);
-    --sidebar-accent-foreground: oklch(0.4732 0.1247 46.2007);
-    --sidebar-border: oklch(0.9276 0.0058 264.5313);
+    --sidebar-accent: oklch(0.9500 0.0150 70.0804);
+    --sidebar-accent-foreground: oklch(0.4000 0.1200 70.0804);
+    --sidebar-border: oklch(0.9000 0.0100 70.0804);
     --sidebar-ring: oklch(0.7686 0.1647 70.0804);
+    --sidebar-header-gradient: linear-gradient(135deg, oklch(0.7686 0.1647 70.0804 / 0.08), oklch(0.7686 0.1647 70.0804 / 0.03));
+    --navbar: oklch(0.9850 0.0060 70.0804);
     --font-sans: Inter, sans-serif;
     --font-serif: "Source Serif 4", serif;
     --font-mono: "JetBrains Mono", monospace;
@@ -159,14 +163,16 @@
     --chart-3: oklch(0.4732 0.1247 46.2007);
     --chart-4: oklch(0.5553 0.1455 48.9975);
     --chart-5: oklch(0.4732 0.1247 46.2007);
-    --sidebar: oklch(0.1684 0 0);
+    --sidebar: oklch(0.1800 0.0120 70.0804);
     --sidebar-foreground: oklch(0.9219 0 0);
     --sidebar-primary: oklch(0.7686 0.1647 70.0804);
     --sidebar-primary-foreground: oklch(1.0000 0 0);
-    --sidebar-accent: oklch(0.4732 0.1247 46.2007);
+    --sidebar-accent: oklch(0.2500 0.0200 70.0804);
     --sidebar-accent-foreground: oklch(0.9243 0.1151 95.7459);
-    --sidebar-border: oklch(0.3715 0 0);
+    --sidebar-border: oklch(0.3000 0.0100 70.0804);
     --sidebar-ring: oklch(0.7686 0.1647 70.0804);
+    --sidebar-header-gradient: linear-gradient(135deg, oklch(0.7686 0.1647 70.0804 / 0.15), oklch(0.7686 0.1647 70.0804 / 0.08));
+    --navbar: oklch(0.2200 0.0150 70.0804);
     --font-sans: Inter, sans-serif;
     --font-serif: "Source Serif 4", serif;
     --font-mono: "JetBrains Mono", monospace;
@@ -233,5 +239,10 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Sidebar border for inset variant */
+  [data-variant="inset"] [data-sidebar="sidebar"] {
+    @apply border-r border-sidebar-border;
   }
 }
