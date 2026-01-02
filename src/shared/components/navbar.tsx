@@ -29,6 +29,7 @@ import {
   PopoverTrigger,
 } from "@/shared/components/ui/popover"
 import { Badge } from "@/shared/components/ui/badge"
+import { ToggleTheme } from "@/features/landing/components/toggle-theme"
 
 interface NavbarProps {
   user: {
@@ -46,15 +47,87 @@ interface NavbarProps {
 }
 
 export function Navbar({ user, notifications = [] }: NavbarProps) {
-//   const unreadCount = notifications.filter((n) => !n.read).length
+  const unreadCount = notifications.filter((n) => !n.read).length
 
   return (
     <div className="flex h-16 items-center justify-between gap-4 px-4">
       <div className="flex-1" />
       
       <div className="flex items-center gap-2">
+        <div className="hidden lg:flex">
+            <ToggleTheme />
+        </div>
         {/* Notifications */}
-       
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <Badge
+                  variant="destructive"
+                  className="absolute right-0 top-0 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center"
+                >
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </Badge>
+              )}
+              <span className="sr-only">Thông báo</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="end">
+            <div className="flex items-center justify-between border-b px-4 py-3">
+              <h4 className="text-sm font-semibold">Thông báo</h4>
+              {unreadCount > 0 && (
+                <Badge variant="secondary">{unreadCount} mới</Badge>
+              )}
+            </div>
+            <div className="max-h-[400px] overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center text-sm text-muted-foreground">
+                  <Bell className="mb-2 h-8 w-8 opacity-50" />
+                  <p>Không có thông báo</p>
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`px-4 py-3 hover:bg-accent transition-colors ${
+                        !notification.read ? "bg-accent/50" : ""
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="flex-1 space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {notification.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {notification.message}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {notification.time}
+                          </p>
+                        </div>
+                        {!notification.read && (
+                          <div className="h-2 w-2 rounded-full bg-primary" />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {notifications.length > 0 && (
+              <div className="border-t p-2">
+                <Button variant="ghost" className="w-full text-sm" asChild>
+                  <Link to="/notifications">Xem tất cả</Link>
+                </Button>
+              </div>
+            )}
+          </PopoverContent>
+        </Popover>
 
         {/* User Menu */}
         <DropdownMenu>
