@@ -12,9 +12,11 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/admin" element={<AdminRoutes />} />
+      <Route path="/staff" element={<StaffRoutes />} />
       
-      <Route element={<UnAuthorizedRoute />}>
-        {/* <Route path="/login" element={<Login />} /> */}
+      {/* <Route element={<UnAuthorizedRoute />}>
+        <Route path="/login" element={<Login />} />
       </Route>
 
       <Route element={<ProtectedRoute />}>
@@ -38,7 +40,7 @@ function App() {
         >
           <Route path="/staff/*" element={<StaffRoutes />} />
         </Route>
-      </Route>
+      </Route> */}
 
       <Route path="/not-found" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />

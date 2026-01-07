@@ -1,0 +1,77 @@
+import {
+  LayoutDashboard,
+  Package,
+  History,
+  AlertTriangle,
+  Bell,
+  BarChart3,
+} from "lucide-react"
+import { type NavItem } from "@/shared/components/layouts/AppSidebar"
+
+export const staffNavMain: NavItem[] = [
+  {
+    title: "Trang chủ",
+    url: "/staff/dashboard",
+    icon: LayoutDashboard,
+    isActive: false,
+  },
+  {
+    title: "Báo cáo doanh thu",
+    url: "/staff/revenue",
+    icon: BarChart3,
+  },
+  {
+    title: "Lịch sử giao dịch khu vực",
+    url: "/staff/transactions",
+    icon: History,
+    // items: [
+    //   {
+    //     title: "Tất cả giao dịch",
+    //     url: "/staff/transactions",
+    //   },
+    //   {
+    //     title: "Chi tiết giao dịch",
+    //     url: "/staff/transactions/detail",
+    //   },
+    // ],
+  },
+  {
+    title: "Danh sách khu vực tủ",
+    url: "/staff/lockers",
+    icon: Package,
+    // items: [
+    //   {
+    //     title: "Tất cả khu vực",
+    //     url: "/staff/lockers",
+    //   },
+    //   {
+    //     title: "Chi tiết tủ",
+    //     url: "/staff/lockers/detail",
+    //   },
+    // ],
+  },
+  {
+    title: "Báo cáo lỗi",
+    url: "/staff/error-reports",
+    icon: AlertTriangle,
+    // items: [
+    //   {
+    //     title: "Tất cả báo cáo",
+    //     url: "/staff/error-reports",
+    //   },
+    //   {
+    //     title: "Chi tiết báo cáo",
+    //     url: "/staff/error-reports/detail",
+    //   },
+    // ],
+  },
+]
+
+export const staffNavSecondary: NavItem[] = [
+  {
+    title: "Thông báo",
+    url: "/staff/notifications",
+    icon: Bell,
+  },
+]
+
