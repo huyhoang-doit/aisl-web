@@ -6,7 +6,7 @@ import {
   LogOut,
   Mail,
 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 
 import {
   Avatar,
@@ -47,7 +47,12 @@ interface NavbarProps {
 }
 
 export function Navbar({ user, notifications = [] }: NavbarProps) {
+  const location = useLocation()
   const unreadCount = notifications.filter((n) => !n.read).length
+  
+  // Determine role from path to build correct profile link
+  const role = location.pathname.startsWith("/admin") ? "admin" : "staff"
+  const profilePath = `/${role}/profile`
 
   return (
     <div className="flex h-16 items-center justify-between gap-4">
@@ -181,13 +186,13 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link to="/profile">
+                <Link to={profilePath}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Hồ sơ</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/settings">
+                <Link to={`/${role}/settings`}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Cài đặt</span>
                 </Link>
