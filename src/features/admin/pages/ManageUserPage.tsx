@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react"
 import { DataTable, type Column, type SortConfig, type FilterConfig, type QuickFilter } from "@/shared/components/DataTable"
-import { CreateOrUpdateUserModal, type UserData } from "../modals/CreateOrUpdateUserModal"
+import { CreateOrUpdateUserModal, type UserData } from "../features/user/components/CreateOrUpdateUserModal"
 import { Badge } from "@/shared/components/ui/badge"
 import { roles } from "@/shared/configs/role"
 import {
