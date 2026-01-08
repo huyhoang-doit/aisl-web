@@ -3,6 +3,7 @@ import { AdminLayout } from "@/features/admin/components/AdminLayout";
 import AdminDashboardPage from "@/features/admin/pages/AdminDashboardPage";
 import ProfilePage from "@/shared/pages/ProfilePage";
 import NotFoundPage from "@/shared/pages/NotFoundPage";
+import ManageUserPage from "../pages/ManageUserPage";
 
 const AdminRoutes = () => {
   return (
@@ -11,6 +12,7 @@ const AdminRoutes = () => {
         <Route index element={<AdminDashboardPage />} />
         <Route path="dashboard" element={<AdminDashboardPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="users" element={<ManageUserPage />} />
 
 
       </Route>

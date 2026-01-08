@@ -1,7 +1,6 @@
 import {
   LayoutDashboard,
   Users,
-  UserCog,
   Package,
   DollarSign,
   BarChart3,
@@ -22,49 +21,27 @@ export const adminNavMain: NavItem[] = [
     icon: BarChart3,
   },
   {
-    title: "Quản lý người dùng",
+    title: "Quản lý tài khoản",
     url: "/admin/users",
     icon: Users,
-    // items: [
-    //   {
-    //     title: "Danh sách người dùng",
-    //     url: "/admin/users",
-    //   },
-    //   {
-    //     title: "Danh sách người dùng đã khoá",
-    //     url: "/admin/users/locked",
-    //   },
-    // ],
-  },
-  {
-    title: "Quản lý nhân viên",
-    url: "/admin/staff",
-    icon: UserCog,
-    // items: [
-    //   {
-    //     title: "Tất cả nhân viên",
-    //     url: "/admin/staff",
-    //   },
-    //   {
-    //     title: "Chi tiết nhân viên",
-    //     url: "/admin/staff/detail",
-    //   },
-    // ],
-  },
-  {
-    title: "Yêu cầu duyệt Courier",
-    url: "/admin/courier-requests",
-    icon: UserCog,
-    // items: [
-    //   {
-    //     title: "Tất cả nhân viên",
-    //     url: "/admin/staff",
-    //   },
-    //   {
-    //     title: "Chi tiết nhân viên",
-    //     url: "/admin/staff/detail",
-    //   },
-    // ],
+    items: [
+      {
+        title: "Danh sách người dùng",
+        url: "/admin/users",
+      },
+      {
+        title: "Danh sách nhân viên",
+        url: "/admin/staff",
+      },
+      {
+        title: "Yêu cầu duyệt Courier",
+        url: "/admin/courier-requests",
+      },
+      {
+        title: "Danh sách tài khoản đã khoá",
+        url: "/admin/locked-accounts",
+      },
+    ],
   },
   {
     title: "Quản lý locker",
