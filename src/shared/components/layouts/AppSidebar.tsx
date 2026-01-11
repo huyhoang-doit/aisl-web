@@ -21,6 +21,7 @@ export interface NavItem {
   items?: {
     title: string
     url: string
+    icon?: LucideIcon
   }[]
 }
 

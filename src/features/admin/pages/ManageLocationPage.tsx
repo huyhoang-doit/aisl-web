@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
-import LockerCardItem from "../features/locker/components/LockerCardItem";
-import CreateOrUpdateLockerModal, { type LockerFormData } from "../features/locker/modals/CreateOrUpdateLockerModal";
-import LockerDetailModal from "../features/locker/modals/LockerDetailModal";
-import { DataGrid, type Column, type FilterConfig, type QuickFilter } from "@/shared/components/DataGrid";
+import LocationCardItem from "../features/location/components/LocationCardItem";
+import CreateOrUpdateLocationModal, { type LocationFormData } from "../features/location/modals/CreateOrUpdateLocationModal";
+import LocationDetailModal from "../features/location/modals/LocationDetailModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,102 +12,74 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import type { Locker } from "../features/locker/types/locker.types";
+import type { Location } from "../features/location/types/location.types";
+import { DataGrid, type Column, type FilterConfig, type QuickFilter } from "@/shared/components/DataGrid";
 
 // Mock data - Thay thế bằng API call thực tế
-const mockLockers: Locker[] = [
+const mockLocations: Location[] = [
   {
     id: "1",
-    cabinetId: "1",
-    code: "L001",
-    size: "small",
-    status: "available",
-    price: 50000,
-    description: "Locker nhỏ, phù hợp cho đồ nhẹ",
+    name: "Tòa nhà A - Tầng 1",
+    address: "123 Đường ABC, Quận 1, TP.HCM",
+    description: "Địa điểm đặt tủ locker ở tầng 1 tòa nhà A",
+    status: "active",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
     id: "2",
-    cabinetId: "1",
-    code: "L002",
-    size: "medium",
-    status: "occupied",
-    price: 80000,
-    description: "Locker vừa",
+    name: "Tòa nhà B - Tầng 2",
+    address: "456 Đường XYZ, Quận 3, TP.HCM",
+    description: "Địa điểm đặt tủ locker ở tầng 2 tòa nhà B",
+    status: "active",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
   {
     id: "3",
-    cabinetId: "1",
-    code: "L003",
-    size: "large",
-    status: "available",
-    price: 120000,
-    description: "Locker lớn, phù hợp cho đồ cồng kềnh",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    cabinetId: "2",
-    code: "L004",
-    size: "medium",
-    status: "reserved",
-    price: 80000,
-    description: "Locker đã được đặt trước",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    cabinetId: "2",
-    code: "L005",
-    size: "small",
-    status: "maintenance",
-    price: 50000,
-    description: "Locker đang bảo trì",
+    name: "Tòa nhà C - Tầng 3",
+    address: "789 Đường DEF, Quận 5, TP.HCM",
+    description: "Địa điểm đặt tủ locker ở tầng 3 tòa nhà C",
+    status: "inactive",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
 ];
 
-const ManageLockerPage = () => {
-  const [lockers, setLockers] = useState<Locker[]>(mockLockers);
+const ManageLocationPage = () => {
+  const [locations, setLocations] = useState<Location[]>(mockLocations);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedLocker, setSelectedLocker] = useState<Locker | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "update">("create");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
-  // const [sortConfig, setSortConfig] = useState<SortConfig | null>(null); // Reserved for future use
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter columns for DataGrid
-  const filterColumns: Column<Locker>[] = [
+  const filterColumns: Column<Location>[] = [
     {
-      key: "code",
-      header: "Mã locker",
+      key: "name",
+      header: "Tên địa điểm",
       filterable: true,
       filterType: "text",
-      filterPlaceholder: "Tìm theo mã",
+      filterPlaceholder: "Tìm theo tên",
     },
     {
-      key: "size",
-      header: "Kích thước",
+      key: "address",
+      header: "Địa chỉ",
       filterable: true,
-      filterType: "select",
-      filterOptions: ["Nhỏ", "Vừa", "Lớn"],
+      filterType: "text",
+      filterPlaceholder: "Tìm theo địa chỉ",
     },
     {
       key: "status",
       header: "Trạng thái",
       filterable: true,
       filterType: "select",
-      filterOptions: ["Trống", "Đã thuê", "Bảo trì", "Đã đặt"],
+      filterOptions: ["Hoạt động", "Không hoạt động"],
     },
   ];
 
@@ -119,65 +90,42 @@ const ManageLockerPage = () => {
       label: "Trạng thái",
       placeholder: "Chọn trạng thái",
       options: [
-        { value: "Trống", label: "Trống" },
-        { value: "Đã thuê", label: "Đã thuê" },
-        { value: "Bảo trì", label: "Bảo trì" },
-        { value: "Đã đặt", label: "Đã đặt" },
-      ],
-    },
-    {
-      key: "size",
-      label: "Kích thước",
-      placeholder: "Chọn kích thước",
-      options: [
-        { value: "Nhỏ", label: "Nhỏ" },
-        { value: "Vừa", label: "Vừa" },
-        { value: "Lớn", label: "Lớn" },
+        { value: "Hoạt động", label: "Hoạt động" },
+        { value: "Không hoạt động", label: "Không hoạt động" },
       ],
     },
   ];
 
   // Filter and sort data
   const filteredAndSortedData = useMemo(() => {
-    let result = [...lockers];
+    let result = [...locations];
 
     // Apply search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (locker) =>
-          locker.code.toLowerCase().includes(query) ||
-          locker.description?.toLowerCase().includes(query)
+        (location) =>
+          location.name.toLowerCase().includes(query) ||
+          location.address.toLowerCase().includes(query) ||
+          location.description?.toLowerCase().includes(query)
       );
     }
 
     // Apply filters
     filters.forEach((filter) => {
       if (filter.key === "status") {
-        const statusMap: Record<string, Locker["status"]> = {
-          "Trống": "available",
-          "Đã thuê": "occupied",
-          "Bảo trì": "maintenance",
-          "Đã đặt": "reserved",
+        const statusMap: Record<string, Location["status"]> = {
+          "Hoạt động": "active",
+          "Không hoạt động": "inactive",
         };
         const statusValue = statusMap[filter.value];
         if (statusValue) {
-          result = result.filter((locker) => locker.status === statusValue);
-        }
-      } else if (filter.key === "size") {
-        const sizeMap: Record<string, Locker["size"]> = {
-          "Nhỏ": "small",
-          "Vừa": "medium",
-          "Lớn": "large",
-        };
-        const sizeValue = sizeMap[filter.value];
-        if (sizeValue) {
-          result = result.filter((locker) => locker.size === sizeValue);
+          result = result.filter((location) => location.status === statusValue);
         }
       } else {
         const value = filter.value.toLowerCase();
-        result = result.filter((locker) => {
-          const fieldValue = String(locker[filter.key as keyof Locker] || "").toLowerCase();
+        result = result.filter((location) => {
+          const fieldValue = String(location[filter.key as keyof Location] || "").toLowerCase();
           return fieldValue.includes(value);
         });
       }
@@ -185,7 +133,7 @@ const ManageLockerPage = () => {
 
     // Sorting can be added here in the future if needed
     return result;
-  }, [lockers, searchQuery, filters]);
+  }, [locations, searchQuery, filters]);
 
   // Pagination
   const paginatedData = useMemo(() => {
@@ -196,30 +144,30 @@ const ManageLockerPage = () => {
 
   // Xử lý tạo mới
   const handleCreate = () => {
-    setSelectedLocker(null);
+    setSelectedLocation(null);
     setModalMode("create");
     setIsModalOpen(true);
   };
 
   // Xử lý chỉnh sửa
-  const handleEdit = (locker: Locker) => {
-    setSelectedLocker(locker);
+  const handleEdit = (location: Location) => {
+    setSelectedLocation(location);
     setModalMode("update");
     setIsModalOpen(true);
   };
 
   // Xử lý xóa
-  const handleDelete = (locker: Locker) => {
-    setSelectedLocker(locker);
+  const handleDelete = (location: Location) => {
+    setSelectedLocation(location);
     setIsDeleteDialogOpen(true);
   };
 
   // Xác nhận xóa
   const confirmDelete = () => {
-    if (selectedLocker?.id) {
-      setLockers(lockers.filter((l) => l.id !== selectedLocker.id));
+    if (selectedLocation?.id) {
+      setLocations(locations.filter((l) => l.id !== selectedLocation.id));
       setIsDeleteDialogOpen(false);
-      setSelectedLocker(null);
+      setSelectedLocation(null);
       // Reset page if current page is empty
       const newTotalPages = Math.ceil((filteredAndSortedData.length - 1) / pageSize);
       if (page > newTotalPages && newTotalPages > 0) {
@@ -229,44 +177,53 @@ const ManageLockerPage = () => {
   };
 
   // Xử lý submit form
-  const handleSubmit = async (data: LockerFormData) => {
+  const handleSubmit = async (data: LocationFormData) => {
     if (modalMode === "create") {
-      // Tạo locker mới - cần cabinetId từ user hoặc default
-      const newLocker: Locker = {
+      // Tạo location mới
+      const newLocation: Location = {
         ...data,
-        id: Date.now().toString(),
-        cabinetId: "1", // TODO: Lấy từ context hoặc props
+        id: Date.now().toString(), // Thay bằng ID từ API
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      setLockers([...lockers, newLocker]);
-      // TODO: Gọi API để tạo locker
-      console.log("Creating locker:", newLocker);
+      setLocations([...locations, newLocation]);
+      // TODO: Gọi API để tạo location
+      console.log("Creating location:", newLocation);
     } else {
-      // Cập nhật locker
-      setLockers(
-        lockers.map((l) =>
-          l.id === selectedLocker?.id
-            ? { ...data, id: l.id, cabinetId: l.cabinetId, createdAt: l.createdAt, updatedAt: new Date().toISOString() }
+      // Cập nhật location
+      setLocations(
+        locations.map((l) =>
+          l.id === selectedLocation?.id
+            ? { ...data, id: l.id, createdAt: l.createdAt, updatedAt: new Date().toISOString() }
             : l
         )
       );
-      // TODO: Gọi API để cập nhật locker
-      console.log("Updating locker:", data);
+      // TODO: Gọi API để cập nhật location
+      console.log("Updating location:", data);
     }
-    setIsModalOpen(false);
-    setSelectedLocker(null);
   };
 
   // Xử lý xem chi tiết
-  const handleViewDetails = (locker: Locker) => {
-    setSelectedLocker(locker);
+  const handleViewDetails = (location: Location) => {
+    setSelectedLocation(location);
     setIsDetailModalOpen(true);
   };
 
-  const handleDetailModalClose = () => {
-    setIsDetailModalOpen(false);
-    setSelectedLocker(null);
+  // Xử lý đóng detail modal và refresh data nếu cần
+  const handleDetailModalClose = (open: boolean | Location) => {
+    if (typeof open === "boolean") {
+      setIsDetailModalOpen(open);
+      if (!open) {
+        setSelectedLocation(null);
+      }
+    } else {
+      // Location was updated
+      setLocations(
+        locations.map((l) => (l.id === open.id ? open : l))
+      );
+      setIsDetailModalOpen(false);
+      setSelectedLocation(null);
+    }
   };
 
   // Handler functions for DataGrid
@@ -287,30 +244,42 @@ const ManageLockerPage = () => {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Quản lý locker</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Quản lý địa điểm đặt tủ</h1>
         <p className="text-muted-foreground mt-2">
-          Quản lý các locker trong hệ thống
+          Quản lý các địa điểm đặt các cụm cabinet trong hệ thống
         </p>
       </div>
+
+      {/* Action bar */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-muted-foreground">
+          Tổng số địa điểm: <strong>{locations.length}</strong>
+        </div>
+        {/* <Button onClick={handleCreate} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Thêm địa điểm mới
+        </Button> */}
+      </div>
+
 
       <DataGrid
         data={paginatedData}
         keyExtractor={(row) => row.id}
-        renderCard={(locker) => (
-          <LockerCardItem
-            locker={locker}
-            onClick={() => handleViewDetails(locker)}
+        renderCard={(location) => (
+          <LocationCardItem
+            location={location}
+            onClick={() => handleViewDetails(location)}
           />
         )}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onCreate={handleCreate}
-        emptyMessage="Chưa có locker nào"
+        emptyMessage="Chưa có địa điểm nào"
         isLoading={false}
-        gridCols={{ default: 1, md: 2, lg: 3, xl: 4 }}
+        gridCols={{ default: 1, md: 2, lg: 3 }}
         // Search
         searchable={true}
-        searchPlaceholder="Tìm kiếm theo mã locker..."
+        searchPlaceholder="Tìm kiếm theo tên, địa chỉ..."
         onSearch={handleSearch}
         // Filters
         filterable={true}
@@ -333,23 +302,30 @@ const ManageLockerPage = () => {
           pageSizeOptions: [6, 12, 18, 24],
         }}
       />
-
       {/* Modal tạo/cập nhật */}
-      <CreateOrUpdateLockerModal
+      <CreateOrUpdateLocationModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        lockerData={selectedLocker}
+        locationData={selectedLocation}
         onSubmit={handleSubmit}
         mode={modalMode}
-        cabinetId="1" // TODO: Lấy từ context hoặc state
       />
 
       {/* Modal chi tiết */}
-      {selectedLocker && (
-        <LockerDetailModal
+      {selectedLocation && (
+        <LocationDetailModal
           open={isDetailModalOpen}
           onOpenChange={handleDetailModalClose}
-          locker={selectedLocker}
+          location={selectedLocation}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onUpdateLocation={(updatedLocation) => {
+            setLocations(
+              locations.map((l) =>
+                l.id === updatedLocation.id ? updatedLocation : l
+              )
+            );
+          }}
         />
       )}
 
@@ -357,10 +333,11 @@ const ManageLockerPage = () => {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa locker</AlertDialogTitle>
+            <AlertDialogTitle>Xác nhận xóa địa điểm</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa locker{" "}
-              <strong>{selectedLocker?.code}</strong>? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn xóa địa điểm{" "}
+              <strong>{selectedLocation?.name}</strong>? Hành động này không thể hoàn tác.
+              Tất cả các cabinet và locker trong địa điểm này cũng sẽ bị xóa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -378,4 +355,4 @@ const ManageLockerPage = () => {
   );
 };
 
-export default ManageLockerPage;
+export default ManageLocationPage;

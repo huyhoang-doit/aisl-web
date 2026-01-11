@@ -216,6 +216,12 @@ html {
   box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.141);
 }
 
+
+/* Cursor pointer for close button */
+button.absolute.right-4.top-4 {
+  cursor: pointer;
+}
+
 /* Container styles for Tailwind v4 */
 @layer utilities {
   .container {

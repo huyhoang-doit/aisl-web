@@ -5,6 +5,13 @@ import {
   DollarSign,
   BarChart3,
   Bell,
+  MapPin,
+  Box,
+  Lock,
+  User,
+  UserCog,
+  UserRoundPen,
+  Boxes,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -26,37 +33,48 @@ export const adminNavMain: NavItem[] = [
     icon: Users,
     items: [
       {
-        title: "Danh sách người dùng",
+        title: "Người dùng",
         url: "/admin/users",
+        icon: User,
       },
       {
-        title: "Danh sách nhân viên",
+        title: "Nhân viên",
         url: "/admin/staff",
+        icon: UserCog,
       },
       {
-        title: "Yêu cầu duyệt Courier",
+        title: "Duyệt người chuyển phát",
         url: "/admin/courier-requests",
+        icon: UserRoundPen,
       },
       {
-        title: "Danh sách tài khoản đã khoá",
+        title: "Tài khoản đã khoá",
         url: "/admin/locked-accounts",
+        icon: Lock,
       },
     ],
   },
   {
     title: "Quản lý locker",
-    url: "/admin/lockers",
+    url: "/admin/locations",
     icon: Package,
-    // items: [
-    //   {
-    //     title: "Tất cả tủ",
-    //     url: "/admin/lockers",
-    //   },
-    //   {
-    //     title: "Chi tiết tủ",
-    //     url: "/admin/lockers/detail",
-    //   },
-    // ],
+    items: [
+      {
+        title: "Địa điểm",
+        url: "/admin/locations",
+        icon: MapPin,
+      },
+      {
+        title: "Cụm tủ",
+        url: "/admin/cabinets",
+        icon: Boxes,
+      },
+      {
+        title: "Tủ",
+        url: "/admin/lockers",
+        icon: Box,
+      },
+    ],
   },
   {
     title: "Quản lý bảng giá",
