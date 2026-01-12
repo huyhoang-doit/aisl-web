@@ -31,6 +31,7 @@ export function NavMain({
     items?: {
       title: string
       url: string
+      icon?: LucideIcon
     }[]
   }[]
 }) {
@@ -68,6 +69,7 @@ export function NavMain({
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
                             <Link to={subItem.url}>
+                              {subItem.icon && <subItem.icon className={item.isActive ? "text-sidebar-primary" : ""} />}
                               <span>{subItem.title}</span>
                             </Link>
                           </SidebarMenuSubButton>

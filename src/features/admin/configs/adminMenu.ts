@@ -1,11 +1,17 @@
 import {
   LayoutDashboard,
   Users,
-  UserCog,
   Package,
   DollarSign,
   BarChart3,
   Bell,
+  MapPin,
+  Box,
+  Lock,
+  User,
+  UserCog,
+  UserRoundPen,
+  Boxes,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -22,64 +28,53 @@ export const adminNavMain: NavItem[] = [
     icon: BarChart3,
   },
   {
-    title: "Quản lý người dùng",
+    title: "Quản lý tài khoản",
     url: "/admin/users",
     icon: Users,
-    // items: [
-    //   {
-    //     title: "Danh sách người dùng",
-    //     url: "/admin/users",
-    //   },
-    //   {
-    //     title: "Danh sách người dùng đã khoá",
-    //     url: "/admin/users/locked",
-    //   },
-    // ],
-  },
-  {
-    title: "Quản lý nhân viên",
-    url: "/admin/staff",
-    icon: UserCog,
-    // items: [
-    //   {
-    //     title: "Tất cả nhân viên",
-    //     url: "/admin/staff",
-    //   },
-    //   {
-    //     title: "Chi tiết nhân viên",
-    //     url: "/admin/staff/detail",
-    //   },
-    // ],
-  },
-  {
-    title: "Yêu cầu duyệt Courier",
-    url: "/admin/courier-requests",
-    icon: UserCog,
-    // items: [
-    //   {
-    //     title: "Tất cả nhân viên",
-    //     url: "/admin/staff",
-    //   },
-    //   {
-    //     title: "Chi tiết nhân viên",
-    //     url: "/admin/staff/detail",
-    //   },
-    // ],
+    items: [
+      {
+        title: "Người dùng",
+        url: "/admin/users",
+        icon: User,
+      },
+      {
+        title: "Nhân viên",
+        url: "/admin/staff",
+        icon: UserCog,
+      },
+      {
+        title: "Duyệt người chuyển phát",
+        url: "/admin/courier-requests",
+        icon: UserRoundPen,
+      },
+      {
+        title: "Tài khoản đã khoá",
+        url: "/admin/locked-accounts",
+        icon: Lock,
+      },
+    ],
   },
   {
     title: "Quản lý locker",
-    url: "/admin/lockers",
+    url: "/admin/locations",
     icon: Package,
-    // items: [
-    //   {
-    //     title: "Tất cả tủ",
-    //     url: "/admin/lockers",
-    //   },
-    //   {
-    //     title: "Chi tiết tủ",
-    //     url: "/admin/lockers/detail",
-    //   },
-    // ],
+    items: [
+      {
+        title: "Địa điểm",
+        url: "/admin/locations",
+        icon: MapPin,
+      },
+      {
+        title: "Cụm tủ",
+        url: "/admin/cabinets",
+        icon: Boxes,
+      },
+      {
+        title: "Tủ",
+        url: "/admin/lockers",
+        icon: Box,
+      },
+    ],
   },
   {
     title: "Quản lý bảng giá",
