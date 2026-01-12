@@ -3,11 +3,11 @@ import { AdminLayout } from "@/features/admin/components/AdminLayout";
 import AdminDashboardPage from "@/features/admin/pages/AdminDashboardPage";
 import ProfilePage from "@/shared/pages/ProfilePage";
 import NotFoundPage from "@/shared/pages/NotFoundPage";
+import SettingPage from "@/shared/pages/SettingPage";
 import ManageUserPage from "../pages/ManageUserPage";
 import ManageLockerPage from "../pages/ManageLockerPage";
 import ManageCabinetPage from "../pages/ManageCabinetPage";
 import ManageLocationPage from "../pages/ManageLocationPage";
-
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -15,6 +15,7 @@ const AdminRoutes = () => {
         <Route index element={<AdminDashboardPage />} />
         <Route path="dashboard" element={<AdminDashboardPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="settings" element={<SettingPage />} />
         <Route path="users" element={<ManageUserPage />} />
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="lockers" element={<ManageLockerPage />} />
