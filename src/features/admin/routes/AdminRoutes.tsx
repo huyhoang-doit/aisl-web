@@ -8,6 +8,7 @@ import ManageUserPage from "../pages/ManageUserPage";
 import ManageLockerPage from "../pages/ManageLockerPage";
 import ManageCabinetPage from "../pages/ManageCabinetPage";
 import ManageLocationPage from "../pages/ManageLocationPage";
+import ManagePlanPage from "../pages/ManagePlanPage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -20,7 +21,7 @@ const AdminRoutes = () => {
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="lockers" element={<ManageLockerPage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
-
+        <Route path="plans" element={<ManagePlanPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />

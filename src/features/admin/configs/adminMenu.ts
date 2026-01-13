@@ -77,8 +77,8 @@ export const adminNavMain: NavItem[] = [
     ],
   },
   {
-    title: "Quản lý bảng giá",
-    url: "/admin/pricing",
+    title: "Quản lý gói đăng ký",
+    url: "/admin/plans",
     icon: DollarSign,
     // items: [
     //   {
