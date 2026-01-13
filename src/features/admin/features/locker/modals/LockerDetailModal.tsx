@@ -6,8 +6,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
+import { Pencil, Trash2 } from "lucide-react";
 import type { Locker } from "../types/locker.types.ts";
 
 interface LockerDetailModalProps {
@@ -15,12 +17,18 @@ interface LockerDetailModalProps {
   // eslint-disable-next-line no-unused-vars
   onOpenChange: (open: boolean) => void;
   locker: Locker;
+  // eslint-disable-next-line no-unused-vars
+  onEdit?: (locker: Locker) => void;
+  // eslint-disable-next-line no-unused-vars
+  onDelete?: (locker: Locker) => void;
 }
 
 const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
   open,
   onOpenChange,
   locker,
+  onEdit,
+  onDelete,
 }) => {
   const sizeConfig = {
     small: { label: "Nhỏ", variant: "secondary" as const },
@@ -42,10 +50,46 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">{locker.code}</DialogTitle>
-          <DialogDescription>
-            Chi tiết thông tin locker
-          </DialogDescription>
+          <div className="flex items-start justify-between">
+            <div>
+              <DialogTitle className="text-xl font-bold">{locker.code}</DialogTitle>
+              <DialogDescription>
+                Chi tiết thông tin locker
+              </DialogDescription>
+            </div>
+            <div className="flex items-center gap-2 mr-5">
+              {onEdit && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    if (onEdit) {
+                      onEdit(locker);
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <Pencil className="h-4 w-4" />
+                  Sửa locker
+                </Button>
+              )}
+              {onDelete && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    if (onDelete) {
+                      onDelete(locker);
+                    }
+                  }}
+                  className="gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Xóa locker
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">

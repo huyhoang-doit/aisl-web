@@ -219,6 +219,8 @@ const ManageLockerPage = () => {
     if (selectedLocker?.id) {
       setLockers(lockers.filter((l) => l.id !== selectedLocker.id));
       setIsDeleteDialogOpen(false);
+      // Đóng modal detail sau khi xóa thành công
+      setIsDetailModalOpen(false);
       setSelectedLocker(null);
       // Reset page if current page is empty
       const newTotalPages = Math.ceil((filteredAndSortedData.length - 1) / pageSize);
@@ -244,18 +246,31 @@ const ManageLockerPage = () => {
       console.log("Creating locker:", newLocker);
     } else {
       // Cập nhật locker
+      const updatedLocker: Locker = {
+        ...data,
+        id: selectedLocker!.id,
+        cabinetId: selectedLocker!.cabinetId,
+        createdAt: selectedLocker!.createdAt,
+        updatedAt: new Date().toISOString(),
+      };
       setLockers(
         lockers.map((l) =>
-          l.id === selectedLocker?.id
-            ? { ...data, id: l.id, cabinetId: l.cabinetId, createdAt: l.createdAt, updatedAt: new Date().toISOString() }
-            : l
+          l.id === selectedLocker?.id ? updatedLocker : l
         )
       );
+      // Cập nhật selectedLocker để modal detail hiển thị dữ liệu mới
+      if (isDetailModalOpen) {
+        setSelectedLocker(updatedLocker);
+      } else {
+        setSelectedLocker(null);
+      }
       // TODO: Gọi API để cập nhật locker
       console.log("Updating locker:", data);
     }
     setIsModalOpen(false);
-    setSelectedLocker(null);
+    if (modalMode === "create") {
+      setSelectedLocker(null);
+    }
   };
 
   // Xử lý xem chi tiết
@@ -337,7 +352,17 @@ const ManageLockerPage = () => {
       {/* Modal tạo/cập nhật */}
       <CreateOrUpdateLockerModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          // Khi đóng modal edit (hủy), cập nhật selectedLocker từ danh sách lockers
+          // để đảm bảo modal detail hiển thị dữ liệu mới nhất
+          if (!open && selectedLocker && isDetailModalOpen) {
+            const updatedLocker = lockers.find((l) => l.id === selectedLocker.id);
+            if (updatedLocker) {
+              setSelectedLocker(updatedLocker);
+            }
+          }
+        }}
         lockerData={selectedLocker}
         onSubmit={handleSubmit}
         mode={modalMode}
@@ -350,11 +375,25 @@ const ManageLockerPage = () => {
           open={isDetailModalOpen}
           onOpenChange={handleDetailModalClose}
           locker={selectedLocker}
+          onEdit={(locker) => {
+            // Không đóng modal detail, chỉ mở modal edit
+            handleEdit(locker);
+          }}
+          onDelete={(locker) => {
+            // Không đóng modal detail, chỉ mở dialog xóa
+            handleDelete(locker);
+          }}
         />
       )}
 
       {/* Dialog xác nhận xóa */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog 
+        open={isDeleteDialogOpen} 
+        onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          // Khi hủy dialog xóa, không làm gì cả - modal detail vẫn mở
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa locker</AlertDialogTitle>
