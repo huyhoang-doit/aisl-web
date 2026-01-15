@@ -1,4 +1,5 @@
 import StaffDashboardPage from "@/features/staff/pages/StaffDashboardPage"
+import ManageLockerAreaPage from "@/features/staff/pages/ManageLockerAreaPage"
 import { StaffLayout } from "@/features/staff/components/StaffLayout"
 import ProfilePage from "@/shared/pages/ProfilePage"
 import SettingPage from "@/shared/pages/SettingPage"
@@ -10,6 +11,7 @@ const StaffRoutes = () => {
     <Routes>
       <Route element={<StaffLayout />}>
         <Route path="dashboard" element={<StaffDashboardPage />} />
+        <Route path="list-lockers" element={<ManageLockerAreaPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="settings" element={<SettingPage />} />
         <Route index element={<StaffDashboardPage />} />

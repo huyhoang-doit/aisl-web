@@ -5,6 +5,8 @@ import {
   AlertTriangle,
   Bell,
   BarChart3,
+  User,
+  UserCog,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -21,23 +23,8 @@ export const staffNavMain: NavItem[] = [
     icon: BarChart3,
   },
   {
-    title: "Lịch sử giao dịch khu vực",
-    url: "/staff/transactions",
-    icon: History,
-    // items: [
-    //   {
-    //     title: "Tất cả giao dịch",
-    //     url: "/staff/transactions",
-    //   },
-    //   {
-    //     title: "Chi tiết giao dịch",
-    //     url: "/staff/transactions/detail",
-    //   },
-    // ],
-  },
-  {
-    title: "Danh sách khu vực tủ",
-    url: "/staff/lockers",
+    title: "Quản lý lockers ",
+    url: "/staff/list-lockers",
     icon: Package,
     // items: [
     //   {
@@ -51,17 +38,34 @@ export const staffNavMain: NavItem[] = [
     // ],
   },
   {
-    title: "Báo cáo lỗi",
-    url: "/staff/error-reports",
+    title: "Quản lý báo cáo",
+    url: "/staff/manage-reports",
     icon: AlertTriangle,
+    items: [
+      {
+        title: "Phía khách hàng",
+        url: "/staff/manage-reports",
+        icon: User,
+      },
+      {
+        title: "Phía nv kỹ thuật",
+        url: "/staff/manage-reports",
+        icon: UserCog,
+      },
+    ],
+  },
+  {
+    title: "Lịch sử giao dịch ",
+    url: "/staff/transactions",
+    icon: History,
     // items: [
     //   {
-    //     title: "Tất cả báo cáo",
-    //     url: "/staff/error-reports",
+    //     title: "Tất cả giao dịch",
+    //     url: "/staff/transactions",
     //   },
     //   {
-    //     title: "Chi tiết báo cáo",
-    //     url: "/staff/error-reports/detail",
+    //     title: "Chi tiết giao dịch",
+    //     url: "/staff/transactions/detail",
     //   },
     // ],
   },
