@@ -7,11 +7,13 @@ import { RoleRoutes } from "./shared/routes/guards/RoleRoutes";
 import AdminRoutes from "./features/admin/routes/AdminRoutes";
 import StaffRoutes from "./features/staff/routes/StaffRoutes";
 import NotFoundPage from "./shared/pages/NotFoundPage";
+import Login from "./features/auth/pages/Login";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<Login />} />
       <Route path="/admin/*" element={<AdminRoutes />} />
       <Route path="/staff/*" element={<StaffRoutes />} />
       
