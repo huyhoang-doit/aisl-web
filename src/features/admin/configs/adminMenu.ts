@@ -12,6 +12,8 @@ import {
   UserCog,
   UserRoundPen,
   Boxes,
+  AlertTriangle,
+  History,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -77,6 +79,23 @@ export const adminNavMain: NavItem[] = [
     ],
   },
   {
+    title: "Quản lý báo cáo",
+    url: "/admin/manage-reports",
+    icon: AlertTriangle,
+    items: [
+      {
+        title: "Phía khách hàng",
+        url: "/admin/manage-reports",
+        icon: User,
+      },
+      {
+        title: "Phía nv kỹ thuật",
+        url: "/admin/manage-reports-staff",
+        icon: UserCog,
+      },
+    ],
+  },
+  {
     title: "Quản lý gói đăng ký",
     url: "/admin/plans",
     icon: DollarSign,
@@ -88,6 +107,21 @@ export const adminNavMain: NavItem[] = [
     //   {
     //     title: "Chi tiết bảng giá",
     //     url: "/admin/pricing/detail",
+    //   },
+    // ],
+  },
+  {
+    title: "Lịch sử giao dịch ",
+    url: "/admin/transactions",
+    icon: History,
+    // items: [
+    //   {
+    //     title: "Tất cả giao dịch",
+    //     url: "/staff/transactions",
+    //   },
+    //   {
+    //     title: "Chi tiết giao dịch",
+    //     url: "/staff/transactions/detail",
     //   },
     // ],
   },
