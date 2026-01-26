@@ -249,6 +249,11 @@ button.absolute.right-4.top-4 {
       max-width: 1400px;
     }
   }
+
+  /* Active tab styles */
+  .active-tab {
+    @apply data-[state=active]:bg-primary data-[state=active]:text-white data-[state=active]:shadow-sm hover:bg-primary/10 hover:text-white transition-all;
+  }
 }
 
 @layer base {

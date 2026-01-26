@@ -225,7 +225,7 @@ const LockerAreaDetailModal: React.FC<LockerAreaDetailModalProps> = ({
               <DialogTitle className="text-xl font-bold">{lockerArea.code}</DialogTitle>
               <DialogDescription>Chi tiết thông tin locker area</DialogDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-5">
               {/* Cập nhật trạng thái */}
               <Select
                 value={currentStatus}
