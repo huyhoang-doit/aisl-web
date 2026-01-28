@@ -190,13 +190,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
  * Helper hooks để check role
  */
 export const useIsAdmin = () => {
-  return useAuthStore((state) => state.user?.role === roles.ADMIN);
+  return useAuthStore((state) => state.user?.roles.includes(roles.ADMIN));
 };
 
 export const useIsStaff = () => {
-  return useAuthStore((state) => state.user?.role === roles.STAFF);
+  return useAuthStore((state) => state.user?.roles.includes(roles.STAFF));
 };
 
 export const useUserRole = () => {
-  return useAuthStore((state) => state.user?.role);
+  return useAuthStore((state) => state.user?.roles);
 };

@@ -13,7 +13,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { Button } from "@/shared/components/ui/button";
+import { Settings } from "lucide-react";
 import type { Locker } from "../features/locker/types/locker.types";
+import ManageSizeModal from "../features/locker/modals/ManageSizeModal";
 
 // Mock data - Thay thế bằng API call thực tế
 const mockLockers: Locker[] = [
@@ -86,6 +89,9 @@ const ManageLockerPage = () => {
   // const [sortConfig, setSortConfig] = useState<SortConfig | null>(null); // Reserved for future use
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // State cho modal quản lý size
+  const [isManageSizeModalOpen, setIsManageSizeModalOpen] = useState(false);
 
   // Filter columns for DataGrid
   const filterColumns: Column<Locker>[] = [
@@ -301,11 +307,20 @@ const ManageLockerPage = () => {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Quản lý locker</h1>
-        <p className="text-muted-foreground mt-2">
-          Quản lý các locker trong hệ thống
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý locker</h1>
+          <p className="text-muted-foreground mt-2">
+            Quản lý các locker trong hệ thống
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => setIsManageSizeModalOpen(true)}
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Quản lý kích thước
+        </Button>
       </div>
 
       <DataGrid
@@ -413,6 +428,12 @@ const ManageLockerPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal quản lý kích thước */}
+      <ManageSizeModal
+        open={isManageSizeModalOpen}
+        onOpenChange={setIsManageSizeModalOpen}
+      />
     </div>
   );
 };

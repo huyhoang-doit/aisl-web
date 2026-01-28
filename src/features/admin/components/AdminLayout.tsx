@@ -1,13 +1,6 @@
 import { AppLayout } from "@/shared/components/layouts/AppLayout"
 import { adminNavMain, adminNavSecondary } from "../configs/adminMenu"
 
-// Mock user data - replace with actual user data from context/store
-const mockUser = {
-  name: "Admin User",
-  email: "admin@lockerly.com",
-  avatar: "/src/assets/logo.png",
-}
-
 // Mock notifications - replace with actual notifications from context/store
 const mockNotifications = [
   {
@@ -45,7 +38,6 @@ export function AdminLayout() {
         navMain: adminNavMain,
         navSecondary: adminNavSecondary,
       }}
-      user={mockUser}
       notifications={mockNotifications}
     />
   )
