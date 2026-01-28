@@ -1,24 +1,23 @@
 import { Navigate, Outlet } from 'react-router-dom'
+import { useAuthStore } from '@/features/auth/store/auth.store'
+import { roles } from '@/shared/configs/role'
 
 export const UnAuthorizedRoute = () => {
-    const userInfo = localStorage.getItem('userInfo')
-    if (!userInfo) return <Outlet />
+    const { isAuthenticated, user } = useAuthStore()
     
-    let user
-    try {
-      user = JSON.parse(userInfo)
-    } catch {
-      // Nếu parse JSON lỗi, cho phép truy cập route
+    // Nếu chưa đăng nhập, cho phép truy cập route (login page)
+    if (!isAuthenticated || !user) {
       return <Outlet />
     }
     
-    // Nếu user đã đăng nhập (có dữ liệu hợp lệ), redirect về trang chủ
-    if (user && Object.keys(user).length > 0 && user.role) {
-      // Redirect dựa trên role
-      if (user.role === 'admin') return <Navigate to="/admin" replace={true} />
-      if (user.role === 'staff') return <Navigate to="/staff" replace={true} />
-      return <Navigate to="/" replace={true} />
+    // Nếu đã đăng nhập, redirect về trang tương ứng với role
+    if (user.role === roles.ADMIN) {
+      return <Navigate to="/admin" replace={true} />
     }
     
-    return <Outlet />
+    if (user.role === roles.STAFF) {
+      return <Navigate to="/staff" replace={true} />
+    }
+    
+    return <Navigate to="/" replace={true} />
   }

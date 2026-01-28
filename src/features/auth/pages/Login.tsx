@@ -16,53 +16,45 @@ import {
 import { roles } from "@/shared/configs/role";
 import { Command } from "lucide-react";
 import landingImage from "@/assets/landing-2.jpg";
+import { useAuthStore } from "../store/auth.store";
 
 const loginSchema = z.object({
-  username: z.string().min(1, "Tên đăng nhập không được để trống"),
-  password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+  email: z.string().min(1, "Email không được để trống").email("Email không hợp lệ"),
+  password: z.string().min(1, "Mật khẩu không được để trống"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, isLoading, error } = useAuthStore();
 
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      // TODO: Gọi API đăng nhập thực tế
-      // Tạm thời mock login với logic đơn giản
-      // Nếu username chứa "admin" -> role admin, ngược lại -> role staff
-      const role = data.username.toLowerCase().includes("admin") 
-        ? roles.ADMIN 
-        : roles.STAFF;
-
-      const userInfo = {
-        username: data.username,
-        email: `${data.username}@lockerly.com`,
-        role: role,
-        name: data.username,
-      };
-
-      // Lưu userInfo vào localStorage
-      localStorage.setItem("userInfo", JSON.stringify(userInfo));
-
+      await login(data);
+      
+      // Lấy user từ store sau khi login thành công
+      const user = useAuthStore.getState().user;
+      
       // Redirect dựa trên role
-      if (role === roles.ADMIN) {
-        navigate("/admin", { replace: true });
+      if (user?.roles.includes(roles.ADMIN)) {
+        navigate("/admin/dashboard", { replace: true });
+      } else if (user?.roles.includes(roles.STAFF)) {
+        navigate("/staff/dashboard", { replace: true });
       } else {
-        navigate("/staff", { replace: true });
+        navigate("/", { replace: true });
       }
     } catch (error) {
+      // Error đã được xử lý trong store (toast notification)
       console.error("Login error:", error);
-      // TODO: Hiển thị thông báo lỗi cho người dùng
     }
   };
 
@@ -96,14 +88,14 @@ const Login = () => {
                   <div className="space-y-4">
                     <FormField
                       control={form.control}
-                      name="username"
+                      name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Tên đăng nhập</FormLabel>
+                          <FormLabel>Email</FormLabel>
                           <FormControl>
                             <Input
-                              type="text"
-                              placeholder="Nhập tên đăng nhập"
+                              type="email"
+                              placeholder="Nhập email"
                               {...field}
                             />
                           </FormControl>
@@ -130,9 +122,21 @@ const Login = () => {
                     />
                   </div>
 
+                  {/* Error Message */}
+                  {error && (
+                    <div className="text-sm text-destructive bg-destructive/10 p-3 rounded-md">
+                      {error}
+                    </div>
+                  )}
+
                   {/* Login Button */}
-                  <Button type="submit" className="w-full" size="lg">
-                    Đăng nhập
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
                   </Button>
 
                   {/* Register Link */}

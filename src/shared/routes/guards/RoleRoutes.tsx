@@ -1,6 +1,6 @@
 import { roles } from '@/shared/configs/role'
-import { useRole } from '@/shared/hooks/useRole'
 import { Navigate, Outlet } from 'react-router-dom'
+import { useAuthStore } from '@/features/auth/store/auth.store'
 
 interface RoleRoutesProps {
     requiredRole: typeof roles.STAFF | typeof roles.ADMIN
@@ -8,29 +8,17 @@ interface RoleRoutesProps {
 }
 
 export const RoleRoutes = ({ requiredRole, redirectTo }: RoleRoutesProps) => {
-    const userInfo = localStorage.getItem('userInfo')
+    const { isAuthenticated, user } = useAuthStore()
     
-    let user = null
-    if (userInfo) {
-        try {
-            user = JSON.parse(userInfo)
-        } catch {
-            // Nếu parse JSON lỗi, user vẫn là null
-        }
-    }
-    
-    const userRole = user?.role as typeof roles.STAFF | typeof roles.ADMIN | undefined
-    const { isStaff, isAdmin } = useRole(userRole)
-    
-    if (!userInfo || !user || !user.role) {
+    if (!isAuthenticated || !user || !user.roles.includes(requiredRole)) {
         return <Navigate to={redirectTo} replace={true} />
     }
     
-    if (requiredRole === roles.STAFF && !isStaff) {
+    if (requiredRole === roles.STAFF && !user.roles.includes(roles.STAFF)) {
         return <Navigate to={redirectTo} replace={true} />
     }
     
-    if (requiredRole === roles.ADMIN && !isAdmin) {
+    if (requiredRole === roles.ADMIN && !user.roles.includes(roles.ADMIN)) {
         return <Navigate to={redirectTo} replace={true} />
     }
     

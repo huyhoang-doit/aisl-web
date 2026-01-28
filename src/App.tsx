@@ -12,16 +12,17 @@ import Login from "./features/auth/pages/Login";
 function App() {
   return (
     <Routes>
+      {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/admin/*" element={<AdminRoutes />} />
-      <Route path="/staff/*" element={<StaffRoutes />} />
       
-      {/* <Route element={<UnAuthorizedRoute />}>
+      {/* Unauthorized routes - chỉ cho phép khi chưa đăng nhập */}
+      <Route element={<UnAuthorizedRoute />}>
         <Route path="/login" element={<Login />} />
       </Route>
 
+      {/* Protected routes - yêu cầu đăng nhập */}
       <Route element={<ProtectedRoute />}>
+        {/* Admin routes - yêu cầu role ADMIN */}
         <Route
           element={
             <RoleRoutes
@@ -32,6 +33,8 @@ function App() {
         >
           <Route path="/admin/*" element={<AdminRoutes />} />
         </Route>
+        
+        {/* Staff routes - yêu cầu role STAFF */}
         <Route
           element={
             <RoleRoutes
@@ -42,8 +45,9 @@ function App() {
         >
           <Route path="/staff/*" element={<StaffRoutes />} />
         </Route>
-      </Route> */}
+      </Route>
 
+      {/* 404 routes */}
       <Route path="/not-found" element={<NotFoundPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
