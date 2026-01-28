@@ -18,17 +18,11 @@ export interface Notification {
 
 export interface AppLayoutProps {
   sidebarProps: AppSidebarProps
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
   notifications?: Notification[]
 }
 
 export function AppLayout({
   sidebarProps,
-  user,
   notifications = [],
 }: AppLayoutProps) {
   return (
@@ -41,7 +35,7 @@ export function AppLayout({
               <SidebarTrigger className="-ml-1 hover:bg-accent transition-colors" />
               <Separator orientation="vertical" className="mr-2 h-4" />
             </div>
-            <Navbar user={user} notifications={notifications} />
+            <Navbar notifications={notifications} />
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">

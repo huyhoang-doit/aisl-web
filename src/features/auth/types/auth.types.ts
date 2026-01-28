@@ -8,7 +8,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
-  name: string;
+  // name: string;
   roles: [typeof roles.STAFF, typeof roles.ADMIN];
   avatar?: string;
   createdAt?: string;

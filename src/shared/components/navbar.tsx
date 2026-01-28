@@ -6,7 +6,7 @@ import {
   LogOut,
   Mail,
 } from "lucide-react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 
 import {
   Avatar,
@@ -30,13 +30,10 @@ import {
 } from "@/shared/components/ui/popover"
 import { Badge } from "@/shared/components/ui/badge"
 import { ToggleTheme } from "@/features/landing/components/toggle-theme"
+import { useAuthStore } from "@/features/auth"
+import { toast } from "sonner"
 
 interface NavbarProps {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
   notifications?: Array<{
     id: string
     title: string
@@ -46,13 +43,26 @@ interface NavbarProps {
   }>
 }
 
-export function Navbar({ user, notifications = [] }: NavbarProps) {
+export function Navbar({ notifications = [] }: NavbarProps) {
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
   const location = useLocation()
   const unreadCount = notifications.filter((n) => !n.read).length
   
   // Determine role from path to build correct profile link
   const role = location.pathname.startsWith("/admin") ? "admin" : "staff"
   const profilePath = `/${role}/profile`
+
+  const handleLogout = async () => {
+    await logout()
+   
+    navigate("/login")
+  }
+
+  // Don't render if user is not available
+  if (!user) {
+    return null
+  }
 
   return (
     <div className="flex h-16 items-center justify-between gap-4">
@@ -142,9 +152,9 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
               className="flex items-center gap-2 px-2 py-1.5 h-auto hover:bg-accent transition-colors"
             >
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarImage src={user.avatar} alt={user.username} />
                 <AvatarFallback>
-                  {user.name
+                  {user.username
                     .split(" ")
                     .map((n) => n[0])
                     .join("")
@@ -153,7 +163,7 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
               </Avatar>
               <div className="hidden md:flex flex-col items-start text-left">
                 <span className="text-sm font-medium leading-none">
-                  {user.name}
+                  {user.username}
                 </span>
                 <span className="text-xs text-muted-foreground">
                   {user.email}
@@ -166,9 +176,9 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarImage src={user.avatar} alt={user.username} />
                   <AvatarFallback>
-                    {user.name
+                    {user.username
                       .split(" ")
                       .map((n) => n[0])
                       .join("")
@@ -176,7 +186,7 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col text-left">
-                  <span className="text-sm font-medium">{user.name}</span>
+                  <span className="text-sm font-medium">{user.username}</span>
                   <span className="text-xs text-muted-foreground">
                     {user.email}
                   </span>
@@ -199,7 +209,7 @@ export function Navbar({ user, notifications = [] }: NavbarProps) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
               <span>Đăng xuất</span>
             </DropdownMenuItem>
