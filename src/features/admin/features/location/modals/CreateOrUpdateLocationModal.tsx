@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -21,21 +23,30 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
+import { Checkbox } from "@/shared/components/ui/checkbox";
 import type { Location } from "../types/location.types";
+import SelectLocationMap from "../components/SelectLocationMap";
 
-export interface LocationFormData {
-  name: string;
-  address: string;
-  description?: string;
-  status: "active" | "inactive";
-}
+// Zod schema cho validation
+const locationSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Tên địa điểm không được để trống")
+    .min(2, "Tên địa điểm phải có ít nhất 2 ký tự"),
+  address: z
+    .string()
+    .min(1, "Địa chỉ không được để trống")
+    .min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
+  latitude: z.number().min(-90, "Vĩ độ không hợp lệ").max(90, "Vĩ độ không hợp lệ"),
+  longitude: z.number().min(-180, "Kinh độ không hợp lệ").max(180, "Kinh độ không hợp lệ"),
+  description: z.string().optional(),
+  isActive: z.boolean(),
+  plannedCabinetQuantity: z.number().min(0, "Số lượng cabinet phải lớn hơn hoặc bằng 0"),
+  plannedLockerQuantity: z.number().min(0, "Số lượng locker phải lớn hơn hoặc bằng 0"),
+});
+
+// Payload theo yêu cầu backend
+export type LocationFormData = z.infer<typeof locationSchema>;
 
 interface CreateOrUpdateLocationModalProps {
   open: boolean;
@@ -54,14 +65,18 @@ export function CreateOrUpdateLocationModal({
 }: CreateOrUpdateLocationModalProps) {
   const isUpdateMode = mode === "update" && locationData;
 
-  const form = useForm<LocationFormData>({
+  const form = useForm({
+    resolver: zodResolver(locationSchema),
     defaultValues: {
       name: "",
       address: "",
+      latitude: 0,
+      longitude: 0,
       description: "",
-      status: "active",
-      ...locationData,
-    },
+      isActive: true,
+      plannedCabinetQuantity: 0,
+      plannedLockerQuantity: 0,
+    } as LocationFormData,
   });
 
   useEffect(() => {
@@ -70,15 +85,23 @@ export function CreateOrUpdateLocationModal({
         form.reset({
           name: locationData.name,
           address: locationData.address,
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
           description: locationData.description || "",
-          status: locationData.status,
+          isActive: locationData.isActive,
+          plannedCabinetQuantity: locationData.plannedCabinetQuantity,
+          plannedLockerQuantity: locationData.plannedLockerQuantity,
         });
       } else {
         form.reset({
           name: "",
           address: "",
+          latitude: 0,
+          longitude: 0,
           description: "",
-          status: "active",
+          isActive: true,
+          plannedCabinetQuantity: 0,
+          plannedLockerQuantity: 0,
         });
       }
     }
@@ -123,13 +146,6 @@ export function CreateOrUpdateLocationModal({
               <FormField
                 control={form.control}
                 name="name"
-                rules={{
-                  required: "Tên địa điểm là bắt buộc",
-                  minLength: {
-                    value: 2,
-                    message: "Tên địa điểm phải có ít nhất 2 ký tự",
-                  },
-                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tên địa điểm *</FormLabel>
@@ -147,13 +163,6 @@ export function CreateOrUpdateLocationModal({
               <FormField
                 control={form.control}
                 name="address"
-                rules={{
-                  required: "Địa chỉ là bắt buộc",
-                  minLength: {
-                    value: 5,
-                    message: "Địa chỉ phải có ít nhất 5 ký tự",
-                  },
-                }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Địa chỉ *</FormLabel>
@@ -167,6 +176,51 @@ export function CreateOrUpdateLocationModal({
                   </FormItem>
                 )}
               />
+              <SelectLocationMap />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Vĩ độ (Latitude) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="any"
+                          placeholder="Nhập vĩ độ"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kinh độ (Longitude) *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          step="any"
+                          placeholder="Nhập kinh độ"
+                          {...field}
+                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
@@ -189,34 +243,67 @@ export function CreateOrUpdateLocationModal({
                 )}
               />
 
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="plannedCabinetQuantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Số lượng Cabinet dự kiến *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Nhập số lượng cabinet"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="plannedLockerQuantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Số lượng Locker dự kiến *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="Nhập số lượng locker"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          value={field.value || ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
-                name="status"
-                rules={{
-                  required: "Trạng thái là bắt buộc",
-                }}
+                name="isActive"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Trạng thái *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || "active"}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn trạng thái" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Hoạt động</SelectItem>
-                        <SelectItem value="inactive">Không hoạt động</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      Trạng thái hoạt động của địa điểm
-                    </FormDescription>
-                    <FormMessage />
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Trạng thái hoạt động</FormLabel>
+                      <FormDescription>
+                        Bật/tắt trạng thái hoạt động của địa điểm này
+                      </FormDescription>
+                    </div>
                   </FormItem>
                 )}
               />

@@ -97,25 +97,25 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   useEffect(() => {
     if (!open) return;
     
-    let cancelled = false;
-    // Setting loading state at the start of effect is acceptable pattern
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 100);
+    // let cancelled = false;
+    // // Setting loading state at the start of effect is acceptable pattern
+    // setTimeout(() => {
+    //   setIsLoading(true);
+    // }, 100);
     
-    // Simulate API call
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        const mockData = getMockCabinets(location.id);
-        setCabinets(mockData);
-        setIsLoading(false);
-      }
-    }, 500);
+    // // Simulate API call
+    // const timeoutId = setTimeout(() => {
+    //   if (!cancelled) {
+    //     const mockData = getMockCabinets(location.id);
+    //     setCabinets(mockData);
+    //     setIsLoading(false);
+    //   }
+    // }, 500);
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
+    // return () => {
+    //   cancelled = true;
+    //   clearTimeout(timeoutId);
+    // };
   }, [open, location.id]);
 
   const handleClose = () => {
@@ -252,13 +252,13 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
               </Button>
             </div>
 
-            <CabinetTable
+            {/* <CabinetTable
               cabinets={cabinets}
               onEdit={handleEditCabinet}
               onDelete={handleDeleteCabinet}
               onViewDetails={handleViewCabinetDetails}
               isLoading={isLoading}
-            />
+            /> */}
           </div>
         </DialogContent>
       </Dialog>

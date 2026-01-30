@@ -22,8 +22,8 @@ const LocationCardItem: React.FC<LocationCardItemProps> = ({ location, onClick }
       <CardHeader>
         <div className="flex items-start justify-between">
           <CardTitle className="text-lg font-semibold">{location.name}</CardTitle>
-          <Badge variant={location.status === "active" ? "default" : "secondary"}>
-            {location.status === "active" ? "Hoạt động" : "Không hoạt động"}
+          <Badge variant={location.isActive ? "default" : "secondary"}>
+            {location.isActive ? "Hoạt động" : "Không hoạt động"}
           </Badge>
         </div>
         <CardDescription className="flex items-center gap-2 mt-2">
