@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import LocationCardItem from "../features/location/components/LocationCardItem";
 import CreateOrUpdateLocationModal, { type LocationFormData } from "../features/location/modals/CreateOrUpdateLocationModal";
 import LocationDetailModal from "../features/location/modals/LocationDetailModal";
@@ -13,80 +13,38 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import type { Location } from "../features/location/types/location.types";
-import { DataGrid, type Column, type FilterConfig, type QuickFilter } from "@/shared/components/DataGrid";
-
-// Mock data - Thay thế bằng API call thực tế
-const mockLocations: Location[] = [
-  {
-    id: "1",
-    name: "Tòa nhà A - Tầng 1",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-    description: "Địa điểm đặt tủ locker ở tầng 1 tòa nhà A",
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    name: "Tòa nhà B - Tầng 2",
-    address: "456 Đường XYZ, Quận 3, TP.HCM",
-    description: "Địa điểm đặt tủ locker ở tầng 2 tòa nhà B",
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "Tòa nhà C - Tầng 3",
-    address: "789 Đường DEF, Quận 5, TP.HCM",
-    description: "Địa điểm đặt tủ locker ở tầng 3 tòa nhà C",
-    status: "inactive",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+import { DataGrid, type Column, type QuickFilter } from "@/shared/components/DataGrid";
+import { locationService } from "../features/location/services/location.service";
+import { useLocation } from "../features/location/hooks/useLocation";
+import { toast } from "sonner";
 
 const ManageLocationPage = () => {
-  const [locations, setLocations] = useState<Location[]>(mockLocations);
+  const {
+    locations,
+    total,
+    isLoading,
+    page,
+    pageSize,
+    setLocations,
+    setTotal,
+    setPage,
+    setPageSize,
+    refetch,
+    handleSearch,
+    handleFilter,
+    handleClearFilters,
+  } = useLocation({ defaultPageSize: 10 });
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "update">("create");
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(12);
-  const [filters, setFilters] = useState<FilterConfig[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Filter columns for DataGrid
-  const filterColumns: Column<Location>[] = [
-    {
-      key: "name",
-      header: "Tên địa điểm",
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo tên",
-    },
-    {
-      key: "address",
-      header: "Địa chỉ",
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo địa chỉ",
-    },
-    {
-      key: "status",
-      header: "Trạng thái",
-      filterable: true,
-      filterType: "select",
-      filterOptions: ["Hoạt động", "Không hoạt động"],
-    },
-  ];
 
   // Quick filters
   const quickFilters: QuickFilter[] = [
     {
-      key: "status",
+      key: "isActive",
       label: "Trạng thái",
       placeholder: "Chọn trạng thái",
       options: [
@@ -95,52 +53,6 @@ const ManageLocationPage = () => {
       ],
     },
   ];
-
-  // Filter and sort data
-  const filteredAndSortedData = useMemo(() => {
-    let result = [...locations];
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(
-        (location) =>
-          location.name.toLowerCase().includes(query) ||
-          location.address.toLowerCase().includes(query) ||
-          location.description?.toLowerCase().includes(query)
-      );
-    }
-
-    // Apply filters
-    filters.forEach((filter) => {
-      if (filter.key === "status") {
-        const statusMap: Record<string, Location["status"]> = {
-          "Hoạt động": "active",
-          "Không hoạt động": "inactive",
-        };
-        const statusValue = statusMap[filter.value];
-        if (statusValue) {
-          result = result.filter((location) => location.status === statusValue);
-        }
-      } else {
-        const value = filter.value.toLowerCase();
-        result = result.filter((location) => {
-          const fieldValue = String(location[filter.key as keyof Location] || "").toLowerCase();
-          return fieldValue.includes(value);
-        });
-      }
-    });
-
-    // Sorting can be added here in the future if needed
-    return result;
-  }, [locations, searchQuery, filters]);
-
-  // Pagination
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
-    return filteredAndSortedData.slice(start, end);
-  }, [filteredAndSortedData, page, pageSize]);
 
   // Xử lý tạo mới
   const handleCreate = () => {
@@ -163,43 +75,62 @@ const ManageLocationPage = () => {
   };
 
   // Xác nhận xóa
-  const confirmDelete = () => {
-    if (selectedLocation?.id) {
+  const confirmDelete = async () => {
+    if (!selectedLocation?.id) return;
+
+    try {
+      await locationService.delete(selectedLocation.id);
       setLocations(locations.filter((l) => l.id !== selectedLocation.id));
+      setTotal((prev) => Math.max(0, prev - 1));
       setIsDeleteDialogOpen(false);
       setSelectedLocation(null);
-      // Reset page if current page is empty
-      const newTotalPages = Math.ceil((filteredAndSortedData.length - 1) / pageSize);
-      if (page > newTotalPages && newTotalPages > 0) {
-        setPage(newTotalPages);
+
+      // Reset page nếu trang hiện tại trống và không phải trang 1
+      if (locations.length <= 1 && page > 1) {
+        setPage(Math.max(1, page - 1));
       }
+
+      toast.success("Xóa địa điểm thành công");
+    } catch (error) {
+      console.error("Error deleting location:", error);
+      toast.error("Có lỗi xảy ra khi xóa địa điểm");
     }
   };
 
   // Xử lý submit form
   const handleSubmit = async (data: LocationFormData) => {
-    if (modalMode === "create") {
-      // Tạo location mới
-      const newLocation: Location = {
-        ...data,
-        id: Date.now().toString(), // Thay bằng ID từ API
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setLocations([...locations, newLocation]);
-      // TODO: Gọi API để tạo location
-      console.log("Creating location:", newLocation);
-    } else {
-      // Cập nhật location
-      setLocations(
-        locations.map((l) =>
-          l.id === selectedLocation?.id
-            ? { ...data, id: l.id, createdAt: l.createdAt, updatedAt: new Date().toISOString() }
-            : l
-        )
-      );
-      // TODO: Gọi API để cập nhật location
-      console.log("Updating location:", data);
+    // Payload đúng format backend yêu cầu
+    const payload = {
+      name: data.name,
+      address: data.address,
+      latitude: data.latitude,
+      longitude: data.longitude,
+      description: data.description,
+      isActive: data.isActive,
+      plannedCabinetQuantity: data.plannedCabinetQuantity,
+      plannedLockerQuantity: data.plannedLockerQuantity,
+    };
+
+    try {
+      if (modalMode === "create") {
+        await locationService.create(payload);
+        toast.success("Thêm địa điểm thành công");
+        refetch();
+      } else {
+        if (!selectedLocation?.id) return;
+
+        const response = await locationService.update(selectedLocation.id, payload);
+        setLocations(
+          locations.map((l) => (l.id === selectedLocation.id ? response.data : l))
+        );
+        toast.success("Cập nhật địa điểm thành công");
+      }
+
+      setIsModalOpen(false);
+      setSelectedLocation(null);
+    } catch (error) {
+      console.error("Error saving location:", error);
+      toast.error("Có lỗi xảy ra khi thêm/cập nhật địa điểm");
     }
   };
 
@@ -213,7 +144,7 @@ const ManageLocationPage = () => {
   const handleDetailModalClose = (open: boolean | Location) => {
     if (typeof open === "boolean") {
       setIsDetailModalOpen(open);
-      if (!open) {
+      if (!open && modalMode === "create") {
         setSelectedLocation(null);
       }
     } else {
@@ -226,19 +157,8 @@ const ManageLocationPage = () => {
     }
   };
 
-  // Handler functions for DataGrid
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setPage(1); // Reset về trang đầu khi search
-  };
-
-  const handleFilter = (newFilters: FilterConfig[]) => {
-    setFilters(newFilters);
-    setPage(1); // Reset về trang đầu khi filter
-  };
-
   const handleQuickFilterChange = () => {
-    setPage(1); // Reset về trang đầu khi quick filter thay đổi
+    setPage(1);
   };
 
   return (
@@ -253,7 +173,7 @@ const ManageLocationPage = () => {
       {/* Action bar */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Tổng số địa điểm: <strong>{locations.length}</strong>
+          Tổng số địa điểm: <strong>{total}</strong>
         </div>
         {/* <Button onClick={handleCreate} className="gap-2">
           <Plus className="h-4 w-4" />
@@ -263,7 +183,7 @@ const ManageLocationPage = () => {
 
 
       <DataGrid
-        data={paginatedData}
+        data={locations}
         keyExtractor={(row) => row.id}
         renderCard={(location) => (
           <LocationCardItem
@@ -275,7 +195,7 @@ const ManageLocationPage = () => {
         onDelete={handleDelete}
         onCreate={handleCreate}
         emptyMessage="Chưa có địa điểm nào"
-        isLoading={false}
+        isLoading={isLoading}
         gridCols={{ default: 1, md: 2, lg: 3 }}
         // Search
         searchable={true}
@@ -283,23 +203,19 @@ const ManageLocationPage = () => {
         onSearch={handleSearch}
         // Filters
         filterable={true}
-        filterColumns={filterColumns}
+        // filterColumns={filterColumns}
         onFilter={handleFilter}
         quickFilters={quickFilters}
         onQuickFilterChange={handleQuickFilterChange}
-        onClearFilters={() => {
-          setFilters([]);
-          setSearchQuery("");
-          setPage(1);
-        }}
-        // Pagination
+        onClearFilters={handleClearFilters}
+        // Pagination (server-side)
         pagination={{
           page,
           pageSize,
-          total: filteredAndSortedData.length,
+          total,
           onPageChange: setPage,
           onPageSizeChange: setPageSize,
-          pageSizeOptions: [6, 12, 18, 24],
+          pageSizeOptions: [6, 10, 18, 24],
         }}
       />
       {/* Modal tạo/cập nhật */}

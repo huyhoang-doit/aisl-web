@@ -11,32 +11,25 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Textarea } from "@/shared/components/ui/textarea";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import type { Cabinet } from "../types/cabinet.types";
+import { LocationSelector } from "../components/LocationSelector";
 
 export interface CabinetFormData {
+  locationId: string;
   name: string;
-  code: string;
-  description?: string;
-  totalLockers: number;
-  availableLockers: number;
-  status: "active" | "inactive" | "maintenance";
+  macAddress: string;
+  ipAddress: string;
+  firmwareVersion: string;
+  totalRows: number;
+  totalColumns: number;
 }
 
 interface CreateOrUpdateCabinetModalProps {
@@ -45,7 +38,6 @@ interface CreateOrUpdateCabinetModalProps {
   cabinetData?: Cabinet | null;
   onSubmit: (data: CabinetFormData) => void | Promise<void>;
   mode?: "create" | "update";
-  locationId: string;
 }
 
 export function CreateOrUpdateCabinetModal({
@@ -54,18 +46,18 @@ export function CreateOrUpdateCabinetModal({
   cabinetData = null,
   onSubmit,
   mode = "create",
-  locationId: _locationId,
 }: CreateOrUpdateCabinetModalProps) {
   const isUpdateMode = mode === "update" && cabinetData;
 
   const form = useForm<CabinetFormData>({
     defaultValues: {
+      locationId: "",
       name: "",
-      code: "",
-      description: "",
-      totalLockers: 0,
-      availableLockers: 0,
-      status: "active",
+      macAddress: "",
+      ipAddress: "",
+      firmwareVersion: "",
+      totalRows: 0,
+      totalColumns: 0,
       ...cabinetData,
     },
   });
@@ -74,36 +66,30 @@ export function CreateOrUpdateCabinetModal({
     if (open) {
       if (isUpdateMode && cabinetData) {
         form.reset({
+          locationId: cabinetData.locationId,
           name: cabinetData.name,
-          code: cabinetData.code,
-          description: cabinetData.description || "",
-          totalLockers: cabinetData.totalLockers,
-          availableLockers: cabinetData.availableLockers,
-          status: cabinetData.status,
+          macAddress: cabinetData.macAddress,
+          ipAddress: cabinetData.ipAddress,
+          firmwareVersion: cabinetData.firmwareVersion,
+          totalRows: cabinetData.totalRows,
+          totalColumns: cabinetData.totalColumns,
         });
       } else {
         form.reset({
+          locationId: "",
           name: "",
-          code: "",
-          description: "",
-          totalLockers: 0,
-          availableLockers: 0,
-          status: "active",
+          macAddress: "",
+          ipAddress: "",
+          firmwareVersion: "",
+          totalRows: 0,
+          totalColumns: 0,
         });
       }
     }
   }, [open, cabinetData, isUpdateMode, form]);
 
-  const handleSubmit = async (formData: CabinetFormData) => {
+  const handleSubmitForm = async (formData: CabinetFormData) => {
     try {
-      // Validate that availableLockers <= totalLockers
-      if (formData.availableLockers > formData.totalLockers) {
-        form.setError("availableLockers", {
-          type: "manual",
-          message: "Số locker trống không thể lớn hơn tổng số locker",
-        });
-        return;
-      }
       await onSubmit(formData);
       onOpenChange(false);
       if (!isUpdateMode) {
@@ -130,13 +116,37 @@ export function CreateOrUpdateCabinetModal({
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmitForm)}
             className="space-y-6"
           >
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Thông tin cabinet
               </h3>
+
+              <FormField
+                control={form.control}
+                name="locationId"
+                rules={{
+                  required: "Vui lòng chọn địa điểm",
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Địa điểm *</FormLabel>
+                    <FormControl>
+                      <LocationSelector
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Chọn địa điểm đặt cabinet"
+                        filterActiveOnly={true}
+                        allowClear={false}
+                        className="min-w-[200px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
@@ -165,71 +175,17 @@ export function CreateOrUpdateCabinetModal({
 
                 <FormField
                   control={form.control}
-                  name="code"
+                  name="macAddress"
                   rules={{
-                    required: "Mã cabinet là bắt buộc",
-                    minLength: {
-                      value: 2,
-                      message: "Mã cabinet phải có ít nhất 2 ký tự",
-                    },
+                    // required: "MAC Address là bắt buộc",
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mã cabinet *</FormLabel>
+                      <FormLabel>MAC Address *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="VD: CAB-A1"
+                          placeholder="VD: AA:BB:CC:DD:EE:FF"
                           {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mô tả</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Nhập mô tả về cabinet (không bắt buộc)"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Mô tả chi tiết về cabinet này
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <FormField
-                  control={form.control}
-                  name="totalLockers"
-                  rules={{
-                    required: "Tổng số locker là bắt buộc",
-                    min: {
-                      value: 1,
-                      message: "Tổng số locker phải lớn hơn 0",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tổng số locker *</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min="1"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -239,24 +195,61 @@ export function CreateOrUpdateCabinetModal({
 
                 <FormField
                   control={form.control}
-                  name="availableLockers"
+                  name="ipAddress"
                   rules={{
-                    required: "Số locker trống là bắt buộc",
+                    // required: "IP Address là bắt buộc",
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>IP Address *</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="VD: 192.168.1.100"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="firmwareVersion"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phiên bản firmware</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="VD: 1.0.0"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="totalRows"
+                  rules={{
+                    required: "Số hàng là bắt buộc",
                     min: {
                       value: 0,
-                      message: "Số locker trống không thể nhỏ hơn 0",
+                      message: "Số hàng không được âm",
                     },
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Locker trống *</FormLabel>
+                      <FormLabel>Tổng số hàng *</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          min="0"
+                          min={0}
                           placeholder="0"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) => field.onChange(parseInt(e.target.value, 10) || "")}
                         />
                       </FormControl>
                       <FormMessage />
@@ -266,29 +259,26 @@ export function CreateOrUpdateCabinetModal({
 
                 <FormField
                   control={form.control}
-                  name="status"
+                  name="totalColumns"
                   rules={{
-                    required: "Trạng thái là bắt buộc",
+                    required: "Số cột là bắt buộc",
+                    min: {
+                      value: 0,
+                      message: "Số cột không được âm",
+                    },
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trạng thái *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || "active"}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn trạng thái" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="active">Hoạt động</SelectItem>
-                          <SelectItem value="inactive">Không hoạt động</SelectItem>
-                          <SelectItem value="maintenance">Bảo trì</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Tổng số cột *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value, 10) || "")}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

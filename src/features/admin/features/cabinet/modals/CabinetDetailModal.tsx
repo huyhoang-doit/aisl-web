@@ -26,8 +26,9 @@ import type { Locker } from "../../locker/types/locker.types";
 
 interface CabinetDetailModalProps {
   open: boolean;
+  /** Đóng modal: (false) hoặc cập nhật list khi edit từ detail: (updatedCabinet) */
   // eslint-disable-next-line no-unused-vars
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open: boolean | Cabinet) => void;
   cabinet: Cabinet;
   // eslint-disable-next-line no-unused-vars
   onEdit?: (cabinet: Cabinet) => void;
@@ -180,7 +181,7 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
               <div>
                 <DialogTitle className="text-xl font-bold">{cabinet.name}</DialogTitle>
                 <DialogDescription>
-                  Mã: {cabinet.code} | Tổng: {cabinet.totalLockers} | Trống: {cabinet.availableLockers}
+                  MAC: {cabinet.macAddress} | IP: {cabinet.ipAddress} | Hàng: {cabinet.totalRows} × Cột: {cabinet.totalColumns}
                 </DialogDescription>
               </div>
               <div className="flex items-center gap-2 mr-5">
@@ -218,9 +219,10 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
             </div>
           </DialogHeader>
 
-          {cabinet.description && (
-            <div className="rounded-md border border-border bg-muted/50 p-4">
-              <p className="text-sm text-muted-foreground">{cabinet.description}</p>
+          {(cabinet.firmwareVersion || cabinet.ipAddress) && (
+            <div className="rounded-md border border-border bg-muted/50 p-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+              {cabinet.ipAddress && <span>IP: <span className="font-mono">{cabinet.ipAddress}</span></span>}
+              {cabinet.firmwareVersion && <span>Firmware: {cabinet.firmwareVersion}</span>}
             </div>
           )}
 

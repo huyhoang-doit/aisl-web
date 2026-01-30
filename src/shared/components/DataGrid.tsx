@@ -2,24 +2,9 @@
 import * as React from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import { cn } from "@/shared/lib/utils";
-import {
-  Plus,
-  Search,
-  Download,
-  Filter,
-  X,
-} from "lucide-react";
+import { Plus, Search, Filter, X } from "lucide-react";
 import { Pagination } from "@/shared/components/ui/pagination";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -27,52 +12,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import type {
-  Column,
-  ActionButton,
-  SortConfig,
-  FilterConfig,
-  QuickFilter,
-} from "./DataTable";
+import type { Column, FilterConfig, QuickFilter } from "./DataTable";
 
-// Re-export types for convenience
-export type {
-  Column,
-  ActionButton,
-  SortConfig,
-  FilterConfig,
-  QuickFilter,
-};
+export type { Column, FilterConfig, QuickFilter };
 
 export interface DataGridProps<T> {
   data: T[];
-  columns?: Column<T>[]; // Optional for grid - we use renderCard instead
   keyExtractor: (row: T) => string | number;
-  renderCard: (row: T) => React.ReactNode; // Function to render each card
+  renderCard: (row: T) => React.ReactNode;
   onEdit?: (row: T) => void;
   onDelete?: (row: T) => void;
   onCreate?: () => void;
-  customActions?: ActionButton<T>[];
   emptyMessage?: string;
   className?: string;
   cardClassName?: string | ((row: T) => string);
   isLoading?: boolean;
   loadingMessage?: string;
-  // Grid layout
   gridCols?: {
     default?: number;
     md?: number;
     lg?: number;
     xl?: number;
   };
-  // Sorting
-  sortable?: boolean;
-  defaultSort?: SortConfig;
-  onSort?: (_sort: SortConfig | null) => void;
-  // Filtering
+  /** Bật search + quick filters. onFilter/onClearFilters dùng chung với quickFilters. */
   filterable?: boolean;
   onFilter?: (_filters: FilterConfig[]) => void;
-  // Pagination
   pagination?: {
     page: number;
     pageSize: number;
@@ -81,72 +45,43 @@ export interface DataGridProps<T> {
     onPageSizeChange?: (_size: number) => void;
     pageSizeOptions?: number[];
   };
-  // Selection
-  selectable?: boolean;
-  selectedRows?: T[];
-  onSelectionChange?: (_selected: T[]) => void;
-  // Export
-  exportable?: boolean;
-  exportFormats?: ("csv" | "excel" | "pdf")[];
-  onExport?: (_format: string) => void;
-  // Search
   searchable?: boolean;
   searchPlaceholder?: string;
   onSearch?: (_query: string) => void;
-  // Quick Filters
   quickFilters?: QuickFilter[];
   onQuickFilterChange?: (key: string, value: string) => void;
   onClearFilters?: () => void;
-  // Columns for filtering (if different from display)
+  /** Chỉ khi có filterColumns thì mới hiện nút "Lọc" và panel Bộ lọc. Nếu không truyền thì chỉ dùng quickFilters. */
   filterColumns?: Column<T>[];
+  /** Component hiển thị bên ngoài nút "Lọc" và panel Bộ lọc. Khi có filterColumns thì component này sẽ được hiển thị bên ngoài. */
+  extraFiltersComponent?: React.ReactNode;
 }
 
 export function DataGrid<T extends Record<string, any>>({
   data,
-  columns = [],
   keyExtractor,
   renderCard,
   onEdit: _onEdit,
   onDelete: _onDelete,
   onCreate,
-  customActions: _customActions = [],
   emptyMessage = "Không có dữ liệu",
   className,
   cardClassName,
   isLoading = false,
   loadingMessage = "Đang tải...",
   gridCols = { default: 1, md: 2, lg: 3 },
-  // Sorting
-  sortable: _sortable = false,
-  defaultSort: _defaultSort,
-  onSort: _onSort,
-  // Filtering
   filterable = false,
   onFilter,
   filterColumns,
-  // Pagination
   pagination,
-  // Selection
-  selectable = false,
-  selectedRows = [],
-  onSelectionChange,
-  // Export
-  exportable = false,
-  exportFormats = ["csv"],
-  onExport,
-  // Search
   searchable = false,
   searchPlaceholder = "Tìm kiếm...",
   onSearch,
-  // Quick Filters
   quickFilters = [],
   onQuickFilterChange,
   onClearFilters,
+  extraFiltersComponent,
 }: DataGridProps<T>) {
-  // Sort config - reserved for future use
-  // const [sortConfig, setSortConfig] = React.useState<SortConfig | null>(
-  //   defaultSort || null
-  // );
   const [filters, setFilters] = React.useState<FilterConfig[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [showFilters, setShowFilters] = React.useState(false);
@@ -154,8 +89,8 @@ export function DataGrid<T extends Record<string, any>>({
     Record<string, string>
   >({});
 
-  // Use filterColumns if provided, otherwise use columns
-  const columnsForFilter = filterColumns || columns;
+  const hasFilterPanel = Boolean(filterColumns?.length);
+  const columnsForFilter = filterColumns ?? [];
 
   // Handle filter change
   const handleFilterChange = (
@@ -202,55 +137,15 @@ export function DataGrid<T extends Record<string, any>>({
     onQuickFilterChange?.(key, isClear ? "" : value);
   };
 
-  // Sync quick filter values with filters when filters change externally
+  // Sync quick filter values với filters: không có filter = hiển thị "Tất cả" (__all__)
   React.useEffect(() => {
-    const newQuickFilterValues: Record<string, string> = {};
+    const updated: Record<string, string> = {};
     quickFilters.forEach((qf) => {
       const filter = filters.find((f) => f.key === qf.key);
-      if (filter) {
-        newQuickFilterValues[qf.key] = filter.value;
-      }
+      updated[qf.key] = filter?.value ?? "__all__";
     });
-    setQuickFilterValues(() => {
-      const updated: Record<string, string> = {};
-      quickFilters.forEach((qf) => {
-        if (newQuickFilterValues[qf.key]) {
-          updated[qf.key] = newQuickFilterValues[qf.key];
-        }
-      });
-      return updated;
-    });
+    setQuickFilterValues(updated);
   }, [filters, quickFilters]);
-
-  // Handle selection
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectionChange?.(data);
-    } else {
-      onSelectionChange?.([]);
-    }
-  };
-
-  const handleSelectRow = (row: T, checked: boolean) => {
-    if (checked) {
-      onSelectionChange?.([...selectedRows, row]);
-    } else {
-      onSelectionChange?.(
-        selectedRows.filter((r) => keyExtractor(r) !== keyExtractor(row))
-      );
-    }
-  };
-
-  const isRowSelected = (row: T) => {
-    return selectedRows.some((r) => keyExtractor(r) === keyExtractor(row));
-  };
-
-  const isAllSelected = data.length > 0 && selectedRows.length === data.length;
-
-  // Handle export
-  const handleExport = (format: string) => {
-    onExport?.(format);
-  };
 
   const getCardClassName = (row: T): string => {
     if (typeof cardClassName === "function") {
@@ -321,47 +216,23 @@ export function DataGrid<T extends Record<string, any>>({
               );
             })}
 
-          {filterable && (
-            // <div className="relative">
-            //   <Button
-            //     variant="outline"
-            //     size="default"
-            //     onClick={() => setShowFilters(!showFilters)}
-            //     className="gap-2"
-            //   >
-            //     <Filter className="h-4 w-4" />
-            //     Lọc
-            //     {filters.length > 0 && (
-            //       <span className="ml-1 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs">
-            //         {filters.length}
-            //       </span>
-            //     )}
-            //   </Button>
-            // </div>
-            <></>
-          )}
+          {extraFiltersComponent}
 
-          {exportable && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="default" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Xuất
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Xuất dữ liệu</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {exportFormats.map((format) => (
-                  <DropdownMenuItem
-                    key={format}
-                    onClick={() => handleExport(format)}
-                  >
-                    Xuất {format.toUpperCase()}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
+          {filterable && hasFilterPanel && (
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => setShowFilters(!showFilters)}
+              className="gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Lọc
+              {filters.length > 0 && (
+                <span className="ml-1 rounded-full bg-primary text-primary-foreground px-2 py-0.5 text-xs">
+                  {filters.length}
+                </span>
+              )}
+            </Button>
           )}
         </div>
 
@@ -391,8 +262,8 @@ export function DataGrid<T extends Record<string, any>>({
         </div>
       </div>
 
-      {/* Filter Panel */}
-      {filterable && showFilters && columnsForFilter.length > 0 && (
+      {/* Filter Panel - chỉ khi có filterColumns */}
+      {filterable && hasFilterPanel && showFilters && (
         <div className="rounded-md border border-border bg-card p-4 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">Bộ lọc</h3>
@@ -403,6 +274,7 @@ export function DataGrid<T extends Record<string, any>>({
                 setFilters([]);
                 setShowFilters(false);
                 onFilter?.([]);
+                onClearFilters?.();
               }}
               className="h-6 w-6"
             >
@@ -509,23 +381,6 @@ export function DataGrid<T extends Record<string, any>>({
         </div>
       )}
 
-      {/* Selection Bar */}
-      {selectable && selectedRows.length > 0 && (
-        <div className="flex items-center justify-between rounded-md border border-border bg-card p-4">
-          <div className="text-sm text-muted-foreground">
-            Đã chọn <strong>{selectedRows.length}</strong> mục
-          </div>
-          <div className="flex items-center gap-2">
-            <Checkbox
-              checked={isAllSelected}
-              onCheckedChange={handleSelectAll}
-              aria-label="Chọn tất cả"
-            />
-            <span className="text-sm">Chọn tất cả</span>
-          </div>
-        </div>
-      )}
-
       {/* Grid */}
       {isLoading ? (
         <div className="rounded-md border border-border bg-card p-24 text-center text-muted-foreground">
@@ -546,45 +401,21 @@ export function DataGrid<T extends Record<string, any>>({
               gridCols.xl && `xl:${getGridClass(gridCols.xl || gridCols.lg)}`
             )}
           >
-            {data.map((row) => {
-              const rowKey = keyExtractor(row);
-              const isSelected = isRowSelected(row);
-              return (
-                <div
-                  key={rowKey}
-                  className={cn(
-                    "relative",
-                    selectable && "group",
-                    getCardClassName(row)
-                  )}
-                >
-                  {selectable && (
-                    <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={(checked) =>
-                          handleSelectRow(row, checked as boolean)
-                        }
-                        aria-label={`Chọn ${rowKey}`}
-                      />
-                    </div>
-                  )}
-                  {renderCard(row)}
-                </div>
-              );
-            })}
+            {data.map((row) => (
+              <div
+                key={keyExtractor(row)}
+                className={cn("relative", getCardClassName(row))}
+              >
+                {renderCard(row)}
+              </div>
+            ))}
           </div>
         </>
       )}
 
       {/* Pagination */}
       {pagination && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            {selectedRows.length > 0 && (
-              <span>{selectedRows.length} mục đã chọn</span>
-            )}
-          </div>
+        <div className="flex items-center justify-end">
           <Pagination
             current={pagination.page}
             total={pagination.total}
