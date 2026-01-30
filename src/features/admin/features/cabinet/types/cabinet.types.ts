@@ -1,12 +1,12 @@
 export interface Cabinet {
-    id: string;
-    locationId: string;
-    name: string;
-    code: string;
-    description?: string;
-    totalLockers: number;
-    availableLockers: number;
-    status: "active" | "inactive" | "maintenance";
-    createdAt?: string;
-    updatedAt?: string;
-  }
+  id: string;
+  locationId: string;
+  name: string;
+  macAddress: string;
+  ipAddress: string;
+  firmwareVersion: string;
+  totalRows: number;
+  totalColumns: number;
+  createdAt?: string;
+  updatedAt?: string;
+}

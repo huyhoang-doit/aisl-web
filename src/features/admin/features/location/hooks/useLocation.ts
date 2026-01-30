@@ -41,6 +41,8 @@ export interface UseLocationOptions {
   defaultPageSize?: number;
   /** Gọi fetch ngay khi mount */
   fetchOnMount?: boolean;
+  /** Bộ lọc mặc định */
+  initialFilters?: FilterConfig[];
 }
 
 export interface UseLocationReturn {
@@ -86,6 +88,7 @@ export function useLocation(options: UseLocationOptions = {}): UseLocationReturn
   const {
     defaultPageSize = 10,
     fetchOnMount = true,
+    initialFilters = [],
   } = options;
 
   const [locations, setLocations] = useState<Location[]>([]);
@@ -94,7 +97,7 @@ export function useLocation(options: UseLocationOptions = {}): UseLocationReturn
   const [page, setPage] = useState(1);
   const [pageSize, setPageSizeState] = useState(defaultPageSize);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<FilterConfig[]>([]);
+  const [filters, setFilters] = useState<FilterConfig[]>(initialFilters);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const params = useMemo(

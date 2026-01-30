@@ -53,6 +53,8 @@ export interface DataGridProps<T> {
   onClearFilters?: () => void;
   /** Chỉ khi có filterColumns thì mới hiện nút "Lọc" và panel Bộ lọc. Nếu không truyền thì chỉ dùng quickFilters. */
   filterColumns?: Column<T>[];
+  /** Component hiển thị bên ngoài nút "Lọc" và panel Bộ lọc. Khi có filterColumns thì component này sẽ được hiển thị bên ngoài. */
+  extraFiltersComponent?: React.ReactNode;
 }
 
 export function DataGrid<T extends Record<string, any>>({
@@ -78,6 +80,7 @@ export function DataGrid<T extends Record<string, any>>({
   quickFilters = [],
   onQuickFilterChange,
   onClearFilters,
+  extraFiltersComponent,
 }: DataGridProps<T>) {
   const [filters, setFilters] = React.useState<FilterConfig[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -212,6 +215,8 @@ export function DataGrid<T extends Record<string, any>>({
                 </Select>
               );
             })}
+
+          {extraFiltersComponent}
 
           {filterable && hasFilterPanel && (
             <Button
