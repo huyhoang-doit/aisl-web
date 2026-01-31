@@ -81,6 +81,7 @@ export interface FilterConfig {
 }
 
 export interface QuickFilter {
+  allSelectedLabel?: string;
   key: string;
   label: string;
   options: { value: string; label: string }[];

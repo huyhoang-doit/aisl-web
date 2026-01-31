@@ -205,7 +205,7 @@ export function DataGrid<T extends Record<string, any>>({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__all__">Tất cả</SelectItem>
+                    <SelectItem value="__all__">{quickFilter.allSelectedLabel || "Tất cả"}</SelectItem>
                     {quickFilter.options.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
