@@ -1,8 +1,16 @@
 import React from "react";
-import { DataTable, type Column } from "@/shared/components/DataTable";
-import { Badge } from "@/shared/components/ui/badge";
+import { DataTable, type Column, type QuickFilter } from "@/shared/components/DataTable";
 import { Eye } from "lucide-react";
 import type { Cabinet } from "../types/cabinet.types";
+
+interface CabinetTablePagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
+  pageSizeOptions?: number[];
+}
 
 interface CabinetTableProps {
   cabinets: Cabinet[];
@@ -13,6 +21,12 @@ interface CabinetTableProps {
   // eslint-disable-next-line no-unused-vars
   onViewDetails?: (cabinet: Cabinet) => void;
   isLoading?: boolean;
+  pagination?: CabinetTablePagination;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  onSearch?: (query: string) => void;
+  quickFilters?: QuickFilter[];
+  onQuickFilterChange?: (key: string, value: string) => void;
 }
 
 const CabinetTable: React.FC<CabinetTableProps> = ({
@@ -21,53 +35,47 @@ const CabinetTable: React.FC<CabinetTableProps> = ({
   onDelete,
   onViewDetails,
   isLoading = false,
+  pagination,
+  searchable = false,
+  searchPlaceholder = "Tìm kiếm cabinet...",
+  onSearch,
+  quickFilters,
+  onQuickFilterChange,
 }) => {
   const columns: Column<Cabinet>[] = [
     {
-      key: "code",
-      header: "Mã cụm",
-      sortable: true,
-      accessor: (row) => (
-        <div className="font-medium">{row.code}</div>
-      ),
-    },
-    {
       key: "name",
-      header: "Tên cụm",
+      header: "Tên cabinet",
       sortable: true,
       accessor: (row) => row.name,
     },
     {
-      key: "totalLockers",
-      header: "Tổng số locker",
+      key: "macAddress",
+      header: "MAC Address",
+      sortable: true,
+      accessor: (row) => row.macAddress || "—",
+    },
+    {
+      key: "ipAddress",
+      header: "IP Address",
+      sortable: true,
+      accessor: (row) => row.ipAddress || "—",
+    },
+    {
+      key: "totalRows",
+      header: "Số hàng",
       sortable: true,
       accessor: (row) => (
-        <div className="text-center">{row.totalLockers}</div>
+        <div className="text-center">{row.totalRows}</div>
       ),
     },
     {
-      key: "availableLockers",
-      header: "Locker trống",
+      key: "totalColumns",
+      header: "Số cột",
       sortable: true,
       accessor: (row) => (
-        <div className="text-center font-medium text-green-600">
-          {row.availableLockers}
-        </div>
+        <div className="text-center">{row.totalColumns}</div>
       ),
-    },
-    {
-      key: "status",
-      header: "Trạng thái",
-      sortable: true,
-      accessor: (row) => {
-        const statusConfig = {
-          active: { label: "Hoạt động", variant: "default" as const },
-          inactive: { label: "Không hoạt động", variant: "secondary" as const },
-          maintenance: { label: "Bảo trì", variant: "destructive" as const },
-        };
-        const config = statusConfig[row.status || "active"];
-        return <Badge variant={config.variant}>{config.label}</Badge>;
-      },
     },
   ];
 
@@ -95,6 +103,12 @@ const CabinetTable: React.FC<CabinetTableProps> = ({
       emptyMessage="Chưa có cabinet nào"
       isLoading={isLoading}
       loadingMessage="Đang tải danh sách cabinet..."
+      pagination={pagination}
+      searchable={searchable}
+      searchPlaceholder={searchPlaceholder}
+      onSearch={onSearch}
+      quickFilters={quickFilters}
+      onQuickFilterChange={onQuickFilterChange}
     />
   );
 };

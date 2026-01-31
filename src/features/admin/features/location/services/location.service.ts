@@ -5,6 +5,7 @@
 import { api } from '@/shared/lib/api/client';
 import type { Location } from '../types/location.types';
 import type { Pagination } from '@/shared/types/pagination.types';
+import type { Cabinet } from '../../cabinet/types/cabinet.types';
 
 export interface CreateLocationPayload {
   name: string;
@@ -37,6 +38,19 @@ export interface LocationListParams {
   name?: string;
   address?: string;
   isActive?: boolean;
+}
+
+export interface GetCabinetLocationParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface CabinetLocationListResponse {
+  data: {
+    cabinets: Cabinet[];
+    pagination: Pagination;
+  };
 }
 
 export const locationService = {
@@ -83,5 +97,24 @@ export const locationService = {
    */
   delete: async (id: string): Promise<void> => {
     return api.delete<void>(`/locations/${id}`);
+  },
+
+  /**
+   * Lấy danh sách cabinet theo location ID (locations/{id}/cabinets)
+   */
+  getCabinetLocation: async (
+    locationId: string,
+    params?: GetCabinetLocationParams
+  ): Promise<CabinetLocationListResponse> => {
+    const searchParams = new URLSearchParams();
+    if (params?.page != null) searchParams.set('page', String(params.page));
+    if (params?.limit != null) searchParams.set('limit', String(params.limit));
+    if (params?.search) searchParams.set('search', params.search);
+
+    const query = searchParams.toString();
+    const url = query
+      ? `/locations/${locationId}/cabinets?${query}`
+      : `/locations/${locationId}/cabinets`;
+    return api.get<CabinetLocationListResponse>(url);
   },
 };

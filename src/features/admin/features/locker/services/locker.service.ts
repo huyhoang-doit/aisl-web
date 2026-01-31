@@ -39,6 +39,12 @@ export interface LockerListParams {
   search?: string;
 }
 
+export interface GetLockerCabinetParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
 export const lockerService = {
   /**
    * Lấy danh sách lockers với phân trang và filter
@@ -83,5 +89,24 @@ export const lockerService = {
    */
   delete: async (id: string): Promise<void> => {
     return api.delete<void>(`/lockers/${id}`);
+  },
+
+  /**
+   * Lấy danh sách locker theo cabinet ID (cabinets/{id}/lockers)
+   */
+  getLockerCabinet: async (
+    cabinetId: string,
+    params?: GetLockerCabinetParams
+  ): Promise<LockerListResponse> => {
+    const searchParams = new URLSearchParams();
+    if (params?.page != null) searchParams.set('page', String(params.page));
+    if (params?.limit != null) searchParams.set('limit', String(params.limit));
+    if (params?.search) searchParams.set('search', params.search);
+
+    const query = searchParams.toString();
+    const url = query
+      ? `/cabinets/${cabinetId}/lockers?${query}`
+      : `/cabinets/${cabinetId}/lockers`;
+    return api.get<LockerListResponse>(url);
   },
 };

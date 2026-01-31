@@ -18,9 +18,9 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
 };
 
 const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
-  const displayTitle = locker.code || `Hàng ${locker.row} - Cột ${locker.column}`;
-  const sizeName = locker.size?.name || "—";
-  const statusInfo = STATUS_CONFIG[locker.status || "AVAILABLE"];
+  const displayTitle = locker.lockerLabel ?? `${locker.row}-${locker.column}`;
+  const sizeName = locker.sizeType?.name ?? "—";
+  const statusInfo = STATUS_CONFIG[locker.status];
 
   return (
     <Card

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -28,8 +28,7 @@ import {
 } from "@/shared/components/ui/select";
 import { Switch } from "@/shared/components/ui/switch";
 import { CabinetSelector } from "@/features/admin/features/cabinet/components/CabinetSelector";
-import { sizeService } from "@/features/admin/features/size/services/size.service";
-import type { Size } from "@/features/admin/features/size/types/size.types";
+import { SizeSelector } from "@/features/admin/features/size/components/SizeSelector";
 import type { Locker, LockerStatus } from "../types/locker.types";
 
 export interface LockerFormData {
@@ -67,7 +66,7 @@ export function CreateOrUpdateLockerModal({
   defaultCabinetId = "",
 }: CreateOrUpdateLockerModalProps) {
   const isUpdateMode = mode === "update" && lockerData;
-  const [sizes, setSizes] = useState<Size[]>([]);
+  const isFromCabinetDetail = Boolean(defaultCabinetId);
 
   const form = useForm<LockerFormData>({
     defaultValues: {
@@ -80,26 +79,12 @@ export function CreateOrUpdateLockerModal({
     },
   });
 
-  // Load sizes khi modal mở
-  useEffect(() => {
-    if (!open) return;
-    const loadSizes = async () => {
-      try {
-        const response = await sizeService.getAll();
-        setSizes(response.data.sizes || []);
-      } catch (error) {
-        console.error("Error loading sizes:", error);
-      }
-    };
-    loadSizes();
-  }, [open]);
-
   useEffect(() => {
     if (open) {
       if (isUpdateMode && lockerData) {
         form.reset({
           cabinetId: lockerData.cabinetId,
-          sizeId: lockerData.sizeId,
+          sizeId: lockerData.sizeTypeId,
           row: lockerData.row,
           column: lockerData.column,
           status: lockerData.status,
@@ -154,28 +139,42 @@ export function CreateOrUpdateLockerModal({
                 Thông tin locker
               </h3>
 
-              <FormField
-                control={form.control}
-                name="cabinetId"
-                rules={{
-                  required: "Vui lòng chọn cabinet",
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cabinet *</FormLabel>
-                    <FormControl>
-                      <CabinetSelector
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Chọn cabinet"
-                        allowClear={false}
-                        className="min-w-[200px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!isFromCabinetDetail ? (
+                <FormField
+                  control={form.control}
+                  name="cabinetId"
+                  rules={{
+                    required: "Vui lòng chọn cabinet",
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cabinet *</FormLabel>
+                      <FormControl>
+                        <CabinetSelector
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Chọn cabinet"
+                          allowClear={false}
+                          className="min-w-[200px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="cabinetId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <input type="hidden" {...field} value={defaultCabinetId} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
@@ -186,26 +185,15 @@ export function CreateOrUpdateLockerModal({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Kích thước *</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn kích thước" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {sizes.map((size) => (
-                          <SelectItem key={size.id} value={size.id}>
-                            {size.name}
-                            {size.width && size.height && size.depth
-                              ? ` (${size.width}x${size.height}x${size.depth} cm)`
-                              : ""}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <SizeSelector
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Chọn kích thước"
+                        allowClear={false}
+                        className="min-w-[200px]"
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -232,7 +220,7 @@ export function CreateOrUpdateLockerModal({
                           placeholder="0"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(parseInt(e.target.value, 10) || 0)
+                            field.onChange(parseInt(e.target.value, 10) || "")
                           }
                         />
                       </FormControl>
@@ -261,7 +249,7 @@ export function CreateOrUpdateLockerModal({
                           placeholder="0"
                           {...field}
                           onChange={(e) =>
-                            field.onChange(parseInt(e.target.value, 10) || 0)
+                            field.onChange(parseInt(e.target.value, 10) || "")
                           }
                         />
                       </FormControl>

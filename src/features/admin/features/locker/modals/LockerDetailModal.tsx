@@ -34,9 +34,9 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const displayTitle = locker.code || `Hàng ${locker.row} - Cột ${locker.column}`;
-  const sizeName = locker.size?.name || "—";
-  const statusInfo = STATUS_CONFIG[locker.status || "AVAILABLE"];
+  const displayTitle = locker.lockerLabel ?? `${locker.row}-${locker.column}`;
+  const sizeName = locker.sizeType?.name ?? "—";
+  const statusInfo = STATUS_CONFIG[locker.status];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -77,7 +77,7 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
         </DialogHeader>
 
         <div className="space-y-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div>
               <span className="text-sm text-muted-foreground">Kích thước:</span>
               <Badge variant="outline" className="ml-2">
@@ -88,6 +88,12 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
               <span className="text-sm text-muted-foreground">Trạng thái:</span>
               <Badge variant={statusInfo.variant} className="ml-2">
                 {statusInfo.label}
+              </Badge>
+            </div>
+            <div>
+              <span className="text-sm text-muted-foreground">Cửa (HW):</span>
+              <Badge variant="outline" className="ml-2">
+                {locker.hwState ?? "—"}
               </Badge>
             </div>
             <div>
@@ -105,12 +111,10 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
               Thông tin cơ bản
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
-              {locker.code && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Mã locker:</span>
-                  <p className="font-medium">{locker.code}</p>
-                </div>
-              )}
+              <div>
+                <span className="text-sm text-muted-foreground">Nhãn locker:</span>
+                <p className="font-medium font-mono">{displayTitle}</p>
+              </div>
               <div>
                 <span className="text-sm text-muted-foreground">Vị trí:</span>
                 <p className="font-medium">
@@ -121,6 +125,23 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
                 <span className="text-sm text-muted-foreground">Cabinet ID:</span>
                 <p className="font-medium font-mono text-sm">{locker.cabinetId}</p>
               </div>
+              {locker.sizeType && (locker.sizeType.width != null || locker.sizeType.height != null || locker.sizeType.depth != null) && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Kích thước (cm):</span>
+                  <p className="font-medium">
+                    {[locker.sizeType.width, locker.sizeType.height, locker.sizeType.depth]
+                      .filter((n) => n != null)
+                      .join(" × ")}{" "}
+                    cm
+                  </p>
+                </div>
+              )}
+              {locker.totalUsageTime != null && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Tổng thời gian sử dụng:</span>
+                  <p className="font-medium">{locker.totalUsageTime}</p>
+                </div>
+              )}
             </div>
           </div>
 

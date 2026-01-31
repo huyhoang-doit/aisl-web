@@ -265,8 +265,8 @@ const ManageLockerPage = () => {
             <AlertDialogDescription>
               Bạn có chắc chắn muốn xóa locker{" "}
               <strong>
-                {selectedLocker?.code ||
-                  `Hàng ${selectedLocker?.row} - Cột ${selectedLocker?.column}`}
+                {selectedLocker?.lockerLabel ??
+                  `${selectedLocker?.row}-${selectedLocker?.column}`}
               </strong>
               ? Hành động này không thể hoàn tác.
             </AlertDialogDescription>

@@ -11,6 +11,15 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
   RESERVED: { label: "Đã đặt", variant: "outline" },
 };
 
+interface LockerTablePagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
+  pageSizeOptions?: number[];
+}
+
 interface LockerTableProps {
   lockers: Locker[];
   onEdit?: (locker: Locker) => void;
@@ -18,6 +27,10 @@ interface LockerTableProps {
   onViewDetails?: (locker: Locker) => void;
   onCreate?: () => void;
   isLoading?: boolean;
+  pagination?: LockerTablePagination;
+  searchable?: boolean;
+  searchPlaceholder?: string;
+  onSearch?: (query: string) => void;
 }
 
 const LockerTable: React.FC<LockerTableProps> = ({
@@ -27,24 +40,41 @@ const LockerTable: React.FC<LockerTableProps> = ({
   onViewDetails,
   onCreate,
   isLoading = false,
+  pagination,
+  searchable = false,
+  searchPlaceholder = "Tìm theo mã, vị trí locker...",
+  onSearch,
 }) => {
+  // Hiển thị theo response BE: row, column, lockerLabel, sizeType, status, hwState?, isActive, totalUsageTime?
   const columns: Column<Locker>[] = [
     {
-      key: "code",
-      header: "Mã / Vị trí",
+      key: "row",
+      header: "Hàng",
+      sortable: true,
+      accessor: (row) => <div className="text-center">{row.row}</div>,
+    },
+    {
+      key: "column",
+      header: "Cột",
+      sortable: true,
+      accessor: (row) => <div className="text-center">{row.column}</div>,
+    },
+    {
+      key: "lockerLabel",
+      header: "Nhãn",
       sortable: true,
       accessor: (row) => (
-        <div className="font-medium font-mono">
-          {row.code || `H${row.row}-C${row.column}`}
+        <div className="font-mono text-sm">
+          {row.lockerLabel ?? `${row.row}-${row.column}`}
         </div>
       ),
     },
     {
-      key: "size",
+      key: "sizeType",
       header: "Kích thước",
       sortable: true,
       accessor: (row) => (
-        <Badge variant="outline">{row.size?.name || "—"}</Badge>
+        <span className="text-sm">{row.sizeType?.name ?? "—"}</span>
       ),
     },
     {
@@ -52,21 +82,17 @@ const LockerTable: React.FC<LockerTableProps> = ({
       header: "Trạng thái",
       sortable: true,
       accessor: (row) => {
-        const config = STATUS_CONFIG[row.status || "AVAILABLE"];
+        const config = STATUS_CONFIG[row.status];
         return <Badge variant={config.variant}>{config.label}</Badge>;
       },
     },
     {
-      key: "row",
-      header: "Hàng",
+      key: "hwState",
+      header: "Cửa",
       sortable: true,
-      accessor: (row) => <div>{row.row}</div>,
-    },
-    {
-      key: "column",
-      header: "Cột",
-      sortable: true,
-      accessor: (row) => <div>{row.column}</div>,
+      accessor: (row) => (
+        <span className="text-sm">{row.hwState ?? "—"}</span>
+      ),
     },
     {
       key: "isActive",
@@ -105,6 +131,10 @@ const LockerTable: React.FC<LockerTableProps> = ({
       emptyMessage="Chưa có locker nào"
       isLoading={isLoading}
       loadingMessage="Đang tải danh sách locker..."
+      pagination={pagination}
+      searchable={searchable}
+      searchPlaceholder={searchPlaceholder}
+      onSearch={onSearch}
     />
   );
 };
