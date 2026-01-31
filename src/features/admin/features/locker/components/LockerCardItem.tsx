@@ -1,31 +1,26 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Calendar, Package, DollarSign } from "lucide-react";
+import { Calendar, Package } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import type { Locker } from "../types/locker.types";
+import type { Locker, LockerStatus } from "../types/locker.types";
 
 interface LockerCardItemProps {
   locker: Locker;
   onClick?: () => void;
 }
 
+const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  AVAILABLE: { label: "Trống", variant: "default" },
+  OCCUPIED: { label: "Đã thuê", variant: "secondary" },
+  MAINTENANCE: { label: "Bảo trì", variant: "destructive" },
+  RESERVED: { label: "Đã đặt", variant: "outline" },
+};
+
 const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
-  const sizeConfig = {
-    small: { label: "Nhỏ", variant: "secondary" as const },
-    medium: { label: "Vừa", variant: "default" as const },
-    large: { label: "Lớn", variant: "default" as const },
-  };
-
-  const statusConfig = {
-    available: { label: "Trống", variant: "default" as const },
-    occupied: { label: "Đã thuê", variant: "secondary" as const },
-    maintenance: { label: "Bảo trì", variant: "destructive" as const },
-    reserved: { label: "Đã đặt", variant: "outline" as const },
-  };
-
-  const sizeInfo = sizeConfig[locker.size || "medium"];
-  const statusInfo = statusConfig[locker.status || "available"];
+  const displayTitle = locker.code || `Hàng ${locker.row} - Cột ${locker.column}`;
+  const sizeName = locker.size?.name || "—";
+  const statusInfo = STATUS_CONFIG[locker.status || "AVAILABLE"];
 
   return (
     <Card
@@ -39,40 +34,28 @@ const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold font-mono">
-              {locker.code}
+              {displayTitle}
             </CardTitle>
           </div>
           <div className="flex flex-col gap-2 items-end">
             <Badge variant={statusInfo.variant}>
               {statusInfo.label}
             </Badge>
-            <Badge variant={sizeInfo.variant} className="text-xs">
-              {sizeInfo.label}
+            <Badge variant="outline" className="text-xs">
+              {sizeName}
             </Badge>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {/* Price */}
-          {locker.price !== undefined && locker.price > 0 && (
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Giá thuê:</span>
-              <span className="text-sm font-bold text-primary">
-                {locker.price.toLocaleString("vi-VN")} đ/tháng
-              </span>
-            </div>
-          )}
-
-          {/* Size & Status Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Package className="h-4 w-4" />
                 <span>Kích thước</span>
               </div>
-              <p className="font-medium">{sizeInfo.label}</p>
+              <p className="font-medium">{sizeName}</p>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -82,6 +65,15 @@ const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
                 {statusInfo.label}
               </Badge>
             </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            Vị trí: Hàng {locker.row}, Cột {locker.column}
+            {locker.isActive !== undefined && (
+              <span className="ml-2">
+                • {locker.isActive ? "Hoạt động" : "Không hoạt động"}
+              </span>
+            )}
           </div>
 
           {locker.createdAt && (

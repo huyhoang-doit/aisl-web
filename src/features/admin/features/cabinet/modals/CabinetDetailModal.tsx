@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { lockerService } from "../../locker/services/locker.service";
+import { toast } from "sonner";
 import type { Cabinet } from "../types/cabinet.types";
 import type { Locker } from "../../locker/types/locker.types";
 
@@ -35,43 +37,6 @@ interface CabinetDetailModalProps {
   // eslint-disable-next-line no-unused-vars
   onDelete?: (cabinet: Cabinet) => void;
 }
-
-// Mock data - Thay thế bằng API call thực tế
-const getMockLockers = (cabinetId: string): Locker[] => [
-  {
-    id: "1",
-    cabinetId,
-    code: "L001",
-    size: "small",
-    status: "available",
-    price: 50000,
-    description: "Locker nhỏ, phù hợp cho đồ nhẹ",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    cabinetId,
-    code: "L002",
-    size: "medium",
-    status: "occupied",
-    price: 80000,
-    description: "Locker vừa",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    cabinetId,
-    code: "L003",
-    size: "large",
-    status: "available",
-    price: 120000,
-    description: "Locker lớn, phù hợp cho đồ cồng kềnh",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
 
 const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   open,
@@ -88,30 +53,27 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   const [lockerModalMode, setLockerModalMode] = useState<"create" | "update">("create");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load lockers when modal opens
+  const loadLockers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await lockerService.getAll({
+        cabinetId: cabinet.id,
+        limit: 100,
+      });
+      setLockers(response.data.lockers || []);
+    } catch (error) {
+      console.error("Error loading lockers:", error);
+      toast.error("Có lỗi xảy ra khi tải danh sách locker");
+      setLockers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cabinet.id]);
+
   useEffect(() => {
     if (!open) return;
-    
-    let cancelled = false;
-    // Setting loading state at the start of effect is acceptable pattern
-    setTimeout(() => {
-      setIsLoading(true);
-    }, 100);
-    
-    // Simulate API call
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        const mockData = getMockLockers(cabinet.id);
-        setLockers(mockData);
-        setIsLoading(false);
-      }
-    }, 500);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [open, cabinet.id]);
+    loadLockers();
+  }, [open, loadLockers]);
 
   const handleCreateLocker = () => {
     setSelectedLocker(null);
@@ -130,41 +92,52 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDeleteLocker = () => {
-    if (selectedLocker?.id) {
+  const confirmDeleteLocker = async () => {
+    if (!selectedLocker?.id) return;
+    try {
+      await lockerService.delete(selectedLocker.id);
       setLockers(lockers.filter((l) => l.id !== selectedLocker.id));
       setIsDeleteDialogOpen(false);
       setSelectedLocker(null);
-      // TODO: Gọi API để xóa locker
-      console.log("Deleting locker:", selectedLocker);
+      setIsLockerDetailModalOpen(false);
+      toast.success("Xóa locker thành công");
+    } catch (error) {
+      console.error("Error deleting locker:", error);
+      toast.error("Có lỗi xảy ra khi xóa locker");
     }
   };
 
   const handleLockerSubmit = async (data: LockerFormData) => {
-    if (lockerModalMode === "create") {
-      const newLocker: Locker = {
-        ...data,
-        id: Date.now().toString(),
-        cabinetId: cabinet.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setLockers([...lockers, newLocker]);
-      // TODO: Gọi API để tạo locker
-      console.log("Creating locker:", newLocker);
-    } else {
-      setLockers(
-        lockers.map((l) =>
-          l.id === selectedLocker?.id
-            ? { ...data, id: l.id, cabinetId: l.cabinetId, createdAt: l.createdAt, updatedAt: new Date().toISOString() }
-            : l
-        )
-      );
-      // TODO: Gọi API để cập nhật locker
-      console.log("Updating locker:", data);
+    const payload = {
+      cabinetId: data.cabinetId,
+      sizeId: data.sizeId,
+      row: data.row,
+      column: data.column,
+      status: data.status,
+      isActive: data.isActive,
+    };
+    try {
+      if (lockerModalMode === "create") {
+        const response = await lockerService.create(payload);
+        setLockers([...lockers, response.data]);
+        toast.success("Thêm locker thành công");
+      } else {
+        if (!selectedLocker?.id) return;
+        const response = await lockerService.update(selectedLocker.id, payload);
+        setLockers(
+          lockers.map((l) => (l.id === selectedLocker.id ? response.data : l))
+        );
+        if (selectedLocker && isLockerDetailModalOpen) {
+          setSelectedLocker(response.data);
+        }
+        toast.success("Cập nhật locker thành công");
+      }
+      setIsLockerModalOpen(false);
+      setSelectedLocker(null);
+    } catch (error) {
+      console.error("Error saving locker:", error);
+      toast.error("Có lỗi xảy ra khi thêm/cập nhật locker");
     }
-    setIsLockerModalOpen(false);
-    setSelectedLocker(null);
   };
 
   const handleViewLockerDetails = (locker: Locker) => {
@@ -254,15 +227,20 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
         lockerData={selectedLocker}
         onSubmit={handleLockerSubmit}
         mode={lockerModalMode}
-        cabinetId={cabinet.id}
+        defaultCabinetId={cabinet.id}
       />
 
       {/* Locker Detail Modal */}
       {selectedLocker && (
         <LockerDetailModal
           open={isLockerDetailModalOpen}
-          onOpenChange={setIsLockerDetailModalOpen}
+          onOpenChange={(open) => {
+            setIsLockerDetailModalOpen(open);
+            if (!open) setSelectedLocker(null);
+          }}
           locker={selectedLocker}
+          onEdit={handleEditLocker}
+          onDelete={handleDeleteLocker}
         />
       )}
 
@@ -273,7 +251,11 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
             <AlertDialogTitle>Xác nhận xóa locker</AlertDialogTitle>
             <AlertDialogDescription>
               Bạn có chắc chắn muốn xóa locker{" "}
-              <strong>{selectedLocker?.code}</strong>? Hành động này không thể hoàn tác.
+              <strong>
+              {selectedLocker?.code ||
+                `Hàng ${selectedLocker?.row} - Cột ${selectedLocker?.column}`}
+            </strong>
+            ? Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
