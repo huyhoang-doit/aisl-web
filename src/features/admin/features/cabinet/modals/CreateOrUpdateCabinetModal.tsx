@@ -38,6 +38,8 @@ interface CreateOrUpdateCabinetModalProps {
   cabinetData?: Cabinet | null;
   onSubmit: (data: CabinetFormData) => void | Promise<void>;
   mode?: "create" | "update";
+  /** Khi mở từ Location Detail: mặc định chọn location này, ẩn selector địa điểm */
+  defaultLocationId?: string;
 }
 
 export function CreateOrUpdateCabinetModal({
@@ -46,12 +48,14 @@ export function CreateOrUpdateCabinetModal({
   cabinetData = null,
   onSubmit,
   mode = "create",
+  defaultLocationId,
 }: CreateOrUpdateCabinetModalProps) {
   const isUpdateMode = mode === "update" && cabinetData;
+  const isFromLocationDetail = Boolean(defaultLocationId);
 
   const form = useForm<CabinetFormData>({
     defaultValues: {
-      locationId: "",
+      locationId: defaultLocationId ?? "",
       name: "",
       macAddress: "",
       ipAddress: "",
@@ -76,7 +80,7 @@ export function CreateOrUpdateCabinetModal({
         });
       } else {
         form.reset({
-          locationId: "",
+          locationId: isFromLocationDetail ? defaultLocationId! : "",
           name: "",
           macAddress: "",
           ipAddress: "",
@@ -86,7 +90,7 @@ export function CreateOrUpdateCabinetModal({
         });
       }
     }
-  }, [open, cabinetData, isUpdateMode, form]);
+  }, [open, cabinetData, isUpdateMode, isFromLocationDetail, defaultLocationId, form]);
 
   const handleSubmitForm = async (formData: CabinetFormData) => {
     try {
@@ -124,29 +128,43 @@ export function CreateOrUpdateCabinetModal({
                 Thông tin cabinet
               </h3>
 
-              <FormField
-                control={form.control}
-                name="locationId"
-                rules={{
-                  required: "Vui lòng chọn địa điểm",
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Địa điểm *</FormLabel>
-                    <FormControl>
-                      <LocationSelector
-                        value={field.value}
-                        onValueChange={field.onChange}
-                        placeholder="Chọn địa điểm đặt cabinet"
-                        filterActiveOnly={true}
-                        allowClear={false}
-                        className="min-w-[200px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {!isFromLocationDetail ? (
+                <FormField
+                  control={form.control}
+                  name="locationId"
+                  rules={{
+                    required: "Vui lòng chọn địa điểm",
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Địa điểm *</FormLabel>
+                      <FormControl>
+                        <LocationSelector
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Chọn địa điểm đặt cabinet"
+                          filterActiveOnly={true}
+                          allowClear={false}
+                          className="min-w-[200px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="locationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <input type="hidden" {...field} value={defaultLocationId ?? ""} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField

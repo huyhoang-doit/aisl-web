@@ -87,6 +87,8 @@ export interface QuickFilter {
   placeholder?: string;
 }
 
+const EMPTY_QUICK_FILTERS: QuickFilter[] = [];
+
 export interface DataTableProps<T> {
   data: T[];
   columns: Column<T>[];
@@ -170,8 +172,8 @@ export function DataTable<T extends Record<string, any>>({
   searchable = false,
   searchPlaceholder = "Tìm kiếm...",
   onSearch,
-  // Quick Filters
-  quickFilters = [],
+  // Quick Filters (default stable ref to avoid useEffect loop when not passed)
+  quickFilters = EMPTY_QUICK_FILTERS,
   onQuickFilterChange,
   onClearFilters
 }: DataTableProps<T>) {
