@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,6 @@ import {
   Phone,
   Package,
   FileText,
-  Image as ImageIcon,
   UserCheck,
   CheckCircle2,
   XCircle,
@@ -26,13 +25,14 @@ import {
 import type { TechnicalStaffReport } from "../../customerReport/types/customerReport.types";
 import AssignTechnicalStaffModal from "../../customerReport/modals/AssignTechnicalStaffModal";
 import type { Staff } from "@/features/admin/features/staff/types/staff.types";
+import type { CreateTaskPayload } from "../../customerReport/services/maintenanceTask.service";
 
 interface TechnicalStaffReportDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   report: TechnicalStaffReport | null;
   technicalStaffList: Staff[];
-  onAssign?: (reportId: string, staffId: string) => void | Promise<void>;
+  onAssign?: (payload: CreateTaskPayload) => void | Promise<void>;
 }
 
 const issueTypeConfig = {
@@ -445,10 +445,9 @@ export function TechnicalStaffReportDetailModal({
             assignedToName: report.technicalStaffName,
           }}
           technicalStaffList={technicalStaffList}
-          onSubmit={async (reportId, staffId) => {
-            // Use the customer report ID for reassignment
+          onSubmit={async (payload) => {
             if (onAssign) {
-              await onAssign(customerReport.id, staffId);
+              await onAssign(payload);
             }
             setIsAssignModalOpen(false);
           }}

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +15,6 @@ import {
   Phone,
   Package,
   FileText,
-  Image as ImageIcon,
 } from "lucide-react";
 import type { CustomerReport } from "../types/customerReport.types";
 
@@ -41,12 +39,12 @@ const priorityConfig = {
   urgent: { label: "Khẩn cấp", variant: "destructive" as const },
 };
 
-const statusConfig = {
-  pending: { label: "Chờ xử lý", variant: "secondary" as const },
-  assigned: { label: "Đã phân công", variant: "default" as const },
-  in_progress: { label: "Đang xử lý", variant: "default" as const },
-  completed: { label: "Hoàn thành", variant: "default" as const },
-  rejected: { label: "Từ chối", variant: "destructive" as const },
+const statusConfig: Record<string, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+  PENDING: { label: "Chờ xử lý", variant: "secondary" },
+  ASSIGNED: { label: "Đã phân công", variant: "default" },
+  IN_PROGRESS: { label: "Đang xử lý", variant: "default" },
+  COMPLETED: { label: "Hoàn thành", variant: "default" },
+  REJECTED: { label: "Từ chối", variant: "destructive" },
 };
 
 export function CustomerReportDetailModal({
@@ -57,9 +55,11 @@ export function CustomerReportDetailModal({
 }: CustomerReportDetailModalProps) {
   if (!report) return null;
 
-  const issueInfo = issueTypeConfig[report.issueType];
-  const priorityInfo = priorityConfig[report.priority];
-  const statusInfo = statusConfig[report.status];
+  const status = report.status ?? "PENDING";
+  const statusInfo = statusConfig[status] ?? { label: status, variant: "secondary" as const };
+  const hasCustomerInfo = report.customerName || report.customerEmail || report.customerPhone;
+  const hasIssueType = report.issueType && issueTypeConfig[report.issueType];
+  const hasPriority = report.priority && priorityConfig[report.priority];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -68,7 +68,7 @@ export function CustomerReportDetailModal({
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-xl font-bold">
-                {report.reportCode}
+                {report.title ?? report.reportCode ?? report.id?.slice(0, 8)}
               </DialogTitle>
               <DialogDescription>
                 Chi tiết báo cáo từ khách hàng
@@ -76,7 +76,7 @@ export function CustomerReportDetailModal({
             </div>
             <div className="flex items-center gap-2 mr-5">
               <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-              <Badge variant={priorityInfo.variant}>{priorityInfo.label}</Badge>
+              {hasPriority && <Badge variant={priorityConfig[report.priority!].variant}>{priorityConfig[report.priority!].label}</Badge>}
             </div>
           </div>
         </DialogHeader>
@@ -94,82 +94,84 @@ export function CustomerReportDetailModal({
                   Ngày báo cáo
                 </div>
                 <div className="text-sm text-muted-foreground">
-                  {new Date(report.reportedAt).toLocaleString("vi-VN")}
+                  {(report.createdAt ?? report.reportedAt)
+                    ? new Date(report.createdAt ?? report.reportedAt!).toLocaleString("vi-VN")
+                    : "-"}
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <div className="text-sm font-medium">Loại vấn đề</div>
-                <Badge variant={issueInfo.variant}>{issueInfo.label}</Badge>
-              </div>
+              {hasIssueType && (
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">Loại vấn đề</div>
+                  <Badge variant={issueTypeConfig[report.issueType!].variant}>{issueTypeConfig[report.issueType!].label}</Badge>
+                </div>
+              )}
 
               <div className="space-y-1">
                 <div className="text-sm font-medium flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Mã locker
+                  Locker ID
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {report.lockerCode}
-                </div>
-              </div>
-
-              {report.cabinetCode && (
-                <div className="space-y-1">
-                  <div className="text-sm font-medium">Mã cabinet</div>
-                  <div className="text-sm text-muted-foreground">
-                    {report.cabinetCode}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* Thông tin khách hàng */}
-          <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Thông tin khách hàng
-            </h3>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-1">
-                <div className="text-sm font-medium flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  Họ và tên
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {report.customerName}
+                <div className="text-sm text-muted-foreground font-mono">
+                  {report.lockerId ?? report.lockerCode ?? "-"}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="text-sm font-medium flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  Email
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {report.customerEmail}
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <div className="text-sm font-medium flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Số điện thoại
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {report.customerPhone}
+                <div className="text-sm font-medium">Cabinet ID</div>
+                <div className="text-sm text-muted-foreground font-mono">
+                  {report.cabinetId ?? report.cabinetCode ?? "-"}
                 </div>
               </div>
             </div>
           </div>
+
+          {hasCustomerInfo && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Thông tin khách hàng
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {report.customerName && (
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        Họ và tên
+                      </div>
+                      <div className="text-sm text-muted-foreground">{report.customerName}</div>
+                    </div>
+                  )}
+                  {report.customerEmail && (
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium flex items-center gap-2">
+                        <Mail className="h-4 w-4" />
+                        Email
+                      </div>
+                      <div className="text-sm text-muted-foreground">{report.customerEmail}</div>
+                    </div>
+                  )}
+                  {report.customerPhone && (
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium flex items-center gap-2">
+                        <Phone className="h-4 w-4" />
+                        Số điện thoại
+                      </div>
+                      <div className="text-sm text-muted-foreground">{report.customerPhone}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
 
           <Separator />
 
           {/* Mô tả vấn đề */}
           <div className="space-y-4">
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Mô tả vấn đề
+              Mô tả
             </h3>
             <div className="space-y-1">
               <div className="text-sm font-medium flex items-center gap-2">
@@ -177,7 +179,7 @@ export function CustomerReportDetailModal({
                 Chi tiết
               </div>
               <div className="text-sm text-muted-foreground p-3 rounded-md bg-muted/50">
-                {report.issueDescription}
+                {report.description ?? report.issueDescription ?? "-"}
               </div>
             </div>
           </div>
@@ -239,7 +241,7 @@ export function CustomerReportDetailModal({
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-4 border-t">
-          {!report.assignedTo && onAssign && (
+          {!report.assignedTo && status === "PENDING" && onAssign && (
             <Button onClick={() => onAssign(report)}>
               Phân công nhân viên kỹ thuật
             </Button>

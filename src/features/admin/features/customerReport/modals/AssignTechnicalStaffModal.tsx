@@ -27,17 +27,33 @@ import {
 import { useForm } from "react-hook-form";
 import type { CustomerReport } from "../types/customerReport.types";
 import type { Staff } from "@/features/admin/features/staff/types/staff.types";
+import type { CreateTaskPayload } from "../services/maintenanceTask.service";
+
+const TASK_TYPE_OPTIONS: { value: CreateTaskPayload["taskType"]; label: string }[] = [
+  { value: "REPAIR", label: "Sửa chữa" },
+  { value: "INSPECTION", label: "Kiểm tra" },
+  { value: "CLEANING", label: "Vệ sinh" },
+];
+
+const PRIORITY_OPTIONS: { value: CreateTaskPayload["priority"]; label: string }[] = [
+  { value: "LOW", label: "Thấp" },
+  { value: "MEDIUM", label: "Trung bình" },
+  { value: "HIGH", label: "Cao" },
+  { value: "URGENT", label: "Khẩn cấp" },
+];
 
 interface AssignTechnicalStaffModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   report: CustomerReport | null;
   technicalStaffList: Staff[];
-  onSubmit: (reportId: string, staffId: string) => void | Promise<void>;
+  onSubmit: (payload: CreateTaskPayload) => void | Promise<void>;
 }
 
 interface AssignFormData {
   staffId: string;
+  taskType: CreateTaskPayload["taskType"];
+  priority: CreateTaskPayload["priority"];
 }
 
 export function AssignTechnicalStaffModal({
@@ -50,6 +66,8 @@ export function AssignTechnicalStaffModal({
   const form = useForm<AssignFormData>({
     defaultValues: {
       staffId: "",
+      taskType: "REPAIR",
+      priority: "HIGH",
     },
   });
 
@@ -57,6 +75,8 @@ export function AssignTechnicalStaffModal({
     if (open && report) {
       form.reset({
         staffId: report.assignedTo || "",
+        taskType: "REPAIR",
+        priority: "HIGH",
       });
     }
   }, [open, report, form]);
@@ -65,7 +85,12 @@ export function AssignTechnicalStaffModal({
     if (!report || !data.staffId) return;
 
     try {
-      await onSubmit(report.id, data.staffId);
+      await onSubmit({
+        incidentReportId: report.id,
+        assignedToId: data.staffId,
+        taskType: data.taskType,
+        priority: data.priority,
+      });
       onOpenChange(false);
       form.reset();
     } catch (error) {
@@ -77,7 +102,7 @@ export function AssignTechnicalStaffModal({
 
   // Filter only active staff
   const availableStaff = technicalStaffList.filter(
-    (staff) => staff.status === "active"
+    (staff) => staff.status === "active" || !staff.status
   );
 
   return (
@@ -128,6 +153,64 @@ export function AssignTechnicalStaffModal({
                   <FormDescription>
                     Chọn nhân viên kỹ thuật sẽ xử lý báo cáo này
                   </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="taskType"
+              rules={{ required: "Vui lòng chọn loại công việc" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Loại công việc *</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn loại công việc" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {TASK_TYPE_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="priority"
+              rules={{ required: "Vui lòng chọn độ ưu tiên" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Độ ưu tiên *</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Chọn độ ưu tiên" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {PRIORITY_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
