@@ -68,16 +68,16 @@ const ManageCustomerReport = () => {
       filterPlaceholder: "Tìm theo tiêu đề",
       accessor: (row) => <div className="font-medium">{row.title ?? "-"}</div>,
     },
-    {
-      key: "description",
-      header: "Mô tả",
-      sortable: true,
-      accessor: (row) => (
-        <div className="text-sm text-muted-foreground max-w-[200px] truncate">
-          {row.description ?? "-"}
-        </div>
-      ),
-    },
+    // {
+    //   key: "description",
+    //   header: "Mô tả",
+    //   sortable: true,
+    //   accessor: (row) => (
+    //     <div className="text-sm text-muted-foreground max-w-[200px] truncate">
+    //       {row.description ?? "-"}
+    //     </div>
+    //   ),
+    // },
     {
       key: "lockerLabel",
       header: "Locker",
@@ -107,8 +107,8 @@ const ManageCustomerReport = () => {
         if (count === 0) return <span className="text-muted-foreground text-sm">-</span>;
         return (
           <div className="flex items-center gap-1.5 text-sm">
-            <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
-            <span>{count} ảnh</span>
+            {/* <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" /> */}
+            <span>{count} ảnh</span> {/* TODO: Add image preview */}
             {urls[0] && (
               <div className="w-8 h-8 rounded overflow-hidden border border-border shrink-0">
                 <img src={urls[0]} alt="" className="w-full h-full object-cover" />
