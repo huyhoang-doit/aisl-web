@@ -1,14 +1,18 @@
 /** API response structure từ GET /maintenance/reports */
 export interface CustomerReportApi {
   id: string;
+  code: string;
   cabinetId: string;
+  cabinetName: string;
   lockerId: string;
+  lockerLabel: string;
   title: string;
   description: string;
   status: string;
   reportedById?: string;
   createdAt?: string;
   updatedAt?: string;
+  photoUrls?: string[];
 }
 
 export interface CustomerReport extends CustomerReportApi {

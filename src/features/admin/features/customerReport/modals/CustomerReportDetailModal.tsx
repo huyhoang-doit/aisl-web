@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,13 +16,16 @@ import {
   Phone,
   Package,
   FileText,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import type { CustomerReport } from "../types/customerReport.types";
+import { maintenanceReportService } from "../services/maintenanceReport.service";
 
 interface CustomerReportDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  report: CustomerReport | null;
+  reportId: string | null;
   onAssign?: (report: CustomerReport) => void;
 }
 
@@ -47,28 +51,83 @@ const statusConfig: Record<string, { label: string; variant: "secondary" | "defa
   REJECTED: { label: "Từ chối", variant: "destructive" },
 };
 
+function extractReportFromResponse(response: unknown): CustomerReport | null {
+  const r = response as { data?: CustomerReport | { data?: CustomerReport } };
+  if (r?.data && typeof (r.data as CustomerReport).id !== "undefined") return r.data as CustomerReport;
+  if (r?.data && typeof (r.data as { data?: CustomerReport }).data !== "undefined") return (r.data as { data: CustomerReport }).data;
+  return null;
+}
+
 export function CustomerReportDetailModal({
   open,
   onOpenChange,
-  report,
+  reportId,
   onAssign,
 }: CustomerReportDetailModalProps) {
-  if (!report) return null;
+  const [report, setReport] = useState<CustomerReport | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const status = report.status ?? "PENDING";
+  useEffect(() => {
+    if (!open || !reportId) {
+      setReport(null);
+      setError(null);
+      return;
+    }
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+    maintenanceReportService
+      .getById(reportId)
+      .then((res) => {
+        if (cancelled) return;
+        const data = extractReportFromResponse(res);
+        setReport(data ?? null);
+        if (!data) setError("Không thể tải chi tiết báo cáo");
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setReport(null);
+        setError(err?.message ?? "Có lỗi khi tải chi tiết báo cáo");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [open, reportId]);
+
+  if (!open) return null;
+
+  const status = report?.status ?? "PENDING";
   const statusInfo = statusConfig[status] ?? { label: status, variant: "secondary" as const };
-  const hasCustomerInfo = report.customerName || report.customerEmail || report.customerPhone;
-  const hasIssueType = report.issueType && issueTypeConfig[report.issueType];
-  const hasPriority = report.priority && priorityConfig[report.priority];
+  const hasCustomerInfo = report && (report.customerName || report.customerEmail || report.customerPhone);
+  const hasIssueType = report?.issueType && issueTypeConfig[report.issueType];
+  const hasPriority = report?.priority && priorityConfig[report.priority];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        {isLoading && (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          </div>
+        )}
+        {error && !isLoading && (
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-destructive">
+            <AlertCircle className="h-10 w-10" />
+            <p className="text-sm font-medium">{error}</p>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Đóng
+            </Button>
+          </div>
+        )}
+        {report && !isLoading && !error && (
+        <>
         <DialogHeader>
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-xl font-bold">
-                {report.title ?? report.reportCode ?? report.id?.slice(0, 8)}
+                {report.title ?? report.code ?? report.reportCode ?? "-"}
               </DialogTitle>
               <DialogDescription>
                 Chi tiết báo cáo từ khách hàng
@@ -76,7 +135,7 @@ export function CustomerReportDetailModal({
             </div>
             <div className="flex items-center gap-2 mr-5">
               <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-              {hasPriority && <Badge variant={priorityConfig[report.priority!].variant}>{priorityConfig[report.priority!].label}</Badge>}
+              {hasPriority && report && <Badge variant={priorityConfig[report.priority!].variant}>{priorityConfig[report.priority!].label}</Badge>}
             </div>
           </div>
         </DialogHeader>
@@ -88,6 +147,12 @@ export function CustomerReportDetailModal({
               Thông tin báo cáo
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
+              {(report.code != null && report.code !== "") && (
+                <div className="space-y-1">
+                  <div className="text-sm font-medium">Mã báo cáo</div>
+                  <div className="text-sm text-muted-foreground font-mono">{report.code}</div>
+                </div>
+              )}
               <div className="space-y-1">
                 <div className="text-sm font-medium flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -110,17 +175,17 @@ export function CustomerReportDetailModal({
               <div className="space-y-1">
                 <div className="text-sm font-medium flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Locker ID
+                  Locker
                 </div>
                 <div className="text-sm text-muted-foreground font-mono">
-                  {report.lockerId ?? report.lockerCode ?? "-"}
+                  {report.lockerLabel ?? report.lockerCode ?? report.lockerId ?? "-"}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="text-sm font-medium">Cabinet ID</div>
-                <div className="text-sm text-muted-foreground font-mono">
-                  {report.cabinetId ?? report.cabinetCode ?? "-"}
+                <div className="text-sm font-medium">Cabinet</div>
+                <div className="text-sm text-muted-foreground">
+                  {report.cabinetName ?? report.cabinetCode ?? report.cabinetId ?? "-"}
                 </div>
               </div>
             </div>
@@ -184,8 +249,8 @@ export function CustomerReportDetailModal({
             </div>
           </div>
 
-          {/* Hình ảnh đính kèm */}
-          {report.images && report.images.length > 0 && (
+          {/* Hình ảnh đính kèm (photoUrls từ API hoặc images) */}
+          {((report.photoUrls?.length ?? 0) > 0 || (report.images?.length ?? 0) > 0) && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -193,13 +258,13 @@ export function CustomerReportDetailModal({
                   Hình ảnh đính kèm
                 </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {report.images.map((image, index) => (
+                  {(report.photoUrls ?? report.images ?? []).map((imageUrl, index) => (
                     <div
                       key={index}
                       className="relative aspect-square rounded-md overflow-hidden border border-border bg-muted"
                     >
                       <img
-                        src={image}
+                        src={imageUrl}
                         alt={`Hình ảnh ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -241,7 +306,7 @@ export function CustomerReportDetailModal({
         </div>
 
         <div className="flex items-center justify-end gap-2 pt-4 border-t">
-          {!report.assignedTo && status === "PENDING" && onAssign && (
+          {report && !report.assignedTo && status === "PENDING" && onAssign && (
             <Button onClick={() => onAssign(report)}>
               Phân công nhân viên kỹ thuật
             </Button>
@@ -250,6 +315,8 @@ export function CustomerReportDetailModal({
             Đóng
           </Button>
         </div>
+        </>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -139,7 +139,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
         
         // Nếu token không hợp lệ, logout
         if (error?.status === 401) {
-          get().logout();
+          // get().logout();
+          toast.error(errorMessage);
         }
       }
     },

@@ -6,6 +6,7 @@ import { api } from '@/shared/lib/api/client';
 import type { CustomerReport } from '../types/customerReport.types';
 import type { Pagination } from '@/shared/types/pagination.types';
 
+/** Payload tạo báo cáo – gửi dạng multipart/form-data */
 export interface CreateReportPayload {
   lockerId: string;
   cabinetId: string;
@@ -77,7 +78,8 @@ export const maintenanceReportService = {
   },
 
   /**
-   * Tạo report mới (multipart/form-data)
+   * Tạo report mới (multipart/form-data).
+   * Body: lockerId, cabinetId, title, description, photos (array – nhiều file cùng key "photos").
    * POST /maintenance/reports
    */
   create: async (data: CreateReportPayload): Promise<ReportResponse> => {
