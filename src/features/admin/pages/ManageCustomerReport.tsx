@@ -2,7 +2,7 @@ import { useState } from "react";
 import { DataTable, type Column, type SortConfig, type QuickFilter } from "@/shared/components/DataTable";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { Eye, UserCheck, Plus } from "lucide-react";
+import { Eye, UserCheck, Plus, ImageIcon } from "lucide-react";
 import CustomerReportDetailModal from "../features/customerReport/modals/CustomerReportDetailModal";
 import AssignTechnicalStaffModal from "../features/customerReport/modals/AssignTechnicalStaffModal";
 import CreateReportModal from "../features/customerReport/modals/CreateReportModal";
@@ -33,6 +33,7 @@ const ManageCustomerReport = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<CustomerReport | null>(null);
 
   const [, setSortConfig] = useState<SortConfig | null>(null);
@@ -45,17 +46,17 @@ const ManageCustomerReport = () => {
     REJECTED: { label: "Từ chối", variant: "destructive" },
   };
 
-  // Định nghĩa columns cho bảng (theo API response: id, title, description, lockerId, cabinetId, status, createdAt)
+  // Định nghĩa columns cho bảng (theo API response: code, title, description, lockerLabel, cabinetName, status, createdAt)
   const columns: Column<CustomerReport>[] = [
     {
-      key: "id",
+      key: "code",
       header: "Mã báo cáo",
       sortable: true,
       filterable: true,
       filterType: "text",
       filterPlaceholder: "Tìm theo mã",
       accessor: (row) => (
-        <div className="font-medium font-mono text-xs">{row.id.slice(0, 8)}...</div>
+        <div className="font-medium font-mono text-xs">{row.code ?? "-"}</div>
       ),
     },
     {
@@ -67,34 +68,55 @@ const ManageCustomerReport = () => {
       filterPlaceholder: "Tìm theo tiêu đề",
       accessor: (row) => <div className="font-medium">{row.title ?? "-"}</div>,
     },
+    // {
+    //   key: "description",
+    //   header: "Mô tả",
+    //   sortable: true,
+    //   accessor: (row) => (
+    //     <div className="text-sm text-muted-foreground max-w-[200px] truncate">
+    //       {row.description ?? "-"}
+    //     </div>
+    //   ),
+    // },
     {
-      key: "description",
-      header: "Mô tả",
-      sortable: true,
-      accessor: (row) => (
-        <div className="text-sm text-muted-foreground max-w-[200px] truncate">
-          {row.description ?? "-"}
-        </div>
-      ),
-    },
-    {
-      key: "lockerId",
+      key: "lockerLabel",
       header: "Locker",
       sortable: true,
       filterable: true,
       filterType: "text",
       filterPlaceholder: "Tìm theo locker",
       accessor: (row) => (
-        <div className="text-sm font-mono">{row.lockerId?.slice(0, 8) ?? "-"}...</div>
+        <div className="text-sm font-mono">{row.lockerLabel ?? "-"}</div>
       ),
     },
     {
-      key: "cabinetId",
+      key: "cabinetName",
       header: "Cabinet",
       sortable: true,
       accessor: (row) => (
-        <div className="text-sm font-mono">{row.cabinetId?.slice(0, 8) ?? "-"}...</div>
+        <div className="text-sm">{row.cabinetName ?? "-"}</div>
       ),
+    },
+    {
+      key: "photoUrls",
+      header: "Ảnh",
+      sortable: false,
+      accessor: (row) => {
+        const urls = row.photoUrls ?? row.images ?? [];
+        const count = urls.length;
+        if (count === 0) return <span className="text-muted-foreground text-sm">-</span>;
+        return (
+          <div className="flex items-center gap-1.5 text-sm">
+            {/* <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" /> */}
+            <span>{count} ảnh</span> {/* TODO: Add image preview */}
+            {urls[0] && (
+              <div className="w-8 h-8 rounded overflow-hidden border border-border shrink-0">
+                <img src={urls[0]} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "status",
@@ -109,14 +131,14 @@ const ManageCustomerReport = () => {
         return <Badge variant={config.variant}>{config.label}</Badge>;
       },
     },
-    {
-      key: "assignedToName",
-      header: "Nhân viên kỹ thuật",
-      sortable: true,
-      accessor: (row) => (
-        <div className="text-muted-foreground">{row.assignedToName ?? "Chưa phân công"}</div>
-      ),
-    },
+    // {
+    //   key: "assignedToName",
+    //   header: "Nhân viên kỹ thuật",
+    //   sortable: true,
+    //   accessor: (row) => (
+    //     <div className="text-muted-foreground">{row.assignedToName ?? "Chưa phân công"}</div>
+    //   ),
+    // },
     {
       key: "createdAt",
       header: "Ngày báo cáo",
@@ -164,7 +186,7 @@ const ManageCustomerReport = () => {
   };
 
   const handleViewDetails = (report: CustomerReport) => {
-    setSelectedReport(report);
+    setSelectedReportId(report.id);
     setIsDetailModalOpen(true);
   };
 
@@ -182,7 +204,7 @@ const ManageCustomerReport = () => {
 
   const handleDetailModalClose = () => {
     setIsDetailModalOpen(false);
-    setSelectedReport(null);
+    setSelectedReportId(null);
   };
 
   const handleAssignModalClose = () => {
@@ -253,11 +275,11 @@ const ManageCustomerReport = () => {
         }}
       />
 
-      {selectedReport && (
+      {selectedReportId != null && (
         <CustomerReportDetailModal
           open={isDetailModalOpen}
           onOpenChange={handleDetailModalClose}
-          report={selectedReport}
+          reportId={selectedReportId}
           onAssign={handleAssign}
         />
       )}

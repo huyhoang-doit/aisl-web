@@ -45,7 +45,7 @@ export const staffService = {
     const response = await staffService.getAll({
       ...params,
       role: 'TECHNICAL_STAFF',
-      status: 'active',
+      status: 'ACTIVE',
     });
     const data = response.data;
     const list = data?.users ?? data?.staffs ?? [];

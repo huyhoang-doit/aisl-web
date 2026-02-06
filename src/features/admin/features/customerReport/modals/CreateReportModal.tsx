@@ -74,7 +74,8 @@ export function CreateReportModal({
     if (!cabId) {
       setLockers([]);
       form.setValue("lockerId", "");
-      return;    }
+      return;
+    }
     try {
       setLockersLoading(true);
       const response = await lockerService.getLockerCabinet(cabId, { limit: 50, page: 1 });
