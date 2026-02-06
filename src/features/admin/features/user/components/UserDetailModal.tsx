@@ -9,7 +9,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { Pencil, Trash2 } from "lucide-react";
+import { Lock, Pencil } from "lucide-react";
 import type { User, UserStatusValue } from "../types/user.types";
 import { getUserStatusDisplay } from "../types/user.types";
 import { roles } from "@/shared/configs/role";
@@ -20,7 +20,7 @@ const STATUS_CONFIG: Record<
 > = {
   ACTIVE: { label: "Hoạt động", variant: "default" },
   INACTIVE: { label: "Không hoạt động", variant: "secondary" },
-  LOCKED: { label: "Đã khóa", variant: "destructive" },
+  BLOCKED: { label: "Đã khóa", variant: "destructive" },
 };
 
 interface UserDetailModalProps {
@@ -28,7 +28,7 @@ interface UserDetailModalProps {
   onOpenChange: (open: boolean | User) => void;
   user: User;
   onEdit?: (user: User) => void;
-  onDelete?: (user: User) => void;
+  onLock?: (user: User) => void;
 }
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({
@@ -36,12 +36,13 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   onOpenChange,
   user,
   onEdit,
-  onDelete,
+  onLock,
 }) => {
   const statusValue = getUserStatusDisplay(user.status);
   const statusInfo = STATUS_CONFIG[statusValue];
   const roleLabel = user.role === roles.ADMIN ? "Quản trị viên" : "Nhân viên";
-
+  const isLocked = statusValue === "BLOCKED";   
+  
   return (
     <Dialog
       open={open}
@@ -70,15 +71,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                   Sửa
                 </Button>
               )}
-              {onDelete && (
+              {onLock && !isLocked && (
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => onDelete(user)}
+                  onClick={() => onLock(user)}
                   className="gap-2"
                 >
-                  <Trash2 className="h-4 w-4" />
-                  Xóa
+                  <Lock className="h-4 w-4" />
+                  Khóa tài khoản
                 </Button>
               )}
             </div>

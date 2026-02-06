@@ -8,6 +8,8 @@ import type { User, UserStatus, UserStatusValue, NotificationType } from "../typ
 import type { Pagination } from "@/shared/types/pagination.types";
 
 export interface CreateUserPayload {
+  /** Một số BE yêu cầu truyền kèm trong body */
+  keycloakUserId?: string;
   email: string;
   phoneNumber: string;
   fullName: string;
@@ -19,6 +21,9 @@ export interface CreateUserPayload {
 }
 
 export interface UpdateUserPayload {
+  /** Một số BE yêu cầu truyền kèm trong body */
+  keycloakUserId?: string;
+  email?: string;
   phoneNumber?: string;
   fullName?: string;
   role?: string;
@@ -30,7 +35,9 @@ export interface UpdateUserPayload {
 }
 
 export interface UserResponse {
-  data: User;
+  data: {
+    user: User;
+  };
 }
 
 export interface UserListResponse {
@@ -69,6 +76,13 @@ export const userService = {
    * Lấy thông tin user theo keycloakUserId
    */
   getById: async (keycloakUserId: string): Promise<UserResponse> => {
+    return api.get<UserResponse>(`/users/${keycloakUserId}`);
+  },
+
+  /**
+   * Lấy chi tiết user (gọi API detail) – alias của getById
+   */
+  getDetail: async (keycloakUserId: string): Promise<UserResponse> => {
     return api.get<UserResponse>(`/users/${keycloakUserId}`);
   },
 

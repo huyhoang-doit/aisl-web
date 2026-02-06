@@ -1,5 +1,5 @@
 /** Status từ BE - có thể là string hoặc object */
-export type UserStatusValue = "ACTIVE" | "INACTIVE" | "LOCKED";
+export type UserStatusValue = "ACTIVE" | "INACTIVE" | "BLOCKED";
 
 export type UserStatus = UserStatusValue | Record<string, unknown>;
 
@@ -16,6 +16,7 @@ export interface User {
   notificationType?: NotificationType;
   createdAt?: string;
   updatedAt?: string;
+  id: string;
 }
 
 /** Helper: lấy status string để hiển thị */

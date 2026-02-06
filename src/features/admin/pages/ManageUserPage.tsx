@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   DataTable,
   type Column,
-  type FilterConfig,
   type QuickFilter,
 } from "@/shared/components/DataTable";
 import {
@@ -22,6 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { Eye, Lock } from "lucide-react";
+import { authService } from "../../auth/services/auth.service";
 import { userService } from "../features/user/services/user.service";
 import { useUser } from "../features/user/hooks/useUser";
 import type { User } from "../features/user/types/user.types";
@@ -31,7 +32,7 @@ import { toast } from "sonner";
 const STATUS_CONFIG = {
   ACTIVE: { label: "Hoạt động", variant: "default" as const },
   INACTIVE: { label: "Không hoạt động", variant: "secondary" as const },
-  LOCKED: { label: "Đã khóa", variant: "destructive" as const },
+  BLOCKED: { label: "Đã khóa", variant: "destructive" as const },
 };
 
 const ManageUserPage = () => {
@@ -42,7 +43,6 @@ const ManageUserPage = () => {
     page,
     pageSize,
     setUsers,
-    setTotal,
     setPage,
     setPageSize,
     refetch,
@@ -53,7 +53,7 @@ const ManageUserPage = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "update">("create");
   const [selectedRows, setSelectedRows] = useState<User[]>([]);
@@ -63,9 +63,6 @@ const ManageUserPage = () => {
       key: "fullName",
       header: "Họ và tên",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo tên",
       accessor: (row) => (
         <div className="font-medium">{row.fullName}</div>
       ),
@@ -74,9 +71,6 @@ const ManageUserPage = () => {
       key: "email",
       header: "Email",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo email",
       accessor: (row) => (
         <div className="text-muted-foreground">{row.email}</div>
       ),
@@ -85,18 +79,12 @@ const ManageUserPage = () => {
       key: "phoneNumber",
       header: "Số điện thoại",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo số điện thoại",
       accessor: (row) => row.phoneNumber,
     },
     {
       key: "role",
       header: "Vai trò",
       sortable: true,
-      filterable: true,
-      filterType: "select",
-      filterOptions: ["Quản trị viên", "Nhân viên"],
       accessor: (row) => (
         <Badge
           variant={row.role === roles.ADMIN ? "default" : "secondary"}
@@ -109,9 +97,6 @@ const ManageUserPage = () => {
       key: "status",
       header: "Trạng thái",
       sortable: true,
-      filterable: true,
-      filterType: "select",
-      filterOptions: ["Hoạt động", "Không hoạt động", "Đã khóa"],
       accessor: (row) => {
         const statusValue = getUserStatusDisplay(row.status);
         const config = STATUS_CONFIG[statusValue];
@@ -122,10 +107,6 @@ const ManageUserPage = () => {
 
   const handleSort = () => {
     setPage(1);
-  };
-
-  const handleFilterChange = (newFilters: FilterConfig[]) => {
-    handleFilter(newFilters);
   };
 
   const quickFilters: QuickFilter[] = [
@@ -147,100 +128,90 @@ const ManageUserPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (user: User) => {
-    setSelectedUser(user);
-    setModalMode("update");
-    setIsDetailModalOpen(false);
-    setIsModalOpen(true);
-  };
-
-  const handleDelete = (user: User) => {
-    setSelectedUser(user);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleViewDetails = (user: User) => {
-    setSelectedUser(user);
-    setIsDetailModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!selectedUser?.keycloakUserId) return;
-
+  const handleEdit = async (user: User) => {
     try {
-      await userService.delete(selectedUser.keycloakUserId);
-      setUsers(users.filter((u) => u.keycloakUserId !== selectedUser.keycloakUserId));
-      setTotal((prev) => Math.max(0, prev - 1));
-      setIsDeleteDialogOpen(false);
-      setSelectedUser(null);
-      setSelectedRows(selectedRows.filter((r) => r.keycloakUserId !== selectedUser.keycloakUserId));
-
-      if (users.length <= 1 && page > 1) {
-        setPage(Math.max(1, page - 1));
-      }
-
-      toast.success("Xóa người dùng thành công");
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Có lỗi xảy ra khi xóa người dùng");
+      const res = await userService.getDetail(user.id);
+      console.log("🚀 ~ handleEdit ~ res:", res)
+      setSelectedUser(res.data.user);  
+      setModalMode("update");
+      setIsDetailModalOpen(false);
+      setIsModalOpen(true);
+    } catch {
+      toast.error("Không tải được thông tin người dùng");
     }
   };
 
-  const handleDeleteSelected = async () => {
+  const handleLock = (user: User) => {
+    setSelectedUser(user);
+    setIsLockDialogOpen(true);
+  };
+
+  const handleViewDetails = async (user: User) => {
+    try {
+      const res = await userService.getDetail(user.id);
+      console.log("🚀 ~ handleViewDetails ~ res:", res)
+      setSelectedUser(res.data.user);
+      setIsDetailModalOpen(true);
+    } catch {
+      toast.error("Không tải được chi tiết người dùng");
+    }
+  };
+
+  const confirmLock = async () => {
+    if (!selectedUser?.keycloakUserId && !selectedUser?.id) return;
+    const userId = selectedUser.keycloakUserId || selectedUser.id;
+
+    try {
+      await userService.update(userId, { status: "BLOCKED" });
+      setIsLockDialogOpen(false);
+      setSelectedUser(null);
+      refetch();
+      toast.success("Khóa tài khoản thành công");
+    } catch (error) {
+      console.error("Error locking user:", error);
+      toast.error("Có lỗi xảy ra khi khóa tài khoản");
+    }
+  };
+
+  const handleLockSelected = async () => {
     if (selectedRows.length === 0) return;
 
     try {
       await Promise.all(
-        selectedRows.map((u) => userService.delete(u.keycloakUserId))
+        selectedRows.map((u) =>
+          userService.update(u.keycloakUserId || u.id, { status: "BLOCKED" })
+        )
       );
-      setUsers(
-        users.filter((u) => !selectedRows.some((r) => r.keycloakUserId === u.keycloakUserId))
-      );
-      setTotal((prev) => Math.max(0, prev - selectedRows.length));
       setSelectedRows([]);
-      toast.success(`Đã xóa ${selectedRows.length} người dùng`);
+      toast.success(`Đã khóa ${selectedRows.length} tài khoản`);
       refetch();
     } catch (error) {
-      console.error("Error deleting users:", error);
-      toast.error("Có lỗi xảy ra khi xóa người dùng");
+      console.error("Error locking users:", error);
+      toast.error("Có lỗi xảy ra khi khóa tài khoản");
     }
   };
 
   const handleSubmit = async (data: UserFormData) => {
     try {
       if (modalMode === "create") {
-        const payload = {
+        if (!data.password) {
+          toast.error("Vui lòng nhập mật khẩu");
+          return;
+        }
+        await authService.register({
           email: data.email,
-          phoneNumber: data.phoneNumber,
+          password: data.password,
           fullName: data.fullName,
-          password: data.password!,
+          phoneNumber: data.phoneNumber,
           role: data.role,
-          status: data.status,
-          isVerified: data.isVerified,
-        };
-        await userService.create(payload);
+        });
         toast.success("Thêm người dùng thành công");
         refetch();
       } else {
         if (!selectedUser?.keycloakUserId) return;
-        const payload = {
-          fullName: data.fullName,
-          phoneNumber: data.phoneNumber,
-          role: data.role,
-          status: data.status,
-          isVerified: data.isVerified,
-          ...(data.password && { password: data.password }),
-        };
-        const response = await userService.update(
-          selectedUser.keycloakUserId,
-          payload
-        );
-        setUsers(
-          users.map((u) =>
-            u.keycloakUserId === selectedUser.keycloakUserId ? response.data : u
-          )
-        );
+        await userService.update(selectedUser.keycloakUserId, data);
         toast.success("Cập nhật người dùng thành công");
+        refetch();
       }
 
       setIsModalOpen(false);
@@ -283,10 +254,10 @@ const ManageUserPage = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleDeleteSelected}
+              onClick={handleLockSelected}
               className="text-sm text-destructive hover:underline"
             >
-              Xóa đã chọn
+              Khóa đã chọn
             </button>
           </div>
         </div>
@@ -297,20 +268,26 @@ const ManageUserPage = () => {
         columns={columns}
         keyExtractor={(row) => row.keycloakUserId || row.email}
         onEdit={handleEdit}
-        onDelete={handleDelete}
         onCreate={handleCreate}
         customActions={[
           {
             label: "Xem chi tiết",
+            icon: <Eye className="h-4 w-4" />,
             onClick: handleViewDetails,
+            variant: "ghost",
+          },
+          {
+            label: "Khóa tài khoản",
+            icon: <Lock className="h-4 w-4" />,
+            onClick: handleLock,
             variant: "ghost",
           },
         ]}
         emptyMessage="Chưa có người dùng nào"
         isLoading={isLoading}
-        filterable={true}
+        filterable={false}
         onSort={handleSort}
-        onFilter={handleFilterChange}
+        onFilter={handleFilter}
         pagination={{
           page,
           pageSize,
@@ -319,7 +296,7 @@ const ManageUserPage = () => {
           onPageSizeChange: setPageSize,
           pageSizeOptions: [5, 10, 20, 50, 100],
         }}
-        selectable={true}
+        // selectable={true}
         selectedRows={selectedRows}
         onSelectionChange={setSelectedRows}
         searchable={true}
@@ -344,27 +321,27 @@ const ManageUserPage = () => {
           onOpenChange={handleDetailModalClose}
           user={selectedUser}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onLock={handleLock}
         />
       )}
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog open={isLockDialogOpen} onOpenChange={setIsLockDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa người dùng</AlertDialogTitle>
+            <AlertDialogTitle>Xác nhận khóa tài khoản</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa người dùng{" "}
-              <strong>{selectedUser?.fullName}</strong>? Hành động này không thể
-              hoàn tác.
+              Bạn có chắc chắn muốn khóa tài khoản{" "}
+              <strong>{selectedUser?.fullName}</strong>? Người dùng sẽ không thể
+              đăng nhập cho đến khi được mở khóa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDelete}
+              onClick={confirmLock}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Xóa
+              Khóa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -15,7 +15,7 @@ export const UnAuthorizedRoute = () => {
       return <Navigate to="/admin" replace={true} />
     }
     
-    if (user.role === roles.STAFF) {
+    if (user.role === roles.TECHNICAL_STAFF) {
       return <Navigate to="/staff" replace={true} />
     }
     

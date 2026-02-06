@@ -25,13 +25,13 @@ function buildListParams(
   if (searchQuery.trim()) params.search = searchQuery.trim();
   filters.forEach((filter) => {
     if (filter.key === "role" && filter.value) {
-      params.role = filter.value === "Quản trị viên" ? roles.ADMIN : roles.STAFF;
+      params.role = filter.value === "Quản trị viên" ? roles.ADMIN : roles.TECHNICAL_STAFF;
     }
     if (filter.key === "status" && filter.value) {
       const statusMap: Record<string, UserStatusValue> = {
         "Hoạt động": "ACTIVE",
         "Không hoạt động": "INACTIVE",
-        "Đã khóa": "LOCKED",
+        "Đã khóa": "BLOCKED",
       };
       params.status = statusMap[filter.value];
     }

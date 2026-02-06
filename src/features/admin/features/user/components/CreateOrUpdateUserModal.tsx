@@ -28,17 +28,18 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { roles } from "@/shared/configs/role";
-import type { User, UserStatusValue } from "../types/user.types";
+import type { User, UserStatusValue, UserStatus, NotificationType } from "../types/user.types";
 
 export interface UserFormData {
-  keycloakUserId?: string;
+  keycloakUserId: string;
   fullName: string;
   email: string;
   phoneNumber: string;
   password?: string;
+  status: UserStatus;
+  notificationType: NotificationType;
   role: string;
-  status?: UserStatusValue;
-  isVerified?: boolean;
+  isVerified: boolean;
 }
 
 interface CreateOrUpdateUserModalProps {
@@ -58,13 +59,24 @@ export function CreateOrUpdateUserModal({
 }: CreateOrUpdateUserModalProps) {
   const isUpdateMode = mode === "update" && userData;
 
-  const form = useForm<UserFormData>({
+  type UserFormValues = {
+    keycloakUserId?: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    password?: string;
+    role: string;
+    status?: UserStatusValue;
+    isVerified?: boolean;
+  };
+
+  const form = useForm<UserFormValues>({
     defaultValues: {
       fullName: "",
       email: "",
       phoneNumber: "",
       password: "",
-      role: roles.STAFF,
+      role: roles.TECHNICAL_STAFF,
       status: "ACTIVE",
       isVerified: true,
     },
@@ -92,7 +104,7 @@ export function CreateOrUpdateUserModal({
           email: "",
           phoneNumber: "",
           password: "",
-          role: roles.STAFF,
+          role: roles.TECHNICAL_STAFF,
           status: "ACTIVE",
           isVerified: true,
         });
@@ -100,9 +112,25 @@ export function CreateOrUpdateUserModal({
     }
   }, [open, userData, isUpdateMode, form]);
 
-  const handleSubmitForm = async (formData: UserFormData) => {
+  const handleSubmitForm = async (values: UserFormValues) => {
     try {
-      await onSubmit(formData);
+      const statusValue = values.status ?? "ACTIVE";
+      const payload: UserFormData = {
+        keycloakUserId:
+          values.keycloakUserId ??
+          userData?.keycloakUserId ??
+          "",
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        fullName: values.fullName,
+        password: values.password?.trim() ? values.password : undefined,
+        status: statusValue,
+        isVerified: values.isVerified ?? true,
+        role: values.role,
+        notificationType: userData?.notificationType ?? {},
+      };
+
+      await onSubmit(payload);
       onOpenChange(false);
       if (!isUpdateMode) {
         form.reset();
@@ -281,7 +309,7 @@ export function CreateOrUpdateUserModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={roles.STAFF}>Nhân viên</SelectItem>
+                          <SelectItem value={roles.TECHNICAL_STAFF}>Nhân viên</SelectItem>
                           <SelectItem value={roles.ADMIN}>
                             Quản trị viên
                           </SelectItem>
@@ -319,7 +347,7 @@ export function CreateOrUpdateUserModal({
                             <SelectItem value="INACTIVE">
                               Không hoạt động
                             </SelectItem>
-                            <SelectItem value="LOCKED">Đã khóa</SelectItem>
+                            <SelectItem value="BLOCKED">Đã khóa</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormDescription>

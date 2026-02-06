@@ -3,7 +3,7 @@
  * Service layer cho authentication API calls
  */
 import { api } from '@/shared/lib/api/client';
-import type { LoginInput, LoginResponse, User } from '../types/auth.types';
+import type { LoginInput, LoginResponse, RegisterInput, RegisterResponse, User } from '../types/auth.types';
 
 export const authService = {
   /**
@@ -11,6 +11,13 @@ export const authService = {
    */
   login: async (data: LoginInput): Promise<LoginResponse> => {
     return api.post<LoginResponse>('/auth/login', data);
+  },
+
+  /**
+   * Đăng ký tài khoản (admin tạo user mới)
+   */
+  register: async (data: RegisterInput): Promise<RegisterResponse> => {
+    return api.post<RegisterResponse>('/auth/register', data);
   },
 
   /**
