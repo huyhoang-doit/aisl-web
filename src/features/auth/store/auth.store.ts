@@ -194,7 +194,7 @@ export const useIsAdmin = () => {
 };
 
 export const useIsStaff = () => {
-  return useAuthStore((state) => state.user?.roles.includes(roles.STAFF));
+  return useAuthStore((state) => state.user?.roles.includes(roles.TECHNICAL_STAFF));
 };
 
 export const useUserRole = () => {

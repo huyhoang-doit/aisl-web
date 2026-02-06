@@ -9,7 +9,7 @@ export interface User {
   username: string;
   email: string;
   // name: string;
-  roles: [typeof roles.STAFF, typeof roles.ADMIN];
+  roles: [typeof roles.TECHNICAL_STAFF, typeof roles.ADMIN];
   avatar?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -18,6 +18,19 @@ export interface User {
 export interface LoginInput {
   email: string;
   password: string;
+}
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+  fullName: string;
+  phoneNumber: string;
+  role?: string;
+}
+
+export interface RegisterResponse {
+  data: User;
+  message?: string;
 }
 
 export interface LoginResponse {

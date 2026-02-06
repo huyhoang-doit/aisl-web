@@ -6,7 +6,7 @@ export const useRole = (userRole?: RoleType | string) => {
     return { isStaff: false, isAdmin: false };
   }
 
-  const isStaff = userRole === roles.STAFF;
+  const isStaff = userRole === roles.TECHNICAL_STAFF;
   const isAdmin = userRole === roles.ADMIN;
 
   return { isStaff, isAdmin };
