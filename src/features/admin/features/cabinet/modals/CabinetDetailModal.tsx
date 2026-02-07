@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,13 +21,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
+import { lockerService } from "../../locker/services/locker.service";
+import { toast } from "sonner";
 import type { Cabinet } from "../types/cabinet.types";
 import type { Locker } from "../../locker/types/locker.types";
 
 interface CabinetDetailModalProps {
   open: boolean;
+  /** Đóng modal: (false) hoặc cập nhật list khi edit từ detail: (updatedCabinet) */
   // eslint-disable-next-line no-unused-vars
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: (open: boolean | Cabinet) => void;
   cabinet: Cabinet;
   // eslint-disable-next-line no-unused-vars
   onEdit?: (cabinet: Cabinet) => void;
@@ -35,42 +38,7 @@ interface CabinetDetailModalProps {
   onDelete?: (cabinet: Cabinet) => void;
 }
 
-// Mock data - Thay thế bằng API call thực tế
-const getMockLockers = (cabinetId: string): Locker[] => [
-  {
-    id: "1",
-    cabinetId,
-    code: "L001",
-    size: "small",
-    status: "available",
-    price: 50000,
-    description: "Locker nhỏ, phù hợp cho đồ nhẹ",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    cabinetId,
-    code: "L002",
-    size: "medium",
-    status: "occupied",
-    price: 80000,
-    description: "Locker vừa",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    cabinetId,
-    code: "L003",
-    size: "large",
-    status: "available",
-    price: 120000,
-    description: "Locker lớn, phù hợp cho đồ cồng kềnh",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+const DEFAULT_PAGE_SIZE = 10;
 
 const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   open,
@@ -80,6 +48,10 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   onDelete,
 }) => {
   const [lockers, setLockers] = useState<Locker[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLockerModalOpen, setIsLockerModalOpen] = useState(false);
   const [isLockerDetailModalOpen, setIsLockerDetailModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -87,30 +59,36 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   const [lockerModalMode, setLockerModalMode] = useState<"create" | "update">("create");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load lockers when modal opens
-  useEffect(() => {
-    if (!open) return;
-    
-    let cancelled = false;
-    // Setting loading state at the start of effect is acceptable pattern
-    setTimeout(() => {
+  const loadLockers = useCallback(async () => {
+    if (!open || !cabinet.id) return;
+    try {
       setIsLoading(true);
-    }, 100);
-    
-    // Simulate API call
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        const mockData = getMockLockers(cabinet.id);
-        setLockers(mockData);
-        setIsLoading(false);
-      }
-    }, 500);
+      const response = await lockerService.getLockerCabinet(cabinet.id, {
+        page,
+        limit: pageSize,
+        ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
+      });
+      setLockers(response.data.lockers ?? []);
+      setTotal(response.data.pagination?.total ?? 0);
+    } catch (error) {
+      console.error("Error loading lockers:", error);
+      toast.error("Không tải được danh sách locker");
+      setLockers([]);
+      setTotal(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [open, cabinet.id, page, pageSize, searchQuery]);
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [open, cabinet.id]);
+  useEffect(() => {
+    loadLockers();
+  }, [loadLockers]);
+
+  const handleClose = (value: boolean | Cabinet) => {
+    if (typeof onOpenChange === "function") {
+      onOpenChange(value);
+    }
+  };
 
   const handleCreateLocker = () => {
     setSelectedLocker(null);
@@ -129,41 +107,45 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDeleteLocker = () => {
-    if (selectedLocker?.id) {
-      setLockers(lockers.filter((l) => l.id !== selectedLocker.id));
+  const confirmDeleteLocker = async () => {
+    if (!selectedLocker?.id) return;
+    try {
+      await lockerService.delete(selectedLocker.id);
+      toast.success("Đã xóa locker");
       setIsDeleteDialogOpen(false);
       setSelectedLocker(null);
-      // TODO: Gọi API để xóa locker
-      console.log("Deleting locker:", selectedLocker);
+      loadLockers();
+    } catch (error) {
+      console.error("Error deleting locker:", error);
+      toast.error("Không xóa được locker");
     }
   };
 
   const handleLockerSubmit = async (data: LockerFormData) => {
-    if (lockerModalMode === "create") {
-      const newLocker: Locker = {
-        ...data,
-        id: Date.now().toString(),
-        cabinetId: cabinet.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setLockers([...lockers, newLocker]);
-      // TODO: Gọi API để tạo locker
-      console.log("Creating locker:", newLocker);
-    } else {
-      setLockers(
-        lockers.map((l) =>
-          l.id === selectedLocker?.id
-            ? { ...data, id: l.id, cabinetId: l.cabinetId, createdAt: l.createdAt, updatedAt: new Date().toISOString() }
-            : l
-        )
-      );
-      // TODO: Gọi API để cập nhật locker
-      console.log("Updating locker:", data);
+    const payload = {
+      cabinetId: data.cabinetId || cabinet.id,
+      sizeId: data.sizeId,
+      row: data.row,
+      column: data.column,
+      status: data.status,
+      isActive: data.isActive,
+    };
+    try {
+      if (lockerModalMode === "create") {
+        await lockerService.create(payload);
+        toast.success("Đã thêm locker");
+      } else if (selectedLocker?.id) {
+        await lockerService.update(selectedLocker.id, payload);
+        toast.success("Đã cập nhật locker");
+      }
+      setIsLockerModalOpen(false);
+      setSelectedLocker(null);
+      loadLockers();
+    } catch (error) {
+      console.error("Error saving locker:", error);
+      toast.error(lockerModalMode === "create" ? "Không tạo được locker" : "Không cập nhật được locker");
+      throw error;
     }
-    setIsLockerModalOpen(false);
-    setSelectedLocker(null);
   };
 
   const handleViewLockerDetails = (locker: Locker) => {
@@ -171,16 +153,42 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
     setIsLockerDetailModalOpen(true);
   };
 
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+  }, []);
+
+  const handleSearch = useCallback((q: string) => {
+    setSearchQuery(q);
+    setPage(1);
+  }, []);
+
+  const paginationConfig = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+      pageSizeOptions: [5, 10, 20] as number[],
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
+
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-start justify-between">
               <div>
                 <DialogTitle className="text-xl font-bold">{cabinet.name}</DialogTitle>
                 <DialogDescription>
-                  Mã: {cabinet.code} | Tổng: {cabinet.totalLockers} | Trống: {cabinet.availableLockers}
+                  MAC: {cabinet.macAddress} | IP: {cabinet.ipAddress} | Hàng: {cabinet.totalRows} × Cột: {cabinet.totalColumns}
                 </DialogDescription>
               </div>
               <div className="flex items-center gap-2 mr-5">
@@ -188,11 +196,7 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      if (onEdit) {
-                        onEdit(cabinet);
-                      }
-                    }}
+                    onClick={() => onEdit(cabinet)}
                     className="gap-2"
                   >
                     <Pencil className="h-4 w-4" />
@@ -203,11 +207,7 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => {
-                      if (onDelete) {
-                        onDelete(cabinet);
-                      }
-                    }}
+                    onClick={() => onDelete(cabinet)}
                     className="gap-2"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -218,9 +218,10 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
             </div>
           </DialogHeader>
 
-          {cabinet.description && (
-            <div className="rounded-md border border-border bg-muted/50 p-4">
-              <p className="text-sm text-muted-foreground">{cabinet.description}</p>
+          {(cabinet.firmwareVersion || cabinet.ipAddress) && (
+            <div className="rounded-md border border-border bg-muted/50 p-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
+              {cabinet.ipAddress && <span>IP: <span className="font-mono">{cabinet.ipAddress}</span></span>}
+              {cabinet.firmwareVersion && <span>Firmware: {cabinet.firmwareVersion}</span>}
             </div>
           )}
 
@@ -238,40 +239,46 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
               onEdit={handleEditLocker}
               onDelete={handleDeleteLocker}
               onViewDetails={handleViewLockerDetails}
-              // onCreate={handleCreateLocker}
               isLoading={isLoading}
+              pagination={paginationConfig}
+              searchable
+              searchPlaceholder="Tìm theo mã, vị trí locker..."
+              onSearch={handleSearch}
             />
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Locker Modal */}
       <CreateOrUpdateLockerModal
         open={isLockerModalOpen}
         onOpenChange={setIsLockerModalOpen}
         lockerData={selectedLocker}
         onSubmit={handleLockerSubmit}
         mode={lockerModalMode}
-        cabinetId={cabinet.id}
+        defaultCabinetId={cabinet.id}
       />
 
-      {/* Locker Detail Modal */}
       {selectedLocker && (
         <LockerDetailModal
           open={isLockerDetailModalOpen}
-          onOpenChange={setIsLockerDetailModalOpen}
+          onOpenChange={(v) => setIsLockerDetailModalOpen(typeof v === "boolean" ? v : false)}
           locker={selectedLocker}
+          onEdit={handleEditLocker}
+          onDelete={handleDeleteLocker}
         />
       )}
 
-      {/* Delete Locker Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa locker</AlertDialogTitle>
             <AlertDialogDescription>
               Bạn có chắc chắn muốn xóa locker{" "}
-              <strong>{selectedLocker?.code}</strong>? Hành động này không thể hoàn tác.
+              <strong>
+                {selectedLocker?.lockerLabel ??
+                  `${selectedLocker?.row}-${selectedLocker?.column}`}
+              </strong>
+              ? Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

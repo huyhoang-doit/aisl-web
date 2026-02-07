@@ -30,6 +30,11 @@ axiosInstance.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Gửi FormData: không set Content-Type để axios/browser set multipart/form-data với boundary
+    if (config.data instanceof FormData && config.headers) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error: AxiosError) => {
@@ -56,13 +61,18 @@ axiosInstance.interceptors.response.use(
       // Xử lý các trường hợp đặc biệt
       if (status === 401) {
         // Unauthorized - xóa token và redirect đến login
-        localStorage.removeItem('token');
-        localStorage.removeItem('userInfo');
+        // localStorage.removeItem('token');
+        // localStorage.removeItem('userInfo');
         
         // Chỉ redirect nếu không phải đang ở trang login
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
+        // if (window.location.pathname !== '/login') {
+        //   window.location.href = '/login';
+        // }
+        // toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+        return Promise.reject({
+          message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+          status: 401,
+        });
       }
 
       // Tạo error object với thông tin chi tiết

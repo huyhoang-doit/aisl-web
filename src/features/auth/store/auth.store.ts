@@ -139,7 +139,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
         
         // Nếu token không hợp lệ, logout
         if (error?.status === 401) {
-          get().logout();
+          // get().logout();
+          toast.error(errorMessage);
         }
       }
     },
@@ -194,7 +195,7 @@ export const useIsAdmin = () => {
 };
 
 export const useIsStaff = () => {
-  return useAuthStore((state) => state.user?.roles.includes(roles.STAFF));
+  return useAuthStore((state) => state.user?.roles.includes(roles.TECHNICAL_STAFF));
 };
 
 export const useUserRole = () => {

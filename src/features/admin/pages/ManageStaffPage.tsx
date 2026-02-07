@@ -1,8 +1,15 @@
-import { useState, useMemo } from "react"
-import { DataTable, type Column, type SortConfig, type FilterConfig, type QuickFilter } from "@/shared/components/DataTable"
-import { CreateOrUpdateStaffModal, type StaffData } from "../features/staff/components/CreateOrUpdateStaffModal"
-import { Badge } from "@/shared/components/ui/badge"
-import { roles } from "@/shared/configs/role"
+import { useState } from "react";
+import {
+  DataTable,
+  type Column,
+  type QuickFilter,
+} from "@/shared/components/DataTable";
+import {
+  CreateOrUpdateUserModal,
+  type UserFormData,
+} from "../features/user/components/CreateOrUpdateUserModal";
+import UserDetailModal from "../features/user/components/UserDetailModal";
+import UserRoleComponent from "../features/user/components/UserRoleComponent";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,167 +19,103 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/shared/components/ui/alert-dialog"
+} from "@/shared/components/ui/alert-dialog";
+import StatusComponent from "@/shared/components/StatusComponent";
+import { normalizeStatus } from "@/shared/components/statusConfig";
+import { roles } from "@/shared/configs/role";
+import { Eye, Lock, LockOpen } from "lucide-react";
+import { authService } from "../../auth/services/auth.service";
+import { userService } from "../features/user/services/user.service";
+import { useUser } from "../features/user/hooks/useUser";
+import type { User } from "../features/user/types/user.types";
+import { toast } from "sonner";
 
-// Mock data - Thay thế bằng API call thực tế
-const mockStaffs: StaffData[] = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@example.com",
-    phone: "+84 123 456 789",
-    role: roles.STAFF,
-    status: "active",
-    department: "Vận hành",
-    position: "Nhân viên vận hành",
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    email: "tranthib@example.com",
-    phone: "+84 987 654 321",
-    role: roles.STAFF,
-    status: "active",
-    department: "Hỗ trợ",
-    position: "Nhân viên hỗ trợ",
-  },
-  {
-    id: "3",
-    name: "Lê Văn C",
-    email: "levanc@example.com",
-    phone: "+84 555 123 456",
-    role: roles.STAFF,
-    status: "inactive",
-    department: "Bảo trì",
-    position: "Kỹ thuật viên",
-  },
-  {
-    id: "4",
-    name: "Phạm Thị D",
-    email: "phamthid@example.com",
-    phone: "+84 111 222 333",
-    role: roles.STAFF,
-    status: "locked",
-    department: "Vận hành",
-    position: "Nhân viên vận hành",
-  },
-]
+const staffListDefaultParams = { role: roles.TECHNICAL_STAFF };
 
 const ManageStaffPage = () => {
-  const [staffs, setStaffs] = useState<StaffData[]>(mockStaffs)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [selectedStaff, setSelectedStaff] = useState<StaffData | null>(null)
-  const [modalMode, setModalMode] = useState<"create" | "update">("create")
+  const {
+    users,
+    total,
+    isLoading,
+    page,
+    pageSize,
+    setUsers,
+    setPage,
+    setPageSize,
+    refetch,
+    handleSearch,
+    handleFilter,
+    handleClearFilters,
+  } = useUser({
+    defaultPageSize: 10,
+    defaultParams: staffListDefaultParams,
+  });
 
-  // State cho các tính năng mới
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
-  const [filters, setFilters] = useState<FilterConfig[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [selectedRows, setSelectedRows] = useState<StaffData[]>([])
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
+  const [isUnlockDialogOpen, setIsUnlockDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [modalMode, setModalMode] = useState<"create" | "update">("create");
+  const [selectedRows, setSelectedRows] = useState<User[]>([]);
 
-  // Định nghĩa columns cho bảng
-  const columns: Column<StaffData>[] = [
+  const columns: Column<User>[] = [
     {
-      key: "name",
+      key: "fullName",
       header: "Họ và tên",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo tên",
       accessor: (row) => (
-        <div className="font-medium">{row.name}</div>
+        <div className="font-medium">{row.fullName}</div>
       ),
     },
     {
       key: "email",
       header: "Email",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo email",
       accessor: (row) => (
         <div className="text-muted-foreground">{row.email}</div>
       ),
     },
     {
-      key: "phone",
+      key: "phoneNumber",
       header: "Số điện thoại",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo số điện thoại",
-      accessor: (row) => row.phone,
+      accessor: (row) => row.phoneNumber,
     },
     {
-      key: "department",
-      header: "Phòng ban",
+      key: "role",
+      header: "Vai trò",
       sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo phòng ban",
-      accessor: (row) => row.department || "-",
-    },
-    {
-      key: "position",
-      header: "Chức vụ",
-      sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo chức vụ",
-      accessor: (row) => row.position || "-",
+      accessor: (row) => <UserRoleComponent user={row} />,
     },
     {
       key: "status",
       header: "Trạng thái",
       sortable: true,
-      filterable: true,
-      filterType: "select",
-      filterOptions: ["Hoạt động", "Không hoạt động", "Đã khóa"],
-      accessor: (row) => {
-        const statusConfig = {
-          active: { label: "Hoạt động", variant: "default" as const },
-          inactive: { label: "Không hoạt động", variant: "secondary" as const },
-          locked: { label: "Đã khóa", variant: "destructive" as const },
-        }
-        const config = statusConfig[row.status || "active"]
-        return (
-          <Badge variant={config.variant}>{config.label}</Badge>
-        )
-      },
+      accessor: (row) => <StatusComponent status={row.status} />,
     },
-  ]
+  ];
 
-  // Xử lý sorting
-  const handleSort = (sort: SortConfig | null) => {
-    setSortConfig(sort)
-    setPage(1)
-  }
+  const handleSort = () => {
+    setPage(1);
+  };
 
-  // Xử lý filtering
-  const handleFilter = (newFilters: FilterConfig[]) => {
-    setFilters(newFilters)
-    setPage(1)
-  }
-
-  // Xử lý search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    setPage(1)
-  }
-
-  // Xử lý quick filter change
-  const handleQuickFilterChange = () => {
-    setPage(1)
-  }
-
-  // Định nghĩa quick filters
   const quickFilters: QuickFilter[] = [
+    {
+      key: "sortOrder",
+      label: "Sắp xếp",
+      placeholder: "Sắp xếp",
+      hideAllOption: true,
+      defaultValue: "Mới nhất",
+      options: [
+        { value: "Mới nhất", label: "Mới nhất" },
+        { value: "Cũ nhất", label: "Cũ nhất" },
+      ],
+    },
     {
       key: "status",
       label: "Trạng thái",
+      allStringValue: "Tất cả trạng thái",
       placeholder: "Chọn trạng thái",
       options: [
         { value: "Hoạt động", label: "Hoạt động" },
@@ -180,133 +123,142 @@ const ManageStaffPage = () => {
         { value: "Đã khóa", label: "Đã khóa" },
       ],
     },
-  ]
+  ];
 
-  // Filter và sort data
-  const filteredAndSortedData = useMemo(() => {
-    let result = [...staffs]
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (staff) =>
-          staff.name.toLowerCase().includes(query) ||
-          staff.email.toLowerCase().includes(query) ||
-          staff.phone.toLowerCase().includes(query) ||
-          staff.department?.toLowerCase().includes(query) ||
-          staff.position?.toLowerCase().includes(query)
-      )
-    }
-
-    // Apply filters
-    filters.forEach((filter) => {
-      if (filter.key === "status") {
-        const statusMap: Record<string, StaffData["status"]> = {
-          "Hoạt động": "active",
-          "Không hoạt động": "inactive",
-          "Đã khóa": "locked",
-        }
-        const statusValue = statusMap[filter.value]
-        if (statusValue) {
-          result = result.filter((staff) => staff.status === statusValue)
-        }
-      } else {
-        const value = filter.value.toLowerCase()
-        result = result.filter((staff) => {
-          const fieldValue = String(staff[filter.key as keyof StaffData] || "").toLowerCase()
-          return fieldValue.includes(value)
-        })
-      }
-    })
-
-    // Apply sorting
-    if (sortConfig) {
-      result.sort((a, b) => {
-        const aValue = a[sortConfig.key as keyof StaffData]
-        const bValue = b[sortConfig.key as keyof StaffData]
-
-        if (aValue === undefined || aValue === null) return 1
-        if (bValue === undefined || bValue === null) return -1
-
-        const comparison =
-          typeof aValue === "string" && typeof bValue === "string"
-            ? aValue.localeCompare(bValue)
-            : aValue < bValue
-            ? -1
-            : aValue > bValue
-            ? 1
-            : 0
-
-        return sortConfig.direction === "asc" ? comparison : -comparison
-      })
-    }
-
-    return result
-  }, [staffs, searchQuery, filters, sortConfig])
-
-  // Pagination
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize
-    const end = start + pageSize
-    return filteredAndSortedData.slice(start, end)
-  }, [filteredAndSortedData, page, pageSize])
-
-  // Xử lý tạo mới
   const handleCreate = () => {
-    setSelectedStaff(null)
-    setModalMode("create")
-    setIsModalOpen(true)
-  }
+    setSelectedUser(null);
+    setModalMode("create");
+    setIsModalOpen(true);
+  };
 
-  // Xử lý chỉnh sửa
-  const handleEdit = (staff: StaffData) => {
-    setSelectedStaff(staff)
-    setModalMode("update")
-    setIsModalOpen(true)
-  }
-
-  // Xử lý xóa
-  const handleDelete = (staff: StaffData) => {
-    setSelectedStaff(staff)
-    setIsDeleteDialogOpen(true)
-  }
-
-  // Xác nhận xóa
-  const confirmDelete = () => {
-    if (selectedStaff?.id) {
-      setStaffs(staffs.filter((s) => s.id !== selectedStaff.id))
-      setIsDeleteDialogOpen(false)
-      setSelectedStaff(null)
-      setSelectedRows(selectedRows.filter((r) => r.id !== selectedStaff.id))
+  const handleEdit = async (user: User) => {
+    try {
+      const res = await userService.getDetail(user.id);
+      setSelectedUser(res.data.user);
+      setModalMode("update");
+      setIsDetailModalOpen(false);
+      setIsModalOpen(true);
+    } catch {
+      toast.error("Không tải được thông tin nhân viên");
     }
-  }
+  };
 
-  // Xóa nhiều
-  const handleDeleteSelected = () => {
-    if (selectedRows.length > 0) {
-      const idsToDelete = selectedRows.map((r) => r.id)
-      setStaffs(staffs.filter((s) => !idsToDelete.includes(s.id)))
-      setSelectedRows([])
+  const handleLock = (user: User) => {
+    setSelectedUser(user);
+    setIsLockDialogOpen(true);
+  };
+
+  const handleUnlock = (user: User) => {
+    setSelectedUser(user);
+    setIsUnlockDialogOpen(true);
+  };
+
+  const handleViewDetails = async (user: User) => {
+    try {
+      const res = await userService.getDetail(user.id);
+      setSelectedUser(res.data.user);
+      setIsDetailModalOpen(true);
+    } catch {
+      toast.error("Không tải được chi tiết nhân viên");
     }
-  }
+  };
 
-  // Xử lý submit form
-  const handleSubmit = async (data: StaffData) => {
-    if (modalMode === "create") {
-      const newStaff: StaffData = {
-        ...data,
-        id: Date.now().toString(),
+  const confirmLock = async () => {
+    if (!selectedUser?.keycloakUserId && !selectedUser?.id) return;
+    const userId = selectedUser.keycloakUserId || selectedUser.id;
+
+    try {
+      await userService.update(userId, { status: "BLOCKED" });
+      setIsLockDialogOpen(false);
+      setSelectedUser(null);
+      refetch();
+      toast.success("Khóa tài khoản thành công");
+    } catch (error) {
+      console.error("Error locking user:", error);
+      toast.error("Có lỗi xảy ra khi khóa tài khoản");
+    }
+  };
+
+  const confirmUnlock = async () => {
+    if (!selectedUser?.keycloakUserId && !selectedUser?.id) return;
+    const userId = selectedUser.keycloakUserId || selectedUser.id;
+
+    try {
+      await userService.update(userId, { status: "ACTIVE" });
+      setIsUnlockDialogOpen(false);
+      setSelectedUser(null);
+      refetch();
+      toast.success("Mở khóa tài khoản thành công");
+    } catch (error) {
+      console.error("Error unlocking user:", error);
+      toast.error("Có lỗi xảy ra khi mở khóa tài khoản");
+    }
+  };
+
+  const handleLockSelected = async () => {
+    if (selectedRows.length === 0) return;
+
+    try {
+      await Promise.all(
+        selectedRows.map((u) =>
+          userService.update(u.keycloakUserId || u.id, { status: "BLOCKED" })
+        )
+      );
+      setSelectedRows([]);
+      toast.success(`Đã khóa ${selectedRows.length} tài khoản`);
+      refetch();
+    } catch (error) {
+      console.error("Error locking users:", error);
+      toast.error("Có lỗi xảy ra khi khóa tài khoản");
+    }
+  };
+
+  const handleSubmit = async (data: UserFormData) => {
+    try {
+      if (modalMode === "create") {
+        if (!data.password) {
+          toast.error("Vui lòng nhập mật khẩu");
+          return;
+        }
+        await authService.register({
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+          phoneNumber: data.phoneNumber,
+          role: data.role || roles.TECHNICAL_STAFF,
+        });
+        toast.success("Thêm nhân viên thành công");
+        refetch();
+      } else {
+        if (!selectedUser?.keycloakUserId) return;
+        await userService.update(selectedUser.keycloakUserId, data);
+        toast.success("Cập nhật nhân viên thành công");
+        refetch();
       }
-      setStaffs([...staffs, newStaff])
-      console.log("Creating staff:", newStaff)
-    } else {
-      setStaffs(
-        staffs.map((s) => (s.id === selectedStaff?.id ? { ...data, id: s.id } : s))
-      )
-      console.log("Updating staff:", data)
+
+      setIsModalOpen(false);
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Error saving staff:", error);
+      toast.error("Có lỗi xảy ra khi thêm/cập nhật nhân viên");
+      throw error;
     }
-  }
+  };
+
+  const handleDetailModalClose = (open: boolean | User) => {
+    if (typeof open === "boolean") {
+      setIsDetailModalOpen(open);
+      if (!open) setSelectedUser(null);
+    } else {
+      setUsers(
+        users.map((u) =>
+          u.keycloakUserId === open.keycloakUserId ? open : u
+        )
+      );
+      setIsDetailModalOpen(false);
+      setSelectedUser(null);
+    }
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -317,7 +269,6 @@ const ManageStaffPage = () => {
         </p>
       </div>
 
-      {/* Action bar cho selected rows */}
       {selectedRows.length > 0 && (
         <div className="flex items-center justify-between rounded-md border border-border bg-card p-4">
           <div className="text-sm text-muted-foreground">
@@ -325,29 +276,52 @@ const ManageStaffPage = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleDeleteSelected}
+              onClick={handleLockSelected}
               className="text-sm text-destructive hover:underline"
             >
-              Xóa đã chọn
+              Khóa đã chọn
             </button>
           </div>
         </div>
       )}
 
       <DataTable
-        data={paginatedData}
+        data={users}
         columns={columns}
-        keyExtractor={(row) => row.id || row.email}
+        keyExtractor={(row) => row.keycloakUserId || row.email}
         onEdit={handleEdit}
-        onDelete={handleDelete}
         onCreate={handleCreate}
+        customActions={[
+          {
+            label: "Xem chi tiết",
+            icon: <Eye className="h-4 w-4" />,
+            onClick: handleViewDetails,
+            variant: "ghost",
+          },
+          {
+            label: "Mở khóa tài khoản",
+            icon: <LockOpen className="h-4 w-4" />,
+            onClick: handleUnlock,
+            variant: "ghost",
+            visible: (row) => normalizeStatus(row.status) === "BLOCKED",
+          },
+          {
+            label: "Khóa tài khoản",
+            icon: <Lock className="h-4 w-4" />,
+            onClick: handleLock,
+            variant: "ghost",
+            visible: (row) => normalizeStatus(row.status) !== "BLOCKED",
+          },
+        ]}
         emptyMessage="Chưa có nhân viên nào"
+        isLoading={isLoading}
+        filterable={false}
         onSort={handleSort}
         onFilter={handleFilter}
         pagination={{
           page,
           pageSize,
-          total: filteredAndSortedData.length,
+          total,
           onPageChange: setPage,
           onPageSizeChange: setPageSize,
           pageSizeOptions: [5, 10, 20, 50, 100],
@@ -355,49 +329,73 @@ const ManageStaffPage = () => {
         selectedRows={selectedRows}
         onSelectionChange={setSelectedRows}
         searchable={true}
-        searchPlaceholder="Tìm kiếm theo tên, email, số điện thoại, phòng ban..."
+        searchPlaceholder="Tìm kiếm theo tên, email, số điện thoại..."
         onSearch={handleSearch}
         quickFilters={quickFilters}
-        onQuickFilterChange={handleQuickFilterChange}
-        onClearFilters={() => {
-          setFilters([])
-          setSearchQuery("")
-          setPage(1)
-        }}
+        onQuickFilterChange={() => setPage(1)}
+        onClearFilters={handleClearFilters}
       />
 
-      {/* Modal tạo/cập nhật */}
-      <CreateOrUpdateStaffModal
+      <CreateOrUpdateUserModal
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
-        staffData={selectedStaff}
+        userData={selectedUser}
         onSubmit={handleSubmit}
         mode={modalMode}
       />
 
-      {/* Dialog xác nhận xóa */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      {selectedUser && (
+        <UserDetailModal
+          open={isDetailModalOpen}
+          onOpenChange={handleDetailModalClose}
+          user={selectedUser}
+          onEdit={handleEdit}
+          onLock={handleLock}
+        />
+      )}
+
+      <AlertDialog open={isLockDialogOpen} onOpenChange={setIsLockDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa nhân viên</AlertDialogTitle>
+            <AlertDialogTitle>Xác nhận khóa tài khoản</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa nhân viên{" "}
-              <strong>{selectedStaff?.name}</strong>? Hành động này không thể hoàn tác.
+              Bạn có chắc chắn muốn khóa tài khoản{" "}
+              <strong>{selectedUser?.fullName}</strong>? Người dùng sẽ không thể
+              đăng nhập cho đến khi được mở khóa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDelete}
+              onClick={confirmLock}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Xóa
+              Khóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isUnlockDialogOpen} onOpenChange={setIsUnlockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận mở khóa tài khoản</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn mở khóa tài khoản{" "}
+              <strong>{selectedUser?.fullName}</strong>? Người dùng sẽ có thể đăng
+              nhập lại vào hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnlock}>
+              Mở khóa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
-}
+  );
+};
 
-export default ManageStaffPage
+export default ManageStaffPage;

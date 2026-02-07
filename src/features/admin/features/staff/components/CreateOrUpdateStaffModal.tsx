@@ -62,7 +62,7 @@ export function CreateOrUpdateStaffModal({
       name: "",
       email: "",
       phone: "",
-      role: roles.STAFF,
+      role: roles.TECHNICAL_STAFF,
       status: "active",
       department: "",
       position: "",
@@ -79,7 +79,7 @@ export function CreateOrUpdateStaffModal({
           name: "",
           email: "",
           phone: "",
-          role: roles.STAFF,
+          role: roles.TECHNICAL_STAFF,
           status: "active",
           department: "",
           position: "",
@@ -224,7 +224,7 @@ export function CreateOrUpdateStaffModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={roles.STAFF}>Nhân viên</SelectItem>
+                          <SelectItem value={roles.TECHNICAL_STAFF}>Nhân viên</SelectItem>
                           <SelectItem value={roles.ADMIN}>Quản trị viên</SelectItem>
                         </SelectContent>
                       </Select>

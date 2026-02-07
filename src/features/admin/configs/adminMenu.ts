@@ -49,11 +49,11 @@ export const adminNavMain: NavItem[] = [
         url: "/admin/courier-requests",
         icon: UserRoundPen,
       },
-      {
-        title: "Tài khoản đã khoá",
-        url: "/admin/locked-accounts",
-        icon: Lock,
-      },
+      // {
+      //   title: "Tài khoản đã khoá",
+      //   url: "/admin/locked-accounts",
+      //   icon: Lock,
+      // },
     ],
   },
   {

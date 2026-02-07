@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
-import { useEffect } from "react"
-import { useForm } from "react-hook-form"
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -8,9 +8,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/ui/dialog"
-import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
+} from "@/shared/components/ui/dialog";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
 import {
   Form,
   FormControl,
@@ -19,31 +19,36 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/shared/components/ui/form"
+} from "@/shared/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select"
-import { roles } from "@/shared/configs/role"
+} from "@/shared/components/ui/select";
+import { roles } from "@/shared/configs/role";
+import type { User, UserStatusValue, UserStatus, NotificationType } from "../types/user.types";
+import { getPrimaryRole } from "../types/user.types";
 
-export interface UserData {
-  id?: string
-  name: string
-  email: string
-  phone: string
-  role: string
-  status?: "active" | "inactive" | "locked"
+export interface UserFormData {
+  keycloakUserId: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  password?: string;
+  status: UserStatus;
+  notificationType: NotificationType;
+  role: string;
+  isVerified: boolean;
 }
 
 interface CreateOrUpdateUserModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  userData?: UserData | null
-  onSubmit: (userData: UserData) => void | Promise<void>
-  mode?: "create" | "update"
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userData?: User | null;
+  onSubmit: (data: UserFormData) => void | Promise<void>;
+  mode?: "create" | "update";
 }
 
 export function CreateOrUpdateUserModal({
@@ -53,46 +58,88 @@ export function CreateOrUpdateUserModal({
   onSubmit,
   mode = "create",
 }: CreateOrUpdateUserModalProps) {
-  const isUpdateMode = mode === "update" && userData
+  const isUpdateMode = mode === "update" && userData;
 
-  const form = useForm<UserData>({
+  type UserFormValues = {
+    keycloakUserId?: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    password?: string;
+    role: string;
+    status?: UserStatusValue;
+    isVerified?: boolean;
+  };
+
+  const form = useForm<UserFormValues>({
     defaultValues: {
-      name: "",
+      fullName: "",
       email: "",
-      phone: "",
-      role: roles.STAFF,
-      status: "active",
-      ...userData,
+      phoneNumber: "",
+      password: "",
+      role: roles.TECHNICAL_STAFF,
+      status: "ACTIVE",
+      isVerified: true,
     },
-  })
+  });
 
   useEffect(() => {
     if (open) {
       if (isUpdateMode && userData) {
-        form.reset(userData)
+        const statusValue =
+          typeof userData.status === "string"
+            ? userData.status
+            : (userData.status as Record<string, unknown>)?.value ?? "ACTIVE";
+        form.reset({
+          keycloakUserId: userData.keycloakUserId ?? userData.id,
+          fullName: userData.fullName,
+          email: userData.email,
+          phoneNumber: userData.phoneNumber,
+          role: getPrimaryRole(userData) || userData.role,
+          status: statusValue as UserStatusValue,
+          isVerified: userData.isVerified ?? true,
+        });
       } else {
         form.reset({
-          name: "",
+          fullName: "",
           email: "",
-          phone: "",
-          role: roles.STAFF,
-          status: "active",
-        })
+          phoneNumber: "",
+          password: "",
+          role: roles.TECHNICAL_STAFF,
+          status: "ACTIVE",
+          isVerified: true,
+        });
       }
     }
-  }, [open, userData, isUpdateMode, form])
+  }, [open, userData, isUpdateMode, form]);
 
-  const handleSubmit = async (formData: UserData) => {
+  const handleSubmitForm = async (values: UserFormValues) => {
     try {
-      await onSubmit(formData)
-      onOpenChange(false)
+      const statusValue = values.status ?? "ACTIVE";
+      const payload: UserFormData = {
+        keycloakUserId:
+          values.keycloakUserId ??
+          userData?.keycloakUserId ??
+          "",
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        fullName: values.fullName,
+        password: values.password?.trim() ? values.password : undefined,
+        status: statusValue,
+        isVerified: values.isVerified ?? true,
+        role: values.role,
+        notificationType: userData?.notificationType ?? {},
+      };
+
+      await onSubmit(payload);
+      onOpenChange(false);
       if (!isUpdateMode) {
-        form.reset()
+        form.reset();
       }
     } catch (error) {
-      console.error("Error submitting form:", error)
+      console.error("Error submitting form:", error);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -110,10 +157,9 @@ export function CreateOrUpdateUserModal({
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmitForm)}
             className="space-y-6"
           >
-            {/* Thông tin cơ bản */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Thông tin cơ bản
@@ -122,7 +168,7 @@ export function CreateOrUpdateUserModal({
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="fullName"
                   rules={{
                     required: "Họ và tên là bắt buộc",
                     minLength: {
@@ -137,7 +183,7 @@ export function CreateOrUpdateUserModal({
                         <Input
                           placeholder="Nhập họ và tên"
                           {...field}
-                          disabled={isUpdateMode ? Boolean(userData?.id) : false}
+                          disabled={isUpdateMode ? Boolean(userData?.keycloakUserId) : false}
                         />
                       </FormControl>
                       <FormMessage />
@@ -163,7 +209,7 @@ export function CreateOrUpdateUserModal({
                           type="email"
                           placeholder="email@example.com"
                           {...field}
-                          disabled={isUpdateMode ? Boolean(userData?.id) : false}
+                          disabled={isUpdateMode ? Boolean(userData?.keycloakUserId) : false}
                         />
                       </FormControl>
                       <FormMessage />
@@ -175,11 +221,12 @@ export function CreateOrUpdateUserModal({
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="phoneNumber"
                   rules={{
                     required: "Số điện thoại là bắt buộc",
                     pattern: {
-                      value: /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
+                      value:
+                        /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/,
                       message: "Số điện thoại không hợp lệ",
                     },
                   }}
@@ -197,6 +244,51 @@ export function CreateOrUpdateUserModal({
                     </FormItem>
                   )}
                 />
+
+                {!isUpdateMode ? (
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    rules={{
+                      required: "Mật khẩu là bắt buộc",
+                      minLength: {
+                        value: 6,
+                        message: "Mật khẩu phải có ít nhất 6 ký tự",
+                      },
+                    }}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mật khẩu *</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Nhập mật khẩu"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mật khẩu mới (để trống nếu không đổi)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="password"
+                            placeholder="Nhập mật khẩu mới"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -218,8 +310,12 @@ export function CreateOrUpdateUserModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={roles.STAFF}>Nhân viên</SelectItem>
-                          <SelectItem value={roles.ADMIN}>Quản trị viên</SelectItem>
+                          <SelectItem value={roles.TECHNICAL_STAFF}>Nhân viên</SelectItem>
+                          <SelectItem value={roles.ADMIN}>
+                            Quản trị viên
+                          </SelectItem>
+                          <SelectItem value={roles.COURIER}>Người vận chuyển</SelectItem>
+                          <SelectItem value={roles.CUSTOMER}>Khách hàng</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
@@ -232,35 +328,63 @@ export function CreateOrUpdateUserModal({
               </div>
 
               {isUpdateMode && (
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Trạng thái</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || "active"}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn trạng thái" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="active">Hoạt động</SelectItem>
-                          <SelectItem value="inactive">Không hoạt động</SelectItem>
-                          <SelectItem value="locked">Đã khóa</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Trạng thái tài khoản của người dùng
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Trạng thái</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value || "ACTIVE"}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn trạng thái" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="ACTIVE">Hoạt động</SelectItem>
+                            <SelectItem value="INACTIVE">
+                              Không hoạt động
+                            </SelectItem>
+                            <SelectItem value="BLOCKED">Đã khóa</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormDescription>
+                          Trạng thái tài khoản của người dùng
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isVerified"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Đã xác minh</FormLabel>
+                        <Select
+                          onValueChange={(v) => field.onChange(v === "true")}
+                          value={String(field.value ?? true)}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="true">Có</SelectItem>
+                            <SelectItem value="false">Không</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               )}
             </div>
 
@@ -280,7 +404,7 @@ export function CreateOrUpdateUserModal({
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
-export default CreateOrUpdateUserModal
+export default CreateOrUpdateUserModal;

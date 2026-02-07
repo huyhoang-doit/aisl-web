@@ -1,25 +1,37 @@
-export interface CustomerReport {
+/** API response structure từ GET /maintenance/reports */
+export interface CustomerReportApi {
   id: string;
-  reportCode: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  lockerCode: string;
+  code: string;
+  cabinetId: string;
+  cabinetName: string;
   lockerId: string;
-  cabinetCode?: string;
-  cabinetId?: string;
-  issueType: "broken" | "stuck" | "cannot_open" | "other";
-  issueDescription: string;
-  priority: "low" | "medium" | "high" | "urgent";
-  status: "pending" | "assigned" | "in_progress" | "completed" | "rejected";
-  assignedTo?: string; // Technical staff ID
-  assignedToName?: string; // Technical staff name
-  assignedAt?: string;
-  reportedAt: string;
-  completedAt?: string;
-  images?: string[]; // URLs of attached images
+  lockerLabel: string;
+  title: string;
+  description: string;
+  status: string;
+  reportedById?: string;
   createdAt?: string;
   updatedAt?: string;
+  photoUrls?: string[];
+}
+
+export interface CustomerReport extends CustomerReportApi {
+  /** Mã báo cáo (có thể từ API khác hoặc id rút gọn) */
+  reportCode?: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  lockerCode?: string;
+  cabinetCode?: string;
+  issueType?: "broken" | "stuck" | "cannot_open" | "other";
+  issueDescription?: string;
+  priority?: "low" | "medium" | "high" | "urgent";
+  assignedTo?: string;
+  assignedToName?: string;
+  assignedAt?: string;
+  reportedAt?: string;
+  completedAt?: string;
+  images?: string[];
 }
 
 export interface TechnicalStaffReport {

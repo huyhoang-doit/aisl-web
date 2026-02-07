@@ -38,7 +38,7 @@ function App() {
         <Route
           element={
             <RoleRoutes
-              requiredRole={roles.STAFF}
+              requiredRole={roles.TECHNICAL_STAFF}
               redirectTo="/not-found"
             />
           }

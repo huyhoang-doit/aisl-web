@@ -11,11 +11,9 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
-import { Textarea } from "@/shared/components/ui/textarea";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,14 +26,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import type { Locker } from "../types/locker.types.ts";
+import { Switch } from "@/shared/components/ui/switch";
+import { CabinetSelector } from "@/features/admin/features/cabinet/components/CabinetSelector";
+import { SizeSelector } from "@/features/admin/features/size/components/SizeSelector";
+import type { Locker, LockerStatus } from "../types/locker.types";
 
 export interface LockerFormData {
-  code: string;
-  size: "small" | "medium" | "large";
-  status: "available" | "occupied" | "maintenance" | "reserved";
-  price?: number;
-  description?: string;
+  cabinetId: string;
+  sizeId: string;
+  row: number;
+  column: number;
+  status: LockerStatus;
+  isActive: boolean;
 }
 
 interface CreateOrUpdateLockerModalProps {
@@ -44,8 +46,16 @@ interface CreateOrUpdateLockerModalProps {
   lockerData?: Locker | null;
   onSubmit: (data: LockerFormData) => void | Promise<void>;
   mode?: "create" | "update";
-  cabinetId: string;
+  /** Pre-select cabinet khi tạo mới (từ filter trang) */
+  defaultCabinetId?: string;
 }
+
+const STATUS_OPTIONS: { value: LockerStatus; label: string }[] = [
+  { value: "AVAILABLE", label: "Trống" },
+  { value: "OCCUPIED", label: "Đã thuê" },
+  { value: "MAINTENANCE", label: "Bảo trì" },
+  { value: "RESERVED", label: "Đã đặt" },
+];
 
 export function CreateOrUpdateLockerModal({
   open,
@@ -53,18 +63,19 @@ export function CreateOrUpdateLockerModal({
   lockerData = null,
   onSubmit,
   mode = "create",
-  cabinetId: _cabinetId,
+  defaultCabinetId = "",
 }: CreateOrUpdateLockerModalProps) {
   const isUpdateMode = mode === "update" && lockerData;
+  const isFromCabinetDetail = Boolean(defaultCabinetId);
 
   const form = useForm<LockerFormData>({
     defaultValues: {
-      code: "",
-      size: "medium",
-      status: "available",
-      price: 0,
-      description: "",
-      ...lockerData,
+      cabinetId: defaultCabinetId,
+      sizeId: "",
+      row: 0,
+      column: 0,
+      status: "AVAILABLE",
+      isActive: false,
     },
   });
 
@@ -72,25 +83,27 @@ export function CreateOrUpdateLockerModal({
     if (open) {
       if (isUpdateMode && lockerData) {
         form.reset({
-          code: lockerData.code,
-          size: lockerData.size,
+          cabinetId: lockerData.cabinetId,
+          sizeId: lockerData.sizeTypeId,
+          row: lockerData.row,
+          column: lockerData.column,
           status: lockerData.status,
-          price: lockerData.price || 0,
-          description: lockerData.description || "",
+          isActive: lockerData.isActive,
         });
       } else {
         form.reset({
-          code: "",
-          size: "medium",
-          status: "available",
-          price: 0,
-          description: "",
+          cabinetId: defaultCabinetId,
+          sizeId: "",
+          row: 0,
+          column: 0,
+          status: "AVAILABLE",
+          isActive: false,
         });
       }
     }
-  }, [open, lockerData, isUpdateMode, form]);
+  }, [open, lockerData, isUpdateMode, defaultCabinetId, form]);
 
-  const handleSubmit = async (formData: LockerFormData) => {
+  const handleSubmitForm = async (formData: LockerFormData) => {
     try {
       await onSubmit(formData);
       onOpenChange(false);
@@ -118,7 +131,7 @@ export function CreateOrUpdateLockerModal({
 
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={form.handleSubmit(handleSubmitForm)}
             className="space-y-6"
           >
             <div className="space-y-4">
@@ -126,24 +139,89 @@ export function CreateOrUpdateLockerModal({
                 Thông tin locker
               </h3>
 
+              {!isFromCabinetDetail ? (
+                <FormField
+                  control={form.control}
+                  name="cabinetId"
+                  rules={{
+                    required: "Vui lòng chọn cabinet",
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cabinet *</FormLabel>
+                      <FormControl>
+                        <CabinetSelector
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Chọn cabinet"
+                          allowClear={false}
+                          className="min-w-[200px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="cabinetId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <input type="hidden" {...field} value={defaultCabinetId} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <FormField
+                control={form.control}
+                name="sizeId"
+                rules={{
+                  required: "Vui lòng chọn kích thước",
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kích thước *</FormLabel>
+                    <FormControl>
+                      <SizeSelector
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Chọn kích thước"
+                        allowClear={false}
+                        className="min-w-[200px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="code"
+                  name="row"
                   rules={{
-                    required: "Mã locker là bắt buộc",
-                    minLength: {
-                      value: 2,
-                      message: "Mã locker phải có ít nhất 2 ký tự",
+                    required: "Số hàng là bắt buộc",
+                    min: {
+                      value: 0,
+                      message: "Số hàng không được âm",
                     },
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Mã locker *</FormLabel>
+                      <FormLabel>Hàng *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="VD: L001"
+                          type="number"
+                          min={0}
+                          placeholder="0"
                           {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value, 10) || "")
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -153,29 +231,28 @@ export function CreateOrUpdateLockerModal({
 
                 <FormField
                   control={form.control}
-                  name="size"
+                  name="column"
                   rules={{
-                    required: "Kích thước là bắt buộc",
+                    required: "Số cột là bắt buộc",
+                    min: {
+                      value: 0,
+                      message: "Số cột không được âm",
+                    },
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Kích thước *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || "medium"}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn kích thước" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="small">Nhỏ</SelectItem>
-                          <SelectItem value="medium">Vừa</SelectItem>
-                          <SelectItem value="large">Lớn</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel>Cột *</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          placeholder="0"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value, 10) || "")
+                          }
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -194,7 +271,6 @@ export function CreateOrUpdateLockerModal({
                       <FormLabel>Trạng thái *</FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        defaultValue={field.value || "available"}
                         value={field.value}
                       >
                         <FormControl>
@@ -203,10 +279,11 @@ export function CreateOrUpdateLockerModal({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="available">Trống</SelectItem>
-                          <SelectItem value="occupied">Đã thuê</SelectItem>
-                          <SelectItem value="maintenance">Bảo trì</SelectItem>
-                          <SelectItem value="reserved">Đã đặt</SelectItem>
+                          {STATUS_OPTIONS.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -216,48 +293,25 @@ export function CreateOrUpdateLockerModal({
 
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="isActive"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Giá thuê (VNĐ)</FormLabel>
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Trạng thái hoạt động</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Locker có đang hoạt động không
+                        </p>
+                      </div>
                       <FormControl>
-                        <Input
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <FormDescription>
-                        Giá thuê theo tháng (không bắt buộc)
-                      </FormDescription>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mô tả</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Nhập mô tả về locker (không bắt buộc)"
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Mô tả chi tiết về locker này
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <DialogFooter>

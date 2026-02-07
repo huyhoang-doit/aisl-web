@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,9 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import type { Location } from "../../location/types/location.types";
 import type { Cabinet } from "../../cabinet/types/cabinet.types";
+import { locationService } from "../services/location.service";
+import { cabinetService } from "../../cabinet/services/cabinet.service";
+import { toast } from "sonner";
 
 interface LocationDetailModalProps {
   open: boolean;
@@ -37,45 +40,7 @@ interface LocationDetailModalProps {
   onUpdateLocation?: (location: Location) => void;
 }
 
-// Mock data - Thay thế bằng API call thực tế
-const getMockCabinets = (locationId: string): Cabinet[] => [
-  {
-    id: "1",
-    locationId,
-    name: "Cabinet A1",
-    code: "CAB-A1",
-    description: "Cabinet đầu tiên tại địa điểm này",
-    totalLockers: 20,
-    availableLockers: 15,
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    locationId,
-    name: "Cabinet A2",
-    code: "CAB-A2",
-    description: "Cabinet thứ hai tại địa điểm này",
-    totalLockers: 20,
-    availableLockers: 8,
-    status: "active",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    locationId,
-    name: "Cabinet B1",
-    code: "CAB-B1",
-    description: "Cabinet đang bảo trì",
-    totalLockers: 15,
-    availableLockers: 0,
-    status: "maintenance",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+const DEFAULT_PAGE_SIZE = 10;
 
 const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   open,
@@ -83,9 +48,12 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   location,
   onEdit,
   onDelete,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
 }) => {
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
   const [isCabinetDetailModalOpen, setIsCabinetDetailModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -93,30 +61,30 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
   const [cabinetModalMode, setCabinetModalMode] = useState<"create" | "update">("create");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load cabinets when modal opens
-  useEffect(() => {
-    if (!open) return;
-    
-    let cancelled = false;
-    // Setting loading state at the start of effect is acceptable pattern
-    setTimeout(() => {
+  const loadCabinets = useCallback(async () => {
+    if (!open || !location.id) return;
+    try {
       setIsLoading(true);
-    }, 100);
-    
-    // Simulate API call
-    const timeoutId = setTimeout(() => {
-      if (!cancelled) {
-        const mockData = getMockCabinets(location.id);
-        setCabinets(mockData);
-        setIsLoading(false);
-      }
-    }, 500);
+      const response = await locationService.getCabinetLocation(location.id, {
+        page,
+        limit: pageSize,
+        ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
+      });
+      setCabinets(response.data.cabinets ?? []);
+      setTotal(response.data.pagination?.total ?? 0);
+    } catch (error) {
+      console.error("Error loading cabinets:", error);
+      toast.error("Không tải được danh sách cabinet");
+      setCabinets([]);
+      setTotal(0);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [open, location.id, page, pageSize, searchQuery]);
 
-    return () => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [open, location.id]);
+  useEffect(() => {
+    loadCabinets();
+  }, [loadCabinets]);
 
   const handleClose = () => {
     if (typeof onOpenChange === "function") {
@@ -141,41 +109,43 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
     setIsDeleteDialogOpen(true);
   };
 
-  const confirmDeleteCabinet = () => {
-    if (selectedCabinet?.id) {
-      setCabinets(cabinets.filter((c) => c.id !== selectedCabinet.id));
+  const confirmDeleteCabinet = async () => {
+    if (!selectedCabinet?.id) return;
+    try {
+      await cabinetService.delete(selectedCabinet.id);
+      toast.success("Đã xóa cabinet");
       setIsDeleteDialogOpen(false);
       setSelectedCabinet(null);
-      // TODO: Gọi API để xóa cabinet
-      console.log("Deleting cabinet:", selectedCabinet);
+      loadCabinets();
+    } catch (error) {
+      console.error("Error deleting cabinet:", error);
+      toast.error("Không xóa được cabinet");
     }
   };
 
   const handleCabinetSubmit = async (data: CabinetFormData) => {
-    if (cabinetModalMode === "create") {
-      const newCabinet: Cabinet = {
-        ...data,
-        id: Date.now().toString(),
-        locationId: location.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setCabinets([...cabinets, newCabinet]);
-      // TODO: Gọi API để tạo cabinet
-      console.log("Creating cabinet:", newCabinet);
-    } else {
-      setCabinets(
-        cabinets.map((c) =>
-          c.id === selectedCabinet?.id
-            ? { ...data, id: c.id, locationId: c.locationId, createdAt: c.createdAt, updatedAt: new Date().toISOString() }
-            : c
-        )
-      );
-      // TODO: Gọi API để cập nhật cabinet
-      console.log("Updating cabinet:", data);
+    try {
+      if (cabinetModalMode === "create") {
+        await cabinetService.create({
+          ...data,
+          locationId: location.id,
+        });
+        toast.success("Đã thêm cabinet");
+      } else if (selectedCabinet?.id) {
+        await cabinetService.update(selectedCabinet.id, {
+          ...data,
+          locationId: data.locationId || location.id,
+        });
+        toast.success("Đã cập nhật cabinet");
+      }
+      setIsCabinetModalOpen(false);
+      setSelectedCabinet(null);
+      loadCabinets();
+    } catch (error) {
+      console.error("Error saving cabinet:", error);
+      toast.error(cabinetModalMode === "create" ? "Không tạo được cabinet" : "Không cập nhật được cabinet");
+      throw error;
     }
-    setIsCabinetModalOpen(false);
-    setSelectedCabinet(null);
   };
 
   const handleViewCabinetDetails = (cabinet: Cabinet) => {
@@ -196,6 +166,32 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
       handleClose();
     }
   };
+
+  const handlePageChange = useCallback((newPage: number) => {
+    setPage(newPage);
+  }, []);
+
+  const handlePageSizeChange = useCallback((newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+  }, []);
+
+  const handleSearch = useCallback((q: string) => {
+    setSearchQuery(q);
+    setPage(1);
+  }, []);
+
+  const paginationConfig = useMemo(
+    () => ({
+      page,
+      pageSize,
+      total,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+      pageSizeOptions: [5, 10, 20] as number[],
+    }),
+    [page, pageSize, total, handlePageChange, handlePageSizeChange]
+  );
 
   return (
     <>
@@ -258,41 +254,41 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
               onDelete={handleDeleteCabinet}
               onViewDetails={handleViewCabinetDetails}
               isLoading={isLoading}
+              pagination={paginationConfig}
+              searchable
+              searchPlaceholder="Tìm theo tên cabinet..."
+              onSearch={handleSearch}
             />
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Cabinet Modal */}
       <CreateOrUpdateCabinetModal
         open={isCabinetModalOpen}
         onOpenChange={setIsCabinetModalOpen}
         cabinetData={selectedCabinet}
         onSubmit={handleCabinetSubmit}
         mode={cabinetModalMode}
-        locationId={location.id}
+        defaultLocationId={location.id}
       />
 
-      {/* Cabinet Detail Modal */}
       {selectedCabinet && (
         <CabinetDetailModal
           open={isCabinetDetailModalOpen}
-          onOpenChange={setIsCabinetDetailModalOpen}
+          onOpenChange={(v) => setIsCabinetDetailModalOpen(typeof v === "boolean" ? v : false)}
           cabinet={selectedCabinet}
           onEdit={handleEditCabinet}
           onDelete={handleDeleteCabinet}
         />
       )}
 
-      {/* Delete Cabinet Dialog */}
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa cabinet</AlertDialogTitle>
             <AlertDialogDescription>
               Bạn có chắc chắn muốn xóa cabinet{" "}
-              <strong>{selectedCabinet?.name}</strong> ({selectedCabinet?.code})? 
-              Hành động này không thể hoàn tác. Tất cả các locker trong cabinet này cũng sẽ bị xóa.
+              <strong>{selectedCabinet?.name}</strong>? Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
