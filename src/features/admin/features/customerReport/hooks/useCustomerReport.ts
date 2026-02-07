@@ -14,6 +14,8 @@ export interface ReportListParams {
   limit?: number;
   status?: string;
   search?: string;
+  orderBy?: string;
+  orderDirection?: "ASC" | "DESC";
 }
 
 function extractReports(response: unknown): CustomerReport[] {
@@ -40,17 +42,23 @@ function extractPagination(response: unknown): { total: number } {
   };
 }
 
-const STATUS_MAP: Record<string, string> = {
-  "Chờ xử lý": "PENDING",
-  "Đã phân công": "ASSIGNED",
-  "Đang xử lý": "IN_PROGRESS",
-  "Hoàn thành": "COMPLETED",
-  "Từ chối": "REJECTED",
+const SORT_ORDER_MAP: Record<string, "ASC" | "DESC"> = {
+  "Mới nhất": "DESC",
+  "Cũ nhất": "ASC",
 };
+
+export type IncidentReportStatusTab =
+  | "PENDING"
+  | "ASSIGNED"
+  | "IN_PROGRESS"
+  | "RESOLVED"
+  | "CLOSED";
 
 export interface UseCustomerReportOptions {
   defaultPageSize?: number;
   fetchOnMount?: boolean;
+  /** Tab trạng thái – mỗi tab query theo status tương ứng */
+  status?: IncidentReportStatusTab;
 }
 
 export interface UseCustomerReportReturn {
@@ -75,7 +83,7 @@ export interface UseCustomerReportReturn {
 }
 
 export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCustomerReportReturn {
-  const { defaultPageSize = 10, fetchOnMount = true } = options;
+  const { defaultPageSize = 10, fetchOnMount = true, status: tabStatus } = options;
 
   const [reports, setReports] = useState<CustomerReport[]>([]);
   const [total, setTotal] = useState(0);
@@ -90,15 +98,20 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
 
   const params = useMemo<ReportListParams>(
     () => {
-      const statusFilter = filters.find((f) => f.key === "status")?.value;
+      const sortOrderFilter = filters.find((f) => f.key === "sortOrder")?.value;
+      const orderDirection = sortOrderFilter && SORT_ORDER_MAP[sortOrderFilter]
+        ? SORT_ORDER_MAP[sortOrderFilter]
+        : "DESC";
       return {
         page,
         limit: pageSize,
         search: searchQuery.trim() || undefined,
-        status: statusFilter ? STATUS_MAP[statusFilter] || statusFilter : undefined,
+        status: tabStatus ?? undefined,
+        orderBy: "createdAt",
+        orderDirection,
       };
     },
-    [page, pageSize, searchQuery, filters]
+    [page, pageSize, searchQuery, filters, tabStatus]
   );
 
   const loadReports = useCallback(async () => {
