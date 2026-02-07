@@ -9,8 +9,7 @@ import {
   type UserFormData,
 } from "../features/user/components/CreateOrUpdateUserModal";
 import UserDetailModal from "../features/user/components/UserDetailModal";
-import { Badge } from "@/shared/components/ui/badge";
-import { roles } from "@/shared/configs/role";
+import UserRoleComponent from "../features/user/components/UserRoleComponent";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,19 +20,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
-import { Eye, Lock } from "lucide-react";
+import StatusComponent from "@/shared/components/StatusComponent";
+import { normalizeStatus } from "@/shared/components/statusConfig";
+import { Eye, Lock, LockOpen } from "lucide-react";
 import { authService } from "../../auth/services/auth.service";
 import { userService } from "../features/user/services/user.service";
 import { useUser } from "../features/user/hooks/useUser";
 import type { User } from "../features/user/types/user.types";
-import { getUserStatusDisplay } from "../features/user/types/user.types";
 import { toast } from "sonner";
-
-const STATUS_CONFIG = {
-  ACTIVE: { label: "Hoạt động", variant: "default" as const },
-  INACTIVE: { label: "Không hoạt động", variant: "secondary" as const },
-  BLOCKED: { label: "Đã khóa", variant: "destructive" as const },
-};
 
 const ManageUserPage = () => {
   const {
@@ -54,6 +48,7 @@ const ManageUserPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isLockDialogOpen, setIsLockDialogOpen] = useState(false);
+  const [isUnlockDialogOpen, setIsUnlockDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "update">("create");
   const [selectedRows, setSelectedRows] = useState<User[]>([]);
@@ -85,23 +80,13 @@ const ManageUserPage = () => {
       key: "role",
       header: "Vai trò",
       sortable: true,
-      accessor: (row) => (
-        <Badge
-          variant={row.role === roles.ADMIN ? "default" : "secondary"}
-        >
-          {row.role === roles.ADMIN ? "Quản trị viên" : "Nhân viên"}
-        </Badge>
-      ),
+      accessor: (row) => <UserRoleComponent user={row} />,
     },
     {
       key: "status",
       header: "Trạng thái",
       sortable: true,
-      accessor: (row) => {
-        const statusValue = getUserStatusDisplay(row.status);
-        const config = STATUS_CONFIG[statusValue];
-        return <Badge variant={config.variant}>{config.label}</Badge>;
-      },
+      accessor: (row) => <StatusComponent status={row.status} />,
     },
   ];
 
@@ -111,13 +96,37 @@ const ManageUserPage = () => {
 
   const quickFilters: QuickFilter[] = [
     {
+      key: "sortOrder",
+      label: "Sắp xếp",
+      placeholder: "Sắp xếp",
+      hideAllOption: true,
+      defaultValue: "Mới nhất",
+      options: [
+        { value: "Mới nhất", label: "Mới nhất" },
+        { value: "Cũ nhất", label: "Cũ nhất" },
+      ],
+    },
+    {
       key: "status",
       label: "Trạng thái",
+      allStringValue: "Tất cả trạng thái",
       placeholder: "Chọn trạng thái",
       options: [
         { value: "Hoạt động", label: "Hoạt động" },
         { value: "Không hoạt động", label: "Không hoạt động" },
         { value: "Đã khóa", label: "Đã khóa" },
+      ],
+    },
+    {
+      key: "role",
+      label: "Vai trò",
+      allStringValue: "Tất cả vai trò",
+      placeholder: "Chọn vai trò",
+      options: [
+        { value: "Quản trị viên", label: "Quản trị viên" },
+        { value: "Nhân viên", label: "Nhân viên" },
+        { value: "Người vận chuyển", label: "Người vận chuyển" },
+        { value: "Khách hàng", label: "Khách hàng" },
       ],
     },
   ];
@@ -131,7 +140,6 @@ const ManageUserPage = () => {
   const handleEdit = async (user: User) => {
     try {
       const res = await userService.getDetail(user.id);
-      console.log("🚀 ~ handleEdit ~ res:", res)
       setSelectedUser(res.data.user);  
       setModalMode("update");
       setIsDetailModalOpen(false);
@@ -146,10 +154,14 @@ const ManageUserPage = () => {
     setIsLockDialogOpen(true);
   };
 
+  const handleUnlock = (user: User) => {
+    setSelectedUser(user);
+    setIsUnlockDialogOpen(true);
+  };
+
   const handleViewDetails = async (user: User) => {
     try {
       const res = await userService.getDetail(user.id);
-      console.log("🚀 ~ handleViewDetails ~ res:", res)
       setSelectedUser(res.data.user);
       setIsDetailModalOpen(true);
     } catch {
@@ -170,6 +182,22 @@ const ManageUserPage = () => {
     } catch (error) {
       console.error("Error locking user:", error);
       toast.error("Có lỗi xảy ra khi khóa tài khoản");
+    }
+  };
+
+  const confirmUnlock = async () => {
+    if (!selectedUser?.keycloakUserId && !selectedUser?.id) return;
+    const userId = selectedUser.keycloakUserId || selectedUser.id;
+
+    try {
+      await userService.update(userId, { status: "ACTIVE" });
+      setIsUnlockDialogOpen(false);
+      setSelectedUser(null);
+      refetch();
+      toast.success("Mở khóa tài khoản thành công");
+    } catch (error) {
+      console.error("Error unlocking user:", error);
+      toast.error("Có lỗi xảy ra khi mở khóa tài khoản");
     }
   };
 
@@ -277,10 +305,18 @@ const ManageUserPage = () => {
             variant: "ghost",
           },
           {
+            label: "Mở khóa tài khoản",
+            icon: <LockOpen className="h-4 w-4" />,
+            onClick: handleUnlock,
+            variant: "ghost",
+            visible: (row) => normalizeStatus(row.status) === "BLOCKED",
+          },
+          {
             label: "Khóa tài khoản",
             icon: <Lock className="h-4 w-4" />,
             onClick: handleLock,
             variant: "ghost",
+            visible: (row) => normalizeStatus(row.status) !== "BLOCKED",
           },
         ]}
         emptyMessage="Chưa có người dùng nào"
@@ -342,6 +378,25 @@ const ManageUserPage = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Khóa
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isUnlockDialogOpen} onOpenChange={setIsUnlockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xác nhận mở khóa tài khoản</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn mở khóa tài khoản{" "}
+              <strong>{selectedUser?.fullName}</strong>? Người dùng sẽ có thể đăng
+              nhập lại vào hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmUnlock}>
+              Mở khóa
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

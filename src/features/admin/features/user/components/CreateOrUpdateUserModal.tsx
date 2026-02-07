@@ -29,6 +29,7 @@ import {
 } from "@/shared/components/ui/select";
 import { roles } from "@/shared/configs/role";
 import type { User, UserStatusValue, UserStatus, NotificationType } from "../types/user.types";
+import { getPrimaryRole } from "../types/user.types";
 
 export interface UserFormData {
   keycloakUserId: string;
@@ -90,11 +91,11 @@ export function CreateOrUpdateUserModal({
             ? userData.status
             : (userData.status as Record<string, unknown>)?.value ?? "ACTIVE";
         form.reset({
-          keycloakUserId: userData.keycloakUserId,
+          keycloakUserId: userData.keycloakUserId ?? userData.id,
           fullName: userData.fullName,
           email: userData.email,
           phoneNumber: userData.phoneNumber,
-          role: userData.role,
+          role: getPrimaryRole(userData) || userData.role,
           status: statusValue as UserStatusValue,
           isVerified: userData.isVerified ?? true,
         });
@@ -313,6 +314,8 @@ export function CreateOrUpdateUserModal({
                           <SelectItem value={roles.ADMIN}>
                             Quản trị viên
                           </SelectItem>
+                          <SelectItem value={roles.COURIER}>Người vận chuyển</SelectItem>
+                          <SelectItem value={roles.CUSTOMER}>Khách hàng</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>

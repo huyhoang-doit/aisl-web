@@ -53,6 +53,8 @@ export interface UserListParams {
   role?: string;
   status?: UserStatusValue | string;
   search?: string;
+  orderBy?: string;
+  orderDirection?: "ASC" | "DESC";
 }
 
 export const userService = {
@@ -66,6 +68,8 @@ export const userService = {
     if (params?.role) searchParams.set("role", params.role);
     if (params?.status) searchParams.set("status", params.status);
     if (params?.search) searchParams.set("search", params.search);
+    if (params?.orderBy) searchParams.set("orderBy", params.orderBy);
+    if (params?.orderDirection) searchParams.set("orderDirection", params.orderDirection);
 
     const query = searchParams.toString();
     const url = query ? `/users?${query}` : "/users";

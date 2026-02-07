@@ -9,19 +9,11 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
+import StatusComponent from "@/shared/components/StatusComponent";
+import { normalizeStatus } from "@/shared/components/statusConfig";
+import UserRoleComponent from "./UserRoleComponent";
 import { Lock, Pencil } from "lucide-react";
-import type { User, UserStatusValue } from "../types/user.types";
-import { getUserStatusDisplay } from "../types/user.types";
-import { roles } from "@/shared/configs/role";
-
-const STATUS_CONFIG: Record<
-  UserStatusValue,
-  { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
-> = {
-  ACTIVE: { label: "Hoạt động", variant: "default" },
-  INACTIVE: { label: "Không hoạt động", variant: "secondary" },
-  BLOCKED: { label: "Đã khóa", variant: "destructive" },
-};
+import type { User } from "../types/user.types";
 
 interface UserDetailModalProps {
   open: boolean;
@@ -38,9 +30,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
   onEdit,
   onLock,
 }) => {
-  const statusValue = getUserStatusDisplay(user.status);
-  const statusInfo = STATUS_CONFIG[statusValue];
-  const roleLabel = user.role === roles.ADMIN ? "Quản trị viên" : "Nhân viên";
+  const statusValue = normalizeStatus(user.status);
   const isLocked = statusValue === "BLOCKED";   
   
   return (
@@ -90,15 +80,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
           <div className="flex flex-wrap items-center gap-4">
             <div>
               <span className="text-sm text-muted-foreground">Vai trò:</span>
-              <Badge variant="outline" className="ml-2">
-                {roleLabel}
-              </Badge>
+              <span className="ml-2">
+                <UserRoleComponent user={user} />
+              </span>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Trạng thái:</span>
-              <Badge variant={statusInfo.variant} className="ml-2">
-                {statusInfo.label}
-              </Badge>
+              <span className="ml-2">
+                <StatusComponent status={user.status} />
+              </span>
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Xác minh:</span>
@@ -131,15 +121,19 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Vai trò:</span>
-                <p className="font-medium">{roleLabel}</p>
+                <p className="font-medium">
+                  <UserRoleComponent user={user} />
+                </p>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Trạng thái:</span>
-                <p className="font-medium">{statusInfo.label}</p>
+                <p className="font-medium">
+                  <StatusComponent status={user.status} />
+                </p>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Keycloak ID:</span>
-                <p className="font-medium font-mono text-sm">{user.keycloakUserId}</p>
+                <span className="text-sm text-muted-foreground">ID:</span>
+                <p className="font-medium font-mono text-sm">{user.keycloakUserId ?? user.id}</p>
               </div>
             </div>
           </div>
