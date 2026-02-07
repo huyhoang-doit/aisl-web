@@ -12,6 +12,14 @@ import {
 import type { FilterConfig } from "@/shared/components/DataTable";
 import { roles } from "@/shared/configs/role";
 
+const ORDER_BY_DEFAULT = "createdAt";
+const ORDER_DIRECTION_DEFAULT: "ASC" | "DESC" = "DESC";
+
+const SORT_ORDER_MAP: Record<string, "ASC" | "DESC"> = {
+  "Mới nhất": "DESC",
+  "Cũ nhất": "ASC",
+};
+
 function buildListParams(
   page: number,
   limit: number,
@@ -21,11 +29,21 @@ function buildListParams(
   const params: UserListParams = {
     page,
     limit,
+    orderBy: ORDER_BY_DEFAULT,
+    orderDirection: ORDER_DIRECTION_DEFAULT,
   };
-  if (searchQuery.trim()) params.search = searchQuery.trim();
+  if (searchQuery.trim()) {
+    params.search = searchQuery.trim();
+  }
   filters.forEach((filter) => {
     if (filter.key === "role" && filter.value) {
-      params.role = filter.value === "Quản trị viên" ? roles.ADMIN : roles.TECHNICAL_STAFF;
+      const roleMap: Record<string, string> = {
+        "Quản trị viên": roles.ADMIN,
+        "Nhân viên": roles.TECHNICAL_STAFF,
+        "Người vận chuyển": roles.COURIER,
+        "Khách hàng": roles.CUSTOMER,
+      };
+      params.role = roleMap[filter.value] ?? filter.value;
     }
     if (filter.key === "status" && filter.value) {
       const statusMap: Record<string, UserStatusValue> = {
@@ -35,6 +53,9 @@ function buildListParams(
       };
       params.status = statusMap[filter.value];
     }
+    if (filter.key === "sortOrder" && filter.value && SORT_ORDER_MAP[filter.value]) {
+      params.orderDirection = SORT_ORDER_MAP[filter.value];
+    }
   });
   return params;
 }
@@ -42,6 +63,7 @@ function buildListParams(
 export interface UseUserOptions {
   defaultPageSize?: number;
   fetchOnMount?: boolean;
+  defaultParams?: Partial<UserListParams>;
 }
 
 export interface UseUserReturn {
@@ -64,7 +86,7 @@ export interface UseUserReturn {
 }
 
 export function useUser(options: UseUserOptions = {}): UseUserReturn {
-  const { defaultPageSize = 10, fetchOnMount = true } = options;
+  const { defaultPageSize = 10, fetchOnMount = true, defaultParams } = options;
 
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
@@ -75,10 +97,10 @@ export function useUser(options: UseUserOptions = {}): UseUserReturn {
   const [filters, setFilters] = useState<FilterConfig[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const params = useMemo(
-    () => buildListParams(page, pageSize, searchQuery, filters),
-    [page, pageSize, searchQuery, filters]
-  );
+  const params = useMemo(() => {
+    const built = buildListParams(page, pageSize, searchQuery, filters);
+    return { ...defaultParams, ...built } as UserListParams;
+  }, [page, pageSize, searchQuery, filters, defaultParams]);
 
   const loadUsers = useCallback(async () => {
     try {

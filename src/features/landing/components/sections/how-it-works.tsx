@@ -16,7 +16,7 @@ const workflowPanels: WorkflowPanelProps[] = [
       "Người nhận mở ứng dụng, chọn 'Tạo đơn hàng nhận' hoặc 'Book tủ'",
       "Chọn kích cỡ tủ (Nhỏ, Vừa, Lớn) và địa điểm tủ locker",
       "Hệ thống tạo mã PIN/QR dùng một lần và gửi cho người nhận",
-      "Người nhận gửi mã cho Courier/Shipper",
+      "Người nhận gửi mã cho Người vận chuyển",
       "Courier đến trạm locker, chọn 'Gửi hàng' trên màn hình",
       "Courier nhập mã PIN hoặc quét mã QR",
       "Courier chụp ảnh/video gói hàng làm bằng chứng",

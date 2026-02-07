@@ -67,6 +67,8 @@ export interface ActionButton<T> {
     | "ghost"
     | "link";
   className?: string;
+  /** Chỉ hiển thị action khi return true (theo từng dòng) */
+  visible?: (_row: T) => boolean;
 }
 
 export interface SortConfig {
@@ -85,6 +87,11 @@ export interface QuickFilter {
   label: string;
   options: { value: string; label: string }[];
   placeholder?: string;
+  allStringValue?: string;
+  /** Ẩn option "Tất cả", dùng với defaultValue khi mặc định đã đủ */
+  hideAllOption?: boolean;
+  /** Giá trị hiển thị khi chưa chọn (dùng khi hideAllOption) */
+  defaultValue?: string;
 }
 
 const EMPTY_QUICK_FILTERS: QuickFilter[] = [];
@@ -227,8 +234,10 @@ export function DataTable<T extends Record<string, any>>({
 
   // Handle quick filter change
   const handleQuickFilterChange = (key: string, value: string) => {
-    // "__all__" is a special value to clear the filter
     const isClear = value === "__all__";
+    const qf = quickFilters.find((q) => q.key === key);
+    const isDefaultValue = !isClear && !!qf?.defaultValue && value === qf.defaultValue;
+
     const newValues = { ...quickFilterValues };
     if (isClear) {
       delete newValues[key];
@@ -237,9 +246,8 @@ export function DataTable<T extends Record<string, any>>({
     }
     setQuickFilterValues(newValues);
 
-    // Update filters - remove existing filter for this key and add new one if value exists
     const newFilters = filters.filter((f) => f.key !== key);
-    if (!isClear && value) {
+    if (!isClear && value && !isDefaultValue) {
       newFilters.push({
         key,
         value,
@@ -248,28 +256,17 @@ export function DataTable<T extends Record<string, any>>({
     }
     setFilters(newFilters);
     onFilter?.(newFilters);
-    onQuickFilterChange?.(key, isClear ? "" : value);
+    onQuickFilterChange?.(key, isClear || isDefaultValue ? "" : value);
   };
 
-  // Sync quick filter values with filters when filters change externally
+  // Sync quick filter values with filters: không có filter = "Tất cả" hoặc defaultValue
   React.useEffect(() => {
-    const newQuickFilterValues: Record<string, string> = {};
+    const updated: Record<string, string> = {};
     quickFilters.forEach((qf) => {
       const filter = filters.find((f) => f.key === qf.key);
-      if (filter) {
-        newQuickFilterValues[qf.key] = filter.value;
-      }
+      updated[qf.key] = filter?.value ?? qf.defaultValue ?? "__all__";
     });
-    // Only update quickFilterValues for quickFilter keys, remove others
-    setQuickFilterValues((prev) => {
-      const updated: Record<string, string> = {};
-      quickFilters.forEach((qf) => {
-        if (newQuickFilterValues[qf.key]) {
-          updated[qf.key] = newQuickFilterValues[qf.key];
-        }
-      });
-      return updated;
-    });
+    setQuickFilterValues(updated);
   }, [filters, quickFilters]);
 
   // Handle selection
@@ -356,7 +353,9 @@ export function DataTable<T extends Record<string, any>>({
                     />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__all__">Tất cả</SelectItem>
+                    {!quickFilter.hideAllOption && (
+                      <SelectItem value="__all__">{quickFilter.allStringValue || "Tất cả"}</SelectItem>
+                    )}
                     {quickFilter.options.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -661,18 +660,20 @@ export function DataTable<T extends Record<string, any>>({
                     {(onEdit || onDelete || customActions.length > 0) && (
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {customActions.map((action, index) => (
-                            <Button
-                              key={index}
-                              variant={action.variant || "ghost"}
-                              size="icon"
-                              onClick={() => action.onClick(row)}
-                              className={cn("h-8 w-8", action.className)}
-                              title={action.label}
-                            >
-                              {action.icon || action.label}
-                            </Button>
-                          ))}
+                          {customActions
+                            .filter((action) => !action.visible || action.visible(row))
+                            .map((action, index) => (
+                              <Button
+                                key={index}
+                                variant={action.variant || "ghost"}
+                                size="icon"
+                                onClick={() => action.onClick(row)}
+                                className={cn("h-8 w-8", action.className)}
+                                title={action.label}
+                              >
+                                {action.icon || action.label}
+                              </Button>
+                            ))}
                           {onEdit && (
                             <Button
                               variant="ghost"
