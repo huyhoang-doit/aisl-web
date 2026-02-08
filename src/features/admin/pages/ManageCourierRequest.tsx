@@ -1,125 +1,114 @@
-import { useState, useMemo } from "react"
-import { DataTable, type Column, type SortConfig, type FilterConfig, type QuickFilter } from "@/shared/components/DataTable"
+import { useState } from "react"
+import { DataTable, type Column, type SortConfig, type QuickFilter } from "@/shared/components/DataTable"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs"
 import { CourierRequestDetailModal } from "../features/courierRequest/components/CourierRequestDetailModal"
 import { ApproveCourierRequestModal } from "../features/courierRequest/components/ApproveCourierRequestModal"
-import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { CheckCircle2, XCircle, Eye } from "lucide-react"
-import type { CourierRequest } from "../features/courierRequest/types/courierRequest.types"
+import type { CourierApplication, VehicleTypeValue } from "../features/courierRequest/types/courierRequest.types"
+import { CourierStatus, VehicleType } from "../features/courierRequest/types/courierRequest.types"
+import {
+  useCourierApplication,
+  type CourierStatusTab,
+} from "../features/courierRequest/hooks/useCourierApplication"
 
-// Mock data - Thay thế bằng API call thực tế
-const mockCourierRequests: CourierRequest[] = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@example.com",
-    phone: "+84 123 456 789",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-    status: "pending",
-    requestDate: new Date().toISOString(),
-    documents: ["CMND.pdf", "Bằng lái xe.pdf"],
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    email: "tranthib@example.com",
-    phone: "+84 987 654 321",
-    address: "456 Đường XYZ, Quận 2, TP.HCM",
-    status: "approved",
-    requestDate: new Date(Date.now() - 86400000).toISOString(),
-    reviewedDate: new Date().toISOString(),
-    reviewedBy: "Admin User",
-    documents: ["CMND.pdf"],
-  },
-  {
-    id: "3",
-    name: "Lê Văn C",
-    email: "levanc@example.com",
-    phone: "+84 555 123 456",
-    address: "789 Đường DEF, Quận 3, TP.HCM",
-    status: "rejected",
-    requestDate: new Date(Date.now() - 172800000).toISOString(),
-    reviewedDate: new Date(Date.now() - 86400000).toISOString(),
-    reviewedBy: "Admin User",
-    rejectionReason: "Thiếu giấy tờ cần thiết",
-    documents: ["CMND.pdf"],
-  },
+/** Các tab theo trạng thái */
+const COURIER_STATUS_TABS: CourierStatusTab[] = [
+  CourierStatus.PENDING,
+  CourierStatus.APPROVED,
+  CourierStatus.REJECTED,
 ]
 
+const STATUS_LABELS: Record<CourierStatusTab, string> = {
+  [CourierStatus.PENDING]: "Chờ duyệt",
+  [CourierStatus.APPROVED]: "Đã duyệt",
+  [CourierStatus.REJECTED]: "Đã từ chối",
+}
+
+/** Màu tab khi active */
+const TAB_COLOR_CLASS: Record<CourierStatusTab, string> = {
+  [CourierStatus.PENDING]:
+    "data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:border-amber-300 border border-transparent border-border",
+  [CourierStatus.APPROVED]:
+    "data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 data-[state=active]:border-emerald-300 border border-transparent border-border",
+  [CourierStatus.REJECTED]:
+    "data-[state=active]:bg-red-100 data-[state=active]:text-red-800 data-[state=active]:border-red-300 border border-transparent border-border",
+}
+
+const VEHICLE_LABELS: Record<VehicleTypeValue, string> = {
+  [VehicleType.BIKE]: "Xe đạp",
+  [VehicleType.MOTORBIKE]: "Xe máy",
+  [VehicleType.CAR]: "Ô tô",
+}
+
 const ManageCourierRequest = () => {
-  const [requests, setRequests] = useState<CourierRequest[]>(mockCourierRequests)
+  const [currentTab, setCurrentTab] = useState<CourierStatusTab>(CourierStatus.PENDING)
+
+  const {
+    applications,
+    total,
+    isLoading,
+    page,
+    pageSize,
+    setPage,
+    setPageSize,
+    handleSearch,
+    handleFilter,
+    handleClearFilters,
+    approve,
+    reject,
+    isApproving,
+    isRejecting,
+  } = useCourierApplication({ defaultPageSize: 10, status: currentTab })
+
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false)
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-  const [selectedRequest, setSelectedRequest] = useState<CourierRequest | null>(null)
+  const [selectedApplication, setSelectedApplication] = useState<CourierApplication | null>(null)
+  const [, setSortConfig] = useState<SortConfig | null>(null)
 
-  // State cho các tính năng mới
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
-  const [filters, setFilters] = useState<FilterConfig[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(10)
-
-  // Định nghĩa columns cho bảng
-  const columns: Column<CourierRequest>[] = [
+  const columns: Column<CourierApplication>[] = [
     {
-      key: "name",
+      key: "legalName",
       header: "Họ và tên",
       sortable: true,
       filterable: true,
       filterType: "text",
       filterPlaceholder: "Tìm theo tên",
       accessor: (row) => (
-        <div className="font-medium">{row.name}</div>
+        <div className="font-medium">{row.legalName || "—"}</div>
       ),
     },
     {
-      key: "email",
-      header: "Email",
+      key: "licensePlate",
+      header: "Biển số xe",
       sortable: true,
       filterable: true,
       filterType: "text",
-      filterPlaceholder: "Tìm theo email",
+      filterPlaceholder: "Tìm theo biển số",
       accessor: (row) => (
-        <div className="text-muted-foreground">{row.email}</div>
+        <div className="font-mono text-sm">{row.licensePlate || "—"}</div>
       ),
     },
     {
-      key: "phone",
-      header: "Số điện thoại",
-      sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo số điện thoại",
-      accessor: (row) => row.phone,
-    },
-    {
-      key: "status",
-      header: "Trạng thái",
+      key: "vehicleType",
+      header: "Loại xe",
       sortable: true,
       filterable: true,
       filterType: "select",
-      filterOptions: ["Chờ duyệt", "Đã duyệt", "Đã từ chối"],
-      accessor: (row) => {
-        const statusConfig = {
-          pending: { label: "Chờ duyệt", variant: "secondary" as const },
-          approved: { label: "Đã duyệt", variant: "default" as const },
-          rejected: { label: "Đã từ chối", variant: "destructive" as const },
-        }
-        const config = statusConfig[row.status]
-        return (
-          <Badge variant={config.variant}>{config.label}</Badge>
-        )
-      },
+      filterOptions: Object.values(VehicleType).map((v) => VEHICLE_LABELS[v]),
+      accessor: (row) => (
+        <div className="text-muted-foreground">{VEHICLE_LABELS[row.vehicleType] ?? row.vehicleType}</div>
+      ),
     },
     {
-      key: "requestDate",
-      header: "Ngày yêu cầu",
+      key: "createdAt",
+      header: "Ngày tạo",
       sortable: true,
       filterable: false,
       accessor: (row) => (
         <div className="text-sm text-muted-foreground">
-          {row.requestDate ? new Date(row.requestDate).toLocaleDateString("vi-VN") : "-"}
+          {row.createdAt ? new Date(row.createdAt).toLocaleDateString("vi-VN") : "—"}
         </div>
       ),
     },
@@ -134,22 +123,23 @@ const ManageCourierRequest = () => {
             variant="ghost"
             size="sm"
             onClick={() => {
-              setSelectedRequest(row)
+              setSelectedApplication(row)
               setIsDetailModalOpen(true)
             }}
           >
             <Eye className="h-4 w-4" />
           </Button>
-          {row.status === "pending" && (
+          {row.status === CourierStatus.PENDING && (
             <>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedRequest(row)
+                  setSelectedApplication(row)
                   setIsApproveModalOpen(true)
                 }}
                 className="text-green-600 hover:text-green-700"
+                disabled={isApproving || isRejecting}
               >
                 <CheckCircle2 className="h-4 w-4" />
               </Button>
@@ -157,10 +147,11 @@ const ManageCourierRequest = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedRequest(row)
+                  setSelectedApplication(row)
                   setIsRejectModalOpen(true)
                 }}
                 className="text-red-600 hover:text-red-700"
+                disabled={isApproving || isRejecting}
               >
                 <XCircle className="h-4 w-4" />
               </Button>
@@ -171,126 +162,44 @@ const ManageCourierRequest = () => {
     },
   ]
 
-  // Xử lý sorting
-  const handleSort = (sort: SortConfig | null) => {
-    setSortConfig(sort)
+  const handleSort = (_sort: SortConfig | null) => {
+    setSortConfig(_sort)
     setPage(1)
   }
 
-  // Xử lý filtering
-  const handleFilter = (newFilters: FilterConfig[]) => {
-    setFilters(newFilters)
-    setPage(1)
+  const handleApproveSubmit = async (
+    application: CourierApplication,
+    action: "approve" | "reject",
+    reviewNote: string
+  ) => {
+    if (action === "approve") {
+      await approve(application.id, { reviewNote })
+    } else {
+      await reject(application.id, { reviewNote })
+    }
+    setIsApproveModalOpen(false)
+    setIsRejectModalOpen(false)
+    setSelectedApplication(null)
   }
 
-  // Xử lý search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    setPage(1)
-  }
-
-  // Xử lý quick filter change
-  const handleQuickFilterChange = () => {
-    setPage(1)
-  }
-
-  // Định nghĩa quick filters
   const quickFilters: QuickFilter[] = [
     {
-      key: "status",
-      label: "Trạng thái",
-      placeholder: "Chọn trạng thái",
+      key: "sortOrder",
+      label: "Sắp xếp",
+      placeholder: "Sắp xếp",
+      hideAllOption: true,
+      defaultValue: "Mới nhất",
       options: [
-        { value: "Chờ duyệt", label: "Chờ duyệt" },
-        { value: "Đã duyệt", label: "Đã duyệt" },
-        { value: "Đã từ chối", label: "Đã từ chối" },
+        { value: "Mới nhất", label: "Mới nhất" },
+        { value: "Cũ nhất", label: "Cũ nhất" },
       ],
     },
   ]
 
-  // Filter và sort data
-  const filteredAndSortedData = useMemo(() => {
-    let result = [...requests]
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (request) =>
-          request.name.toLowerCase().includes(query) ||
-          request.email.toLowerCase().includes(query) ||
-          request.phone.toLowerCase().includes(query) ||
-          request.address?.toLowerCase().includes(query)
-      )
-    }
-
-    // Apply filters
-    filters.forEach((filter) => {
-      if (filter.key === "status") {
-        const statusMap: Record<string, CourierRequest["status"]> = {
-          "Chờ duyệt": "pending",
-          "Đã duyệt": "approved",
-          "Đã từ chối": "rejected",
-        }
-        const statusValue = statusMap[filter.value]
-        if (statusValue) {
-          result = result.filter((request) => request.status === statusValue)
-        }
-      } else {
-        const value = filter.value.toLowerCase()
-        result = result.filter((request) => {
-          const fieldValue = String(request[filter.key as keyof CourierRequest] || "").toLowerCase()
-          return fieldValue.includes(value)
-        })
-      }
-    })
-
-    // Apply sorting
-    if (sortConfig) {
-      result.sort((a, b) => {
-        const aValue = a[sortConfig.key as keyof CourierRequest]
-        const bValue = b[sortConfig.key as keyof CourierRequest]
-
-        if (aValue === undefined || aValue === null) return 1
-        if (bValue === undefined || bValue === null) return -1
-
-        const comparison =
-          typeof aValue === "string" && typeof bValue === "string"
-            ? aValue.localeCompare(bValue)
-            : aValue < bValue
-            ? -1
-            : aValue > bValue
-            ? 1
-            : 0
-
-        return sortConfig.direction === "asc" ? comparison : -comparison
-      })
-    }
-
-    return result
-  }, [requests, searchQuery, filters, sortConfig])
-
-  // Pagination
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize
-    const end = start + pageSize
-    return filteredAndSortedData.slice(start, end)
-  }, [filteredAndSortedData, page, pageSize])
-
-  // Xử lý duyệt/từ chối
-  const handleApprove = async (request: CourierRequest, action: "approve" | "reject", reason?: string) => {
-    const updatedRequest: CourierRequest = {
-      ...request,
-      status: action === "approve" ? "approved" : "rejected",
-      reviewedDate: new Date().toISOString(),
-      reviewedBy: "Admin User", // Thay bằng user thực tế
-      rejectionReason: reason,
-    }
-    setRequests(requests.map((r) => (r.id === request.id ? updatedRequest : r)))
-    setIsApproveModalOpen(false)
-    setIsRejectModalOpen(false)
-    setSelectedRequest(null)
-    console.log(`${action === "approve" ? "Approving" : "Rejecting"} request:`, updatedRequest)
+  const emptyMessages: Record<CourierStatusTab, string> = {
+    [CourierStatus.PENDING]: "Chưa có đơn nào chờ duyệt",
+    [CourierStatus.APPROVED]: "Chưa có đơn nào đã duyệt",
+    [CourierStatus.REJECTED]: "Chưa có đơn nào đã từ chối",
   }
 
   return (
@@ -298,70 +207,88 @@ const ManageCourierRequest = () => {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Duyệt người chuyển phát</h1>
         <p className="text-muted-foreground mt-2">
-          Duyệt các yêu cầu đăng ký làm người chuyển phát trong hệ thống
+          Duyệt các đơn đăng ký làm người chuyển phát trong hệ thống
         </p>
       </div>
 
-      <DataTable
-        data={paginatedData}
-        columns={columns}
-        keyExtractor={(row) => row.id || row.email}
-        onCreate={undefined}
-        emptyMessage="Chưa có yêu cầu nào"
-        onSort={handleSort}
-        onFilter={handleFilter}
-        pagination={{
-          page,
-          pageSize,
-          total: filteredAndSortedData.length,
-          onPageChange: setPage,
-          onPageSizeChange: setPageSize,
-          pageSizeOptions: [5, 10, 20, 50, 100],
-        }}
-        searchable={true}
-        searchPlaceholder="Tìm kiếm theo tên, email, số điện thoại..."
-        onSearch={handleSearch}
-        quickFilters={quickFilters}
-        onQuickFilterChange={handleQuickFilterChange}
-        onClearFilters={() => {
-          setFilters([])
-          setSearchQuery("")
+      <Tabs
+        value={currentTab}
+        onValueChange={(value) => {
+          setCurrentTab(value as CourierStatusTab)
           setPage(1)
         }}
-      />
+        className="w-full"
+      >
+        <TabsList className="flex justify-start flex-wrap h-auto gap-1 p-1 bg-muted/50">
+          {COURIER_STATUS_TABS.map((status) => (
+            <TabsTrigger
+              key={status}
+              value={status}
+              className={TAB_COLOR_CLASS[status]}
+            >
+              {STATUS_LABELS[status]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {/* Modal chi tiết */}
+        {COURIER_STATUS_TABS.map((tabValue) => (
+          <TabsContent key={tabValue} value={tabValue} className="space-y-4 mt-4">
+            <DataTable
+              data={applications}
+              columns={columns}
+              keyExtractor={(row) => row.id}
+              emptyMessage={emptyMessages[tabValue]}
+              onSort={handleSort}
+              onFilter={handleFilter}
+              pagination={{
+                page,
+                pageSize,
+                total,
+                onPageChange: setPage,
+                onPageSizeChange: setPageSize,
+                pageSizeOptions: [5, 10, 20, 50],
+              }}
+              searchable
+              searchPlaceholder="Tìm theo tên, biển số xe..."
+              onSearch={handleSearch}
+              quickFilters={quickFilters}
+              onQuickFilterChange={() => setPage(1)}
+              onClearFilters={handleClearFilters}
+              isLoading={isLoading}
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
+
       <CourierRequestDetailModal
         open={isDetailModalOpen}
         onOpenChange={setIsDetailModalOpen}
-        request={selectedRequest}
-        onApprove={(request) => {
-          setSelectedRequest(request)
+        application={selectedApplication}
+        onApprove={(app) => {
+          setSelectedApplication(app)
           setIsDetailModalOpen(false)
           setIsApproveModalOpen(true)
         }}
-        onReject={(request) => {
-          setSelectedRequest(request)
+        onReject={(app) => {
+          setSelectedApplication(app)
           setIsDetailModalOpen(false)
           setIsRejectModalOpen(true)
         }}
       />
 
-      {/* Modal duyệt */}
       <ApproveCourierRequestModal
         open={isApproveModalOpen}
         onOpenChange={setIsApproveModalOpen}
-        request={selectedRequest}
-        onSubmit={handleApprove}
+        application={selectedApplication}
+        onSubmit={handleApproveSubmit}
         action="approve"
       />
 
-      {/* Modal từ chối */}
       <ApproveCourierRequestModal
         open={isRejectModalOpen}
         onOpenChange={setIsRejectModalOpen}
-        request={selectedRequest}
-        onSubmit={handleApprove}
+        application={selectedApplication}
+        onSubmit={handleApproveSubmit}
         action="reject"
       />
     </div>
