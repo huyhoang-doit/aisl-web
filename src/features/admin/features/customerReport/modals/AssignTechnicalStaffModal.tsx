@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Input } from "@/shared/components/ui/input";
 import type { CustomerReport } from "../types/customerReport.types";
-import type { CreateTaskPayload } from "../services/maintenanceTask.service";
+import type { CreateTaskPayload } from "@/features/admin/features/task/services/task.service";
 import { useTechnicalStaff } from "@/features/admin/features/staff/hooks/useTechnicalStaff";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { cn } from "@/shared/lib/utils";

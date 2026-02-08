@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import type { TechnicalStaffReport } from "../../customerReport/types/customerReport.types";
 import AssignTechnicalStaffModal from "../../customerReport/modals/AssignTechnicalStaffModal";
-import type { CreateTaskPayload } from "../../customerReport/services/maintenanceTask.service";
+import type { CreateTaskPayload } from "../../task/services/task.service";
 
 interface TechnicalStaffReportDetailModalProps {
   open: boolean;

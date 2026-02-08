@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import type { CustomerReport } from "../types/customerReport.types";
 import { maintenanceReportService, type CreateReportPayload } from "../services/maintenanceReport.service";
-import { maintenanceTaskService, type CreateTaskPayload } from "../services/maintenanceTask.service";
+import { taskService, type CreateTaskPayload } from "@/features/admin/features/task/services/task.service";
 import type { FilterConfig } from "@/shared/components/DataTable";
 
 export interface ReportListParams {
@@ -157,7 +157,7 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
   const assignTask = useCallback(async (payload: CreateTaskPayload) => {
     try {
       setIsAssigning(true);
-      await maintenanceTaskService.create(payload);
+      await taskService.create(payload);
       toast.success("Phân công nhân viên thành công");
       refetch();
     } catch (error) {
@@ -174,7 +174,7 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
     try {
       setIsAssigning(true);
       for (const payload of payloads) {
-        await maintenanceTaskService.create(payload);
+        await taskService.create(payload);
       }
       toast.success(
         payloads.length === 1

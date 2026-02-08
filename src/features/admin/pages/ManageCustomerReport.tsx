@@ -12,7 +12,7 @@ import {
   type IncidentReportStatusTab,
 } from "../features/customerReport/hooks/useCustomerReport";
 import type { CustomerReport } from "../features/customerReport/types/customerReport.types";
-import type { CreateTaskPayload } from "../features/customerReport/services/maintenanceTask.service";
+import type { CreateTaskPayload } from "../features/task/services/task.service";
 
 /** Enum trạng thái báo cáo sự cố (backend) */
 const INCIDENT_STATUS_TABS: IncidentReportStatusTab[] = [
