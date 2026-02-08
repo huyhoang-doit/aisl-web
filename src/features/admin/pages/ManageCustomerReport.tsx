@@ -11,7 +11,6 @@ import {
   useCustomerReport,
   type IncidentReportStatusTab,
 } from "../features/customerReport/hooks/useCustomerReport";
-import { useTechnicalStaff } from "../features/staff/hooks/useTechnicalStaff";
 import type { CustomerReport } from "../features/customerReport/types/customerReport.types";
 import type { CreateTaskPayload } from "../features/customerReport/services/maintenanceTask.service";
 
@@ -64,8 +63,6 @@ const ManageCustomerReport = () => {
     assignTask,
     isCreating,
   } = useCustomerReport({ defaultPageSize: 10, status: currentTab });
-
-  const { staffList: technicalStaff } = useTechnicalStaff();
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -215,7 +212,7 @@ const ManageCustomerReport = () => {
       variant: "ghost" as const,
       className: "text-primary hover:text-primary hover:bg-primary/10",
       visible: (row: CustomerReport) =>
-        ["PENDING", "ASSIGNED"].includes((row.status ?? "PENDING").toUpperCase()),
+        ["PENDING"].includes((row.status ?? "PENDING").toUpperCase()),
     },
   ];
 
@@ -257,7 +254,7 @@ const ManageCustomerReport = () => {
               value={status}
               className={TAB_COLOR_CLASS[status]}
             >
-              {STATUS_LABELS[status]} ({currentTab === status ? customerReports.length : "-"})
+              {STATUS_LABELS[status]}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -306,7 +303,6 @@ const ManageCustomerReport = () => {
           open={isAssignModalOpen}
           onOpenChange={handleAssignModalClose}
           report={selectedReport}
-          technicalStaffList={technicalStaff}
           onSubmit={handleAssignSubmit}
         />
       )}

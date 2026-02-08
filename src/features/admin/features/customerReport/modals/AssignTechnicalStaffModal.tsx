@@ -17,17 +17,11 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/components/ui/select";
 import { useForm } from "react-hook-form";
 import type { CustomerReport } from "../types/customerReport.types";
-import type { Staff } from "@/features/admin/features/staff/types/staff.types";
 import type { CreateTaskPayload } from "../services/maintenanceTask.service";
+import { TechnicalStaffSelector } from "@/features/admin/features/staff/components/TechnicalStaffSelector";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 
 const TASK_TYPE_OPTIONS: { value: CreateTaskPayload["taskType"]; label: string }[] = [
   { value: "REPAIR", label: "Sửa chữa" },
@@ -46,7 +40,6 @@ interface AssignTechnicalStaffModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   report: CustomerReport | null;
-  technicalStaffList: Staff[];
   onSubmit: (payload: CreateTaskPayload) => void | Promise<void>;
 }
 
@@ -60,7 +53,6 @@ export function AssignTechnicalStaffModal({
   open,
   onOpenChange,
   report,
-  technicalStaffList,
   onSubmit,
 }: AssignTechnicalStaffModalProps) {
   const form = useForm<AssignFormData>({
@@ -100,11 +92,6 @@ export function AssignTechnicalStaffModal({
 
   if (!report) return null;
 
-  // Filter only active staff
-  const availableStaff = technicalStaffList.filter(
-    (staff) => staff.status === "active" || !staff.status
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-3xl">
@@ -126,30 +113,14 @@ export function AssignTechnicalStaffModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nhân viên kỹ thuật *</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn nhân viên kỹ thuật" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {availableStaff.length === 0 ? (
-                        <SelectItem value="__empty__" disabled>
-                          Không có nhân viên kỹ thuật nào
-                        </SelectItem>
-                      ) : (
-                        availableStaff.map((staff) => (
-                          <SelectItem key={staff.id} value={staff.id || ""}>
-                            {staff.name} {staff.email && `(${staff.email})`}
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+                  <FormControl>
+                    <TechnicalStaffSelector
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Chọn nhân viên kỹ thuật"
+                      filterActiveOnly={true}
+                    />
+                  </FormControl>
                   <FormDescription>
                     Chọn nhân viên kỹ thuật sẽ xử lý báo cáo này
                   </FormDescription>
@@ -224,10 +195,7 @@ export function AssignTechnicalStaffModal({
               >
                 Hủy
               </Button>
-              <Button
-                type="submit"
-                disabled={availableStaff.length === 0}
-              >
+              <Button type="submit">
                 Phân công
               </Button>
             </DialogFooter>

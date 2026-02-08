@@ -15,7 +15,6 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import TechnicalStaffReportDetailModal from "../features/staffReport/modals/TechnicalStaffReportDetailModal";
 import { useStaffReport } from "../features/staffReport/hooks/useStaffReport";
-import { useTechnicalStaff } from "../features/staff/hooks/useTechnicalStaff";
 import type { TechnicalStaffReport } from "../features/customerReport/types/customerReport.types";
 
 function getCustomerReport(row: TechnicalStaffReport): Record<string, unknown> {
@@ -41,8 +40,6 @@ const ManageTechnicalStaffReport = () => {
     tab: currentTab,
     defaultPageSize: 10,
   });
-
-  const { staffList: technicalStaff } = useTechnicalStaff();
 
   const [selectedReport, setSelectedReport] = useState<TechnicalStaffReport | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -342,7 +339,6 @@ const ManageTechnicalStaffReport = () => {
           open={isDetailModalOpen}
           onOpenChange={setIsDetailModalOpen}
           report={selectedReport}
-          technicalStaffList={technicalStaff}
           onAssign={handleReassign}
         />
       )}

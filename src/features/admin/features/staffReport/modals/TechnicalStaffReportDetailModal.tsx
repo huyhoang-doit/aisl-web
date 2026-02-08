@@ -24,14 +24,12 @@ import {
 } from "lucide-react";
 import type { TechnicalStaffReport } from "../../customerReport/types/customerReport.types";
 import AssignTechnicalStaffModal from "../../customerReport/modals/AssignTechnicalStaffModal";
-import type { Staff } from "@/features/admin/features/staff/types/staff.types";
 import type { CreateTaskPayload } from "../../customerReport/services/maintenanceTask.service";
 
 interface TechnicalStaffReportDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   report: TechnicalStaffReport | null;
-  technicalStaffList: Staff[];
   onAssign?: (payload: CreateTaskPayload) => void | Promise<void>;
 }
 
@@ -61,7 +59,6 @@ export function TechnicalStaffReportDetailModal({
   open,
   onOpenChange,
   report,
-  technicalStaffList,
   onAssign,
 }: TechnicalStaffReportDetailModalProps) {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -444,7 +441,6 @@ export function TechnicalStaffReportDetailModal({
             assignedTo: report.technicalStaffId,
             assignedToName: report.technicalStaffName,
           }}
-          technicalStaffList={technicalStaffList}
           onSubmit={async (payload) => {
             if (onAssign) {
               await onAssign(payload);
