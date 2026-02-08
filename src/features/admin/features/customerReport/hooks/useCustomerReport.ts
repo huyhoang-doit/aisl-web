@@ -78,6 +78,8 @@ export interface UseCustomerReportReturn {
   handleClearFilters: () => void;
   createReport: (data: CreateReportPayload) => Promise<void>;
   assignTask: (payload: CreateTaskPayload) => Promise<void>;
+  /** Tạo nhiều task cho một report (mỗi nhân viên một task) */
+  assignTasks: (payloads: CreateTaskPayload[]) => Promise<void>;
   isCreating: boolean;
   isAssigning: boolean;
 }
@@ -167,6 +169,28 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
     }
   }, [refetch]);
 
+  const assignTasks = useCallback(async (payloads: CreateTaskPayload[]) => {
+    if (!payloads.length) return;
+    try {
+      setIsAssigning(true);
+      for (const payload of payloads) {
+        await maintenanceTaskService.create(payload);
+      }
+      toast.success(
+        payloads.length === 1
+          ? "Phân công nhân viên thành công"
+          : `Đã tạo ${payloads.length} task phân công thành công`
+      );
+      refetch();
+    } catch (error) {
+      console.error("Error assigning tasks:", error);
+      toast.error("Có lỗi xảy ra khi phân công");
+      throw error;
+    } finally {
+      setIsAssigning(false);
+    }
+  }, [refetch]);
+
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
     setPage(1);
@@ -205,6 +229,7 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
     handleClearFilters,
     createReport,
     assignTask,
+    assignTasks,
     isCreating,
     isAssigning,
   };

@@ -60,7 +60,7 @@ const ManageCustomerReport = () => {
     handleFilter,
     handleClearFilters,
     createReport,
-    assignTask,
+    assignTasks,
     isCreating,
   } = useCustomerReport({ defaultPageSize: 10, status: currentTab });
 
@@ -182,8 +182,8 @@ const ManageCustomerReport = () => {
     setIsAssignModalOpen(true);
   };
 
-  const handleAssignSubmit = async (payload: CreateTaskPayload) => {
-    await assignTask(payload);
+  const handleAssignSubmit = async (payloads: CreateTaskPayload[]) => {
+    await assignTasks(payloads);
     setIsAssignModalOpen(false);
     setSelectedReport(null);
   };
@@ -212,7 +212,16 @@ const ManageCustomerReport = () => {
       variant: "ghost" as const,
       className: "text-primary hover:text-primary hover:bg-primary/10",
       visible: (row: CustomerReport) =>
-        ["PENDING"].includes((row.status ?? "PENDING").toUpperCase()),
+        (row.status ?? "PENDING").toUpperCase() === "PENDING",
+    },
+    {
+      label: "Phân công thêm",
+      icon: <UserCheck className="h-4 w-4" />,
+      onClick: handleAssign,
+      variant: "ghost" as const,
+      className: "text-primary hover:text-primary hover:bg-primary/10",
+      visible: (row: CustomerReport) =>
+        (row.status ?? "").toUpperCase() === "ASSIGNED",
     },
   ];
 
