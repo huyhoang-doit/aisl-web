@@ -17,38 +17,38 @@ import {
   FormMessage,
 } from "@/shared/components/ui/form"
 import { Textarea } from "@/shared/components/ui/textarea"
-import type { CourierRequest } from "../types/courierRequest.types"
+import type { CourierApplication } from "../types/courierRequest.types"
 
 interface ApproveCourierRequestModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  request: CourierRequest | null
-  onSubmit: (request: CourierRequest, action: "approve" | "reject", reason?: string) => void | Promise<void>
+  application: CourierApplication | null
+  onSubmit: (application: CourierApplication, action: "approve" | "reject", reviewNote: string) => void | Promise<void>
   action: "approve" | "reject"
 }
 
 interface FormData {
-  reason?: string
+  reviewNote: string
 }
 
 export function ApproveCourierRequestModal({
   open,
   onOpenChange,
-  request,
+  application,
   onSubmit,
   action,
 }: ApproveCourierRequestModalProps) {
   const form = useForm<FormData>({
     defaultValues: {
-      reason: "",
+      reviewNote: "",
     },
   })
 
   const handleSubmit = async (formData: FormData) => {
-    if (!request) return
-    
+    if (!application) return
+
     try {
-      await onSubmit(request, action, formData.reason)
+      await onSubmit(application, action, formData.reviewNote ?? "")
       form.reset()
       onOpenChange(false)
     } catch (error) {
@@ -63,12 +63,12 @@ export function ApproveCourierRequestModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isReject ? "Từ chối yêu cầu" : "Duyệt yêu cầu"}
+            {isReject ? "Từ chối đơn đăng ký" : "Duyệt đơn đăng ký"}
           </DialogTitle>
           <DialogDescription>
             {isReject
-              ? "Vui lòng nhập lý do từ chối yêu cầu đăng ký làm người chuyển phát."
-              : "Xác nhận duyệt yêu cầu đăng ký làm người chuyển phát cho " + request?.name}
+              ? "Vui lòng nhập ghi chú (lý do từ chối) cho đơn đăng ký người chuyển phát."
+              : `Xác nhận duyệt đơn đăng ký cho ${application?.legalName ?? "người nộp đơn"}. Ghi chú (tùy chọn).`}
           </DialogDescription>
         </DialogHeader>
 
@@ -77,32 +77,34 @@ export function ApproveCourierRequestModal({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="space-y-4"
           >
-            {isReject && (
-              <FormField
-                control={form.control}
-                name="reason"
-                rules={{
-                  required: "Lý do từ chối là bắt buộc",
-                  minLength: {
-                    value: 10,
-                    message: "Lý do từ chối phải có ít nhất 10 ký tự",
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Lý do từ chối *</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Nhập lý do từ chối yêu cầu..."
-                        {...field}
-                        rows={4}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name="reviewNote"
+              rules={
+                isReject
+                  ? {
+                      required: "Ghi chú / lý do từ chối là bắt buộc",
+                      minLength: {
+                        value: 1,
+                        message: "Vui lòng nhập ghi chú",
+                      },
+                    }
+                  : undefined
+              }
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{isReject ? "Ghi chú / Lý do từ chối *" : "Ghi chú (tùy chọn)"}</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder={isReject ? "Nhập lý do từ chối..." : "Nhập ghi chú (nếu có)..."}
+                      {...field}
+                      rows={4}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <DialogFooter>
               <Button
