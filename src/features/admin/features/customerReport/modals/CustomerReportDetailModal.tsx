@@ -21,15 +21,19 @@ import {
   AlertCircle,
   Users,
   ClipboardList,
+  Eye,
 } from "lucide-react";
 import StatusComponent from "@/shared/components/StatusComponent";
 import type { CustomerReport, AssignedStaffItem } from "../types/customerReport.types";
 import { maintenanceReportService } from "../services/maintenanceReport.service";
+import { TaskDetailModal } from "@/features/admin/features/task/modals/TaskDetailModal";
 
 interface CustomerReportDetailModalProps {
   open: boolean;
+  // eslint-disable-next-line no-unused-vars -- callback param for consumer
   onOpenChange: (open: boolean) => void;
   reportId: string | null;
+  // eslint-disable-next-line no-unused-vars -- callback param for consumer
   onAssign?: (report: CustomerReport) => void;
 }
 
@@ -201,9 +205,12 @@ function ReportInfoContent({
 function AssignedStaffContent({
   assignedStaff,
   assignmentSummary,
+  onViewTask,
 }: {
   assignedStaff: AssignedStaffItem[];
   assignmentSummary?: { totalTasks: number; openTasks: number; inProgressTasks: number; completedTasks: number };
+  // eslint-disable-next-line no-unused-vars -- callback param for consumer
+  onViewTask?: (taskId: string) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -225,6 +232,7 @@ function AssignedStaffContent({
               <th className="text-left p-3 font-medium">Trạng thái</th>
               <th className="text-left p-3 font-medium">Ưu tiên</th>
               <th className="text-left p-3 font-medium">Ngày phân công</th>
+              {onViewTask && <th className="text-left p-3 font-medium w-[80px]">Thao tác</th>}
             </tr>
           </thead>
           <tbody>
@@ -240,6 +248,19 @@ function AssignedStaffContent({
                 <td className="p-3 text-muted-foreground">
                   {item.assignedAt ? new Date(item.assignedAt).toLocaleString("vi-VN") : "-"}
                 </td>
+                {onViewTask && (
+                  <td className="p-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onViewTask(item.taskId)}
+                      title="Xem chi tiết task"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -258,6 +279,7 @@ export function CustomerReportDetailModal({
   const [report, setReport] = useState<CustomerReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [taskDetailTaskId, setTaskDetailTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !reportId) {
@@ -296,6 +318,7 @@ export function CustomerReportDetailModal({
   const hasPriority = report?.priority && priorityConfig[report.priority];
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         {isLoading && (
@@ -347,7 +370,11 @@ export function CustomerReportDetailModal({
               <ReportInfoContent report={report} hasCustomerInfo={!!hasCustomerInfo} hasIssueType={!!hasIssueType} />
             </TabsContent>
             <TabsContent value="staff" className="mt-4">
-              <AssignedStaffContent assignedStaff={report.assignedStaff} assignmentSummary={report.assignmentSummary} />
+              <AssignedStaffContent
+                assignedStaff={report.assignedStaff}
+                assignmentSummary={report.assignmentSummary}
+                onViewTask={(taskId) => setTaskDetailTaskId(taskId)}
+              />
             </TabsContent>
           </Tabs>
         ) : (
@@ -540,6 +567,12 @@ export function CustomerReportDetailModal({
         )}
       </DialogContent>
     </Dialog>
+    <TaskDetailModal
+      open={!!taskDetailTaskId}
+      onOpenChange={(open) => !open && setTaskDetailTaskId(null)}
+      taskId={taskDetailTaskId}
+    />
+    </>
   );
 }
 
