@@ -1,10 +1,10 @@
 /**
  * Task Service
  * Service layer cho maintenance tasks API: CRUD task, danh sách, chi tiết.
+ * Response chuẩn { data: { tasks?, pagination? } } do service xử lý, hook dùng trực tiếp.
  */
 import { api } from "@/shared/lib/api/client";
-import type { TaskDetail, TaskDetailResponse } from "../types/task.types";
-import type { TechnicalStaffReport } from "@/features/admin/features/customerReport/types/customerReport.types";
+import type { TaskDetail, TaskDetailResponse, TaskListResponse } from "../types/task.types";
 import type { Pagination } from "@/shared/types/pagination.types";
 
 export type TaskType = "REPAIR" | "INSPECTION" | "CLEANING" | string;
@@ -22,20 +22,24 @@ export interface UpdateTaskStatusPayload {
 }
 
 export interface TaskResponse {
-  data: TechnicalStaffReport & { id: string };
-}
-
-export interface TaskListResponse {
-  data: {
-    tasks?: Array<TechnicalStaffReport & { id: string }>;
-    pagination?: Pagination;
-  };
+  data: TaskDetail;
 }
 
 export interface TaskListParams {
   page?: number;
   limit?: number;
   status?: string;
+  taskType?: string;
+  priority?: string;
+  assignedToId?: string;
+}
+
+/** Backend có thể trả { statusCode, message, data } */
+interface ApiListBody {
+  data?: {
+    tasks?: TaskDetail[];
+    pagination?: Pagination;
+  };
 }
 
 export const taskService = {
@@ -44,11 +48,8 @@ export const taskService = {
    * GET /maintenance/tasks/{id}
    */
   getById: async (id: string): Promise<TaskDetailResponse> => {
-    const response = await api.get<{ statusCode?: number; message?: string; data: TaskDetail }>(
-      `/maintenance/tasks/${id}`
-    );
-    const r = response as { data?: TaskDetail };
-    const data = r?.data;
+    const response = await api.get<{ data?: TaskDetail }>(`/maintenance/tasks/${id}`);
+    const data = response?.data;
     if (!data) throw new Error("Không có dữ liệu task");
     return { data };
   },
@@ -62,7 +63,7 @@ export const taskService = {
   },
 
   /**
-   * Lấy danh sách tasks
+   * Lấy danh sách tasks. Luôn trả TaskListResponse để hook dùng response.data.tasks / response.data.pagination.
    * GET /maintenance/tasks
    */
   getAll: async (params?: TaskListParams): Promise<TaskListResponse> => {
@@ -70,9 +71,19 @@ export const taskService = {
     if (params?.page != null) searchParams.set("page", String(params.page));
     if (params?.limit != null) searchParams.set("limit", String(params.limit));
     if (params?.status) searchParams.set("status", params.status);
+    if (params?.taskType) searchParams.set("taskType", params.taskType);
+    if (params?.priority) searchParams.set("priority", params.priority);
+    if (params?.assignedToId) searchParams.set("assignedToId", params.assignedToId);
     const query = searchParams.toString();
     const url = query ? `/maintenance/tasks?${query}` : "/maintenance/tasks";
-    return api.get<TaskListResponse>(url);
+    const res = await api.get<ApiListBody>(url);
+    const data = res?.data;
+    return {
+      data: {
+        tasks: data?.tasks ?? [],
+        pagination: data?.pagination ?? { page: 1, limit: 10, total: 0 },
+      },
+    };
   },
 
   /**
@@ -85,7 +96,14 @@ export const taskService = {
     if (params?.limit != null) searchParams.set("limit", String(params.limit));
     const query = searchParams.toString();
     const url = query ? `/maintenance/tasks/my-tasks?${query}` : "/maintenance/tasks/my-tasks";
-    return api.get<TaskListResponse>(url);
+    const res = await api.get<ApiListBody>(url);
+    const data = res?.data;
+    return {
+      data: {
+        tasks: data?.tasks ?? [],
+        pagination: data?.pagination ?? { page: 1, limit: 10, total: 0 },
+      },
+    };
   },
 
   /**
