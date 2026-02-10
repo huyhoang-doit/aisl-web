@@ -17,13 +17,16 @@ import {
   Wrench,
   ClipboardList,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import StatusComponent from "@/shared/components/StatusComponent";
-import { useTaskDetail } from "../hooks/useTaskDetail";
+import { taskService } from "../services/task.service";
+import type { TaskDetail } from "../types/task.types";
 
 const TASK_TYPE_LABELS: Record<string, string> = {
   REPAIR: "Sửa chữa",
   INSPECTION: "Kiểm tra",
-  CLEANING: "Vệ sinh",
+  SETUP: "Lắp đặt",
+  MAINTENANCE: "Bảo trì",
 };
 
 const PRIORITY_LABELS: Record<string, string> = {
@@ -47,7 +50,32 @@ export interface TaskDetailModalProps {
 }
 
 export function TaskDetailModal({ open, onOpenChange, taskId }: TaskDetailModalProps) {
-  const { task, isLoading, error } = useTaskDetail({ taskId, open });
+  const [task, setTask] = useState<TaskDetail | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open || !taskId) return;
+    let cancelled = false;
+    setIsLoading(true);
+    setError(null);
+    taskService
+      .getById(taskId)
+      .then((res) => {
+        if (!cancelled) setTask(res.data ?? null);
+      })
+      .catch((err) => {
+        if (!cancelled) setError((err as Error)?.message ?? "Có lỗi khi tải chi tiết task");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      setTask(null);
+      setError(null);
+    };
+  }, [open, taskId]);
 
   if (!open) return null;
 
@@ -79,7 +107,7 @@ export function TaskDetailModal({ open, onOpenChange, taskId }: TaskDetailModalP
                   </DialogTitle>
                   <DialogDescription>Chi tiết task bảo trì</DialogDescription>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   <StatusComponent status={task.status} />
                   <Badge variant={priorityVariant[task.priority] ?? "default"}>
                     {PRIORITY_LABELS[task.priority] ?? task.priority}
