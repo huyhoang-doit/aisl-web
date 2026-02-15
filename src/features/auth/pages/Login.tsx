@@ -39,7 +39,15 @@ const Login = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data);
+      // Collect device info
+      // Note: We need to import getDeviceInfo from shared utils.
+      const { getDeviceInfo } = await import('@/shared/utils/device');
+      const deviceInfo = await getDeviceInfo();
+
+      await login({
+        ...data,
+        deviceInfo
+      });
       
       // Lấy user từ store sau khi login thành công
       const user = useAuthStore.getState().user;

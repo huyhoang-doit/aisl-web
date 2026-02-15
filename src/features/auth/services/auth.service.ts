@@ -10,6 +10,7 @@ export const authService = {
    * Đăng nhập
    */
   login: async (data: LoginInput): Promise<LoginResponse> => {
+    // Backend expects { email, password, deviceInfo }
     return api.post<LoginResponse>('/auth/login', data);
   },
 

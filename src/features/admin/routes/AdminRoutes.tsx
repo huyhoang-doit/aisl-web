@@ -13,7 +13,10 @@ import ManageCabinetPage from "../pages/ManageCabinetPage";
 import ManageLocationPage from "../pages/ManageLocationPage";
 import ManagePlanPage from "../pages/ManagePlanPage";
 import ManageCustomerReport from "../pages/ManageCustomerReport";
+
 import ManageTechnicalStaffReport from "../pages/ManageTechnicalStaffReport";
+import AdminNotificationListPage from "@/features/notification/pages/AdminNotificationListPage";
+import AdminNotificationDetailPage from "@/features/notification/pages/AdminNotificationDetailPage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -31,7 +34,10 @@ const AdminRoutes = () => {
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="lockers" element={<ManageLockerPage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
+
         <Route path="plans" element={<ManagePlanPage />} />
+        <Route path="notifications" element={<AdminNotificationListPage />} />
+        <Route path="notifications/:id" element={<AdminNotificationDetailPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />
