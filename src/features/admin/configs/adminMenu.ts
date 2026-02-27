@@ -79,6 +79,18 @@ export const adminNavMain: NavItem[] = [
     ],
   },
   {
+    title: "Điều phối Logistics",
+    url: "/admin/dispatch",
+    icon: MapPin,
+    items: [
+      {
+        title: "Bản đồ Shipper",
+        url: "/admin/dispatch-map",
+        icon: MapPin,
+      },
+    ],
+  },
+  {
     title: "Quản lý báo cáo",
     url: "/admin/manage-reports",
     icon: AlertTriangle,
