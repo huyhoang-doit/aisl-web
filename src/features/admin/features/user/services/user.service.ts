@@ -32,6 +32,8 @@ export interface UpdateUserPayload {
   notificationType?: NotificationType;
   /** Chỉ gửi khi đổi mật khẩu */
   password?: string;
+  /** Avatar – gửi trong field "files", dùng multipart/form-data */
+  file?: File;
 }
 
 export interface UserResponse {
@@ -98,10 +100,23 @@ export const userService = {
   },
 
   /**
-   * Cập nhật user
+   * Cập nhật user.
+   * Có file (avatar) → multipart/form-data, field "files".
+   * Không có file → JSON.
    */
   update: async (keycloakUserId: string, data: UpdateUserPayload): Promise<UserResponse> => {
-    return api.put<UserResponse>(`/users/${keycloakUserId}`, data);
+    const { file, ...rest } = data;
+    if (file) {
+      const formData = new FormData();
+      Object.entries(rest).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      formData.append("files", file);
+      return api.put<UserResponse>(`/users/${keycloakUserId}`, formData);
+    }
+    return api.put<UserResponse>(`/users/${keycloakUserId}`, rest);
   },
 
   /**
