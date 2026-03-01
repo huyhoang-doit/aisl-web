@@ -37,12 +37,22 @@ const locationSchema = z.object({
     .string()
     .min(1, "Địa chỉ không được để trống")
     .min(5, "Địa chỉ phải có ít nhất 5 ký tự"),
-  latitude: z.number().min(-90, "Vĩ độ không hợp lệ").max(90, "Vĩ độ không hợp lệ"),
-  longitude: z.number().min(-180, "Kinh độ không hợp lệ").max(180, "Kinh độ không hợp lệ"),
+  latitude: z
+    .number()
+    .min(-90, "Vĩ độ không hợp lệ")
+    .max(90, "Vĩ độ không hợp lệ"),
+  longitude: z
+    .number()
+    .min(-180, "Kinh độ không hợp lệ")
+    .max(180, "Kinh độ không hợp lệ"),
   description: z.string().optional(),
   isActive: z.boolean(),
-  plannedCabinetQuantity: z.number().min(0, "Số lượng cabinet phải lớn hơn hoặc bằng 0"),
-  plannedLockerQuantity: z.number().min(0, "Số lượng locker phải lớn hơn hoặc bằng 0"),
+  plannedCabinetQuantity: z
+    .number()
+    .min(0, "Số lượng cabinet phải lớn hơn hoặc bằng 0"),
+  plannedLockerQuantity: z
+    .number()
+    .min(0, "Số lượng locker phải lớn hơn hoặc bằng 0"),
 });
 
 // Payload theo yêu cầu backend
@@ -150,10 +160,7 @@ export function CreateOrUpdateLocationModal({
                   <FormItem>
                     <FormLabel>Tên địa điểm *</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Nhập tên địa điểm"
-                        {...field}
-                      />
+                      <Input placeholder="Nhập tên địa điểm" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,40 +174,39 @@ export function CreateOrUpdateLocationModal({
                   <FormItem>
                     <FormLabel>Địa chỉ *</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Nhập địa chỉ chi tiết"
-                        {...field}
-                      />
+                      <Input placeholder="Nhập địa chỉ chi tiết" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <SelectLocationMap />
 
-              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="latitude"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem>
-                      <FormLabel>Vĩ độ (Latitude) *</FormLabel>
+                      <FormLabel>Bản đồ chọn vị trí</FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="any"
-                          placeholder="Nhập vĩ độ"
-                          {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          value={field.value || ""}
+                        <SelectLocationMap
+                          latitude={form.watch("latitude")}
+                          longitude={form.watch("longitude")}
+                          onChange={(lat, lng) => {
+                            form.setValue("latitude", lat);
+                            form.setValue("longitude", lng);
+                          }}
                         />
                       </FormControl>
+                      <FormDescription>
+                        Nhấp vào bản đồ để chọn vị trí (tọa độ sẽ được cập nhật
+                        tự động)
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="longitude"
                   render={({ field }) => (
@@ -212,15 +218,16 @@ export function CreateOrUpdateLocationModal({
                           step="any"
                           placeholder="Nhập kinh độ"
                           {...field}
-                          onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseFloat(e.target.value) || 0)
+                          }
                           value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-              </div>
+                /> */}
 
               <FormField
                 control={form.control}
@@ -256,7 +263,9 @@ export function CreateOrUpdateLocationModal({
                           min="0"
                           placeholder="Nhập số lượng cabinet"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                           value={field.value || ""}
                         />
                       </FormControl>
@@ -277,7 +286,9 @@ export function CreateOrUpdateLocationModal({
                           min="0"
                           placeholder="Nhập số lượng locker"
                           {...field}
-                          onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          onChange={(e) =>
+                            field.onChange(parseInt(e.target.value) || 0)
+                          }
                           value={field.value || ""}
                         />
                       </FormControl>
