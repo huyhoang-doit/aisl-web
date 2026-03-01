@@ -7,6 +7,7 @@ import {
   BarChart3,
   User,
   UserCog,
+  ServerCog,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -36,6 +37,11 @@ export const staffNavMain: NavItem[] = [
     //     url: "/staff/lockers/detail",
     //   },
     // ],
+  },
+  {
+    title: "Cài đặt Tủ (Cabinet)",
+    url: "/staff/setup-cabinet",
+    icon: ServerCog,
   },
   {
     title: "Quản lý báo cáo",

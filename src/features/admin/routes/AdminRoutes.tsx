@@ -17,6 +17,7 @@ import ManageTransactionPage from "../pages/ManageTransactionPage";
 import ManageOrderPage from "../pages/ManageOrderPage";
 import ManageHardwarePage from "../pages/ManageHardwarePage";
 import ManageTechnicalStaffReport from "../pages/ManageTechnicalStaffReport";
+import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/CabinetSetupPage";
 import AdminNotificationListPage from "@/features/notification/pages/AdminNotificationListPage";
 import AdminNotificationDetailPage from "@/features/notification/pages/AdminNotificationDetailPage";
 import DispatchMapPage from "../pages/DispatchMapPage";
@@ -40,6 +41,7 @@ const AdminRoutes = () => {
         <Route path="transactions" element={<ManageTransactionPage />} />
         <Route path="orders" element={<ManageOrderPage />} />
         <Route path="hardware-monitor" element={<ManageHardwarePage />} />
+        <Route path="setup-cabinet" element={<CabinetSetupPage />} />
         <Route path="plans" element={<ManagePlanPage />} />
         <Route path="notifications" element={<AdminNotificationListPage />} />
         <Route path="notifications/:id" element={<AdminNotificationDetailPage />} />

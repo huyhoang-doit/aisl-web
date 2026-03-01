@@ -4,6 +4,7 @@ import ManageCustomerReport from "@/features/admin/pages/ManageCustomerReport"
 import ManageTechnicalStaffReport from "@/features/admin/pages/ManageTechnicalStaffReport"
 import { StaffLayout } from "@/features/staff/components/StaffLayout"
 import ProfilePage from "@/shared/pages/ProfilePage"
+import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/CabinetSetupPage";
 import SettingPage from "@/shared/pages/SettingPage"
 import { Route, Routes } from "react-router-dom"
 import NotFoundPage from "@/shared/pages/NotFoundPage"
@@ -14,6 +15,7 @@ const StaffRoutes = () => {
       <Route element={<StaffLayout />}>
         <Route path="dashboard" element={<StaffDashboardPage />} />
         <Route path="list-lockers" element={<ManageLockerAreaPage />} />
+        <Route path="setup-cabinet" element={<CabinetSetupPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />
         <Route path="manage-reports/technical-staff" element={<ManageTechnicalStaffReport />} />
         <Route path="profile" element={<ProfilePage />} />
