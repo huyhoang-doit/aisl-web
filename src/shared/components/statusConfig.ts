@@ -21,6 +21,13 @@ export const STATUS_CONFIG: Record<string, StatusEntry> = {
   ACTIVE: { label: "Hoạt động", variant: "success" },
   INACTIVE: { label: "Không hoạt động", variant: "secondary" },
   BLOCKED: { label: "Đã khóa", variant: "destructive" },
+  // --- Subscription (đăng ký dịch vụ) ---
+  SUSPENDED: { label: "Tạm ngưng", variant: "warning" },
+  EXPIRED: { label: "Hết hạn", variant: "destructive" },
+  CANCELLED: { label: "Đã hủy", variant: "outline" },
+  // --- Pricing order type ---
+  LOGISTICS: { label: "Logistics", variant: "info" },
+  PERSONAL_RENTAL: { label: "Thuê cá nhân", variant: "secondary" },
   // --- Incident Report (báo cáo sự cố) ---
   PENDING: { label: "Chờ xử lý", variant: "warning" },
   ASSIGNED: { label: "Đã phân công", variant: "info" },

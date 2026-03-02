@@ -12,6 +12,8 @@ import ManageLockerPage from "../pages/ManageLockerPage";
 import ManageCabinetPage from "../pages/ManageCabinetPage";
 import ManageLocationPage from "../pages/ManageLocationPage";
 import ManagePlanPage from "../pages/ManagePlanPage";
+import ManagePricingPage from "../pages/ManagePricingPage";
+import ManageSubscriptionPage from "../pages/ManageSubscriptionPage";
 import ManageCustomerReport from "../pages/ManageCustomerReport";
 import ManageTask from "../pages/ManageTask";
 const AdminRoutes = () => {
@@ -32,6 +34,8 @@ const AdminRoutes = () => {
         <Route path="lockers" element={<ManageLockerPage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
         <Route path="plans" element={<ManagePlanPage />} />
+        <Route path="pricing" element={<ManagePricingPage />} />
+        <Route path="subscriptions" element={<ManageSubscriptionPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />
