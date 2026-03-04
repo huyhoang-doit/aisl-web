@@ -8,12 +8,28 @@ import AdminRoutes from "./features/admin/routes/AdminRoutes";
 import StaffRoutes from "./features/staff/routes/StaffRoutes";
 import NotFoundPage from "./shared/pages/NotFoundPage";
 import Login from "./features/auth/pages/Login";
+import KioskWelcomePage from "./features/kiosk/pages/KioskWelcomePage";
+import KioskLoginPage from "./features/kiosk/pages/KioskLoginPage";
+import KioskHomePage from "./features/kiosk/pages/KioskHomePage";
+import KioskRentPage from "./features/kiosk/pages/KioskRentPage";
+import KioskOpenPage from "./features/kiosk/pages/KioskOpenPage";
+import KioskSendPage from "./features/kiosk/pages/KioskSendPage";
+import KioskInputOTPPage from "./features/kiosk/pages/KioskInputOTPPage";
 
 function App() {
   return (
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
+
+      {/* Kiosk routes - màn hình dọc, thao tác tại kiosk */}
+      <Route path="/kiosk" element={<KioskWelcomePage />} />
+      <Route path="/kiosk/login" element={<KioskLoginPage />} />
+      <Route path="/kiosk/home" element={<KioskHomePage />} />
+      <Route path="/kiosk/rent" element={<KioskRentPage />} />
+      <Route path="/kiosk/open" element={<KioskOpenPage />} />
+      <Route path="/kiosk/send" element={<KioskSendPage />} />
+      <Route path="/kiosk/input-otp" element={<KioskInputOTPPage />} />
       
       {/* Unauthorized routes - chỉ cho phép khi chưa đăng nhập */}
       <Route element={<UnAuthorizedRoute />}>
