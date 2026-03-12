@@ -59,6 +59,17 @@ export interface UserListParams {
   orderDirection?: "ASC" | "DESC";
 }
 
+export interface Role {
+  id: string;
+  name: string;
+}
+
+export interface RolesResponse {
+  data: {
+    roles: Role[];
+  };
+}
+
 export const userService = {
   /**
    * Lấy danh sách users với phân trang và filter
@@ -124,5 +135,12 @@ export const userService = {
    */
   delete: async (keycloakUserId: string): Promise<void> => {
     return api.delete<void>(`/users/${keycloakUserId}`);
+  },
+
+  /**
+   * Lấy danh sách vai trò (roles)
+   */
+  getRoles: async (): Promise<RolesResponse> => {
+    return api.get<RolesResponse>("/roles");
   },
 };

@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useAuthStore } from '@/features/auth/store/auth.store'
 
 interface RoleRoutesProps {
-    requiredRole: typeof roles.TECHNICAL_STAFF | typeof roles.ADMIN
+    requiredRole: typeof roles.TECHNICIAN | typeof roles.ADMIN
     redirectTo: string
 }
 

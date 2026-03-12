@@ -9,7 +9,7 @@ export interface User {
   username: string;
   email: string;
   // name: string;
-  roles: [typeof roles.TECHNICAL_STAFF, typeof roles.ADMIN];
+  roles: [typeof roles.TECHNICIAN, typeof roles.ADMIN];
   avatar?: string;
   createdAt?: string;
   updatedAt?: string;

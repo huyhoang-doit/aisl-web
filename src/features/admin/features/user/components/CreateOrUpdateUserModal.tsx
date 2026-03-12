@@ -27,8 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { roles } from "@/shared/configs/role";
 import type { User, UserStatusValue, UserStatus, NotificationType } from "../types/user.types";
+import { RoleSelector } from "./RoleSelector";
 import { getPrimaryRole } from "../types/user.types";
 
 export interface UserFormData {
@@ -77,7 +77,7 @@ export function CreateOrUpdateUserModal({
       email: "",
       phoneNumber: "",
       password: "",
-      role: roles.TECHNICAL_STAFF,
+      role: "",
       status: "ACTIVE",
       isVerified: true,
     },
@@ -105,7 +105,7 @@ export function CreateOrUpdateUserModal({
           email: "",
           phoneNumber: "",
           password: "",
-          role: roles.TECHNICAL_STAFF,
+          role: "",
           status: "ACTIVE",
           isVerified: true,
         });
@@ -299,25 +299,15 @@ export function CreateOrUpdateUserModal({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Vai trò *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Chọn vai trò" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value={roles.TECHNICAL_STAFF}>Nhân viên</SelectItem>
-                          <SelectItem value={roles.ADMIN}>
-                            Quản trị viên
-                          </SelectItem>
-                          <SelectItem value={roles.COURIER}>Người vận chuyển</SelectItem>
-                          <SelectItem value={roles.CUSTOMER}>Khách hàng</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <RoleSelector
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          placeholder="Chọn vai trò"
+                          allowClear={false}
+                          valueBy="name"
+                        />
+                      </FormControl>
                       <FormDescription>
                         Vai trò xác định quyền truy cập của người dùng
                       </FormDescription>

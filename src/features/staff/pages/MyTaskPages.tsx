@@ -31,14 +31,14 @@ const TASK_STATUS_TABS: TaskStatus[] = [
   TechnicalTaskStatus.OPEN,
   TechnicalTaskStatus.IN_PROGRESS,
   TechnicalTaskStatus.COMPLETED,
-  TechnicalTaskStatus.VERIFIED,
+  TechnicalTaskStatus.RESOLVED,
 ];
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   [TechnicalTaskStatus.OPEN]: "Mở",
   [TechnicalTaskStatus.IN_PROGRESS]: "Đang xử lý",
   [TechnicalTaskStatus.COMPLETED]: "Hoàn thành",
-  [TechnicalTaskStatus.VERIFIED]: "Đã xác minh",
+  [TechnicalTaskStatus.RESOLVED]: "Đã giải quyết",
 };
 
 const TASK_TAB_COLOR_CLASS: Record<TaskStatus, string> = {
@@ -48,7 +48,7 @@ const TASK_TAB_COLOR_CLASS: Record<TaskStatus, string> = {
     "data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:border-amber-300 border border-transparent border-border",
   [TechnicalTaskStatus.COMPLETED]:
     "data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 data-[state=active]:border-emerald-300 border border-transparent border-border",
-  [TechnicalTaskStatus.VERIFIED]:
+  [TechnicalTaskStatus.RESOLVED]:
     "data-[state=active]:bg-teal-100 data-[state=active]:text-teal-800 data-[state=active]:border-teal-300 border border-transparent border-border",
 };
 
@@ -56,14 +56,14 @@ const TASK_STATUS_BADGE_CLASS: Record<string, string> = {
   [TechnicalTaskStatus.OPEN]: "bg-slate-100 text-slate-800 border-slate-300",
   [TechnicalTaskStatus.IN_PROGRESS]: "bg-amber-100 text-amber-800 border-amber-300",
   [TechnicalTaskStatus.COMPLETED]: "bg-emerald-100 text-emerald-800 border-emerald-300",
-  [TechnicalTaskStatus.VERIFIED]: "bg-teal-100 text-teal-800 border-teal-300",
+  [TechnicalTaskStatus.RESOLVED]: "bg-teal-100 text-teal-800 border-teal-300",
 };
 
 const TASK_EMPTY_MESSAGES: Record<TaskStatus, string> = {
   [TechnicalTaskStatus.OPEN]: "Chưa có task nào ở trạng thái mở",
   [TechnicalTaskStatus.IN_PROGRESS]: "Chưa có task nào đang xử lý",
   [TechnicalTaskStatus.COMPLETED]: "Chưa có task nào hoàn thành",
-  [TechnicalTaskStatus.VERIFIED]: "Chưa có task nào đã xác minh",
+  [TechnicalTaskStatus.RESOLVED]: "Chưa có task nào đã giải quyết",
 };
 
 const MyTaskPages = () => {

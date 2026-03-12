@@ -5,7 +5,8 @@ export const TechnicalTaskStatus = {
   OPEN: "OPEN",
   IN_PROGRESS: "IN_PROGRESS",
   COMPLETED: "COMPLETED",
-  VERIFIED: "VERIFIED",
+  // VERIFIED: "VERIFIED",
+  RESOLVED: "RESOLVED",
 } as const;
 
 export const TechnicalTaskPriority = {
