@@ -48,8 +48,8 @@ export const staffNavMain: NavItem[] = [
         icon: User,
       },
       {
-        title: "Phía nv kỹ thuật",
-        url: "/staff/manage-reports",
+        title: "Quản lý task",
+        url: "/staff/manage-tasks",
         icon: UserCog,
       },
     ],

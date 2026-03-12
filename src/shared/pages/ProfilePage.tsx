@@ -1,39 +1,105 @@
 import * as React from "react"
-import { useLocation } from "react-router-dom"
 import { User, Mail, Phone, MapPin, Calendar, Edit, Building2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
-import { EditProfileModal } from "@/shared/components/EditProfileModal"
+import { EditProfileModal, type ProfileData } from "@/shared/components/EditProfileModal"
+import { useAuthStore } from "@/features/auth"
+import { userService } from "@/features/admin/features/user/services/user.service"
+import type { User as UserDetail } from "@/features/admin/features/user/types/user.types"
+import { roles } from "@/shared/configs/role"
 
-// Mock data - replace with actual data from context/store
-const mockProfileData = {
-  id: "1",
-  name: "Nguyễn Văn A",
-  email: "nguyenvana@lockerly.com",
-  phone: "+84 123 456 789",
-  avatar: "/src/assets/logo.png",
-  address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
-  dateOfBirth: "1990-01-15",
-  role: "Admin",
-  department: "Quản trị hệ thống",
-  joinDate: "2023-01-10",
-  bio: "Chuyên viên quản trị hệ thống với hơn 5 năm kinh nghiệm trong việc quản lý và vận hành các hệ thống công nghệ thông tin.",
+const ROLE_LABELS: Record<string, string> = {
+  [roles.ADMIN]: "Quản trị viên",
+  [roles.TECHNICAL_STAFF]: "Nhân viên",
+  [roles.COURIER]: "Người vận chuyển",
+  [roles.CUSTOMER]: "Khách hàng",
 }
 
 export default function ProfilePage() {
-  const location = useLocation()
+  const { user: authUser, getCurrentUser } = useAuthStore()
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
-  const [profileData, setProfileData] = React.useState(mockProfileData)
+  const [userDetail, setUserDetail] = React.useState<UserDetail | null>(null)
+  const [isLoading, setIsLoading] = React.useState(true)
 
-  // Determine role from path
-  const role = location.pathname.startsWith("/admin") ? "admin" : "staff"
-  const rolePrefix = role === "admin" ? "/admin" : "/staff"
+  React.useEffect(() => {
+    if (!authUser) {
+      setUserDetail(null)
+      setIsLoading(false)
+      return
+    }
+    const loadProfile = async () => {
+      setIsLoading(true)
+      const res = await userService.getById(authUser.id).catch(() => null)
+      setUserDetail(res?.data?.user ?? null)
+      setIsLoading(false)
+    }
+    loadProfile()
+  }, [authUser])
 
-  const handleProfileUpdate = (updatedData: typeof mockProfileData) => {
-    setProfileData(updatedData)
+  const handleProfileUpdate = React.useCallback(
+    async (payload: {
+      fullName: string
+      email: string
+      phoneNumber: string
+      avatarFile?: File
+    }) => {
+      if (!authUser?.id) return
+      await userService.update(authUser.id, {
+        fullName: payload.fullName,
+        email: payload.email,
+        phoneNumber: payload.phoneNumber,
+        file: payload.avatarFile,
+      })
+      await getCurrentUser()
+      setUserDetail((prev) =>
+        prev
+          ? {
+              ...prev,
+              fullName: payload.fullName,
+              email: payload.email,
+              phoneNumber: payload.phoneNumber,
+            }
+          : null
+      )
+      setIsEditModalOpen(false)
+    },
+    [authUser, getCurrentUser]
+  )
+
+  if (isLoading || !authUser) {
+    return (
+      <div className="container mx-auto py-6 max-w-4xl">
+        <p className="text-muted-foreground">
+          {isLoading ? "Đang tải..." : "Vui lòng đăng nhập để xem hồ sơ."}
+        </p>
+      </div>
+    )
+  }
+
+  const name = userDetail?.fullName ?? authUser.username ?? ""
+  const email = userDetail?.email ?? authUser.email ?? ""
+  const phone = userDetail?.phoneNumber ?? ""
+  const roleKey = userDetail?.roles?.[0]?.name ?? authUser.roles?.[0] ?? ""
+  const roleLabel = ROLE_LABELS[roleKey] ?? roleKey
+  const joinDate = userDetail?.createdAt
+    ? new Date(userDetail.createdAt).toLocaleDateString("vi-VN")
+    : ""
+
+  const editProfileData: ProfileData = {
+    id: authUser.id,
+    name,
+    email,
+    phone,
+    avatar: authUser.avatar ?? "",
+    address: "",
+    dateOfBirth: "",
+    role: roleLabel,
+    department: "",
+    joinDate,
+    bio: "",
   }
 
   return (
@@ -58,9 +124,9 @@ export default function ProfilePage() {
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={profileData.avatar} alt={profileData.name} />
+                <AvatarImage src={authUser.avatar} alt={name} />
                 <AvatarFallback className="text-2xl">
-                  {profileData.name
+                  {name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")
@@ -68,27 +134,27 @@ export default function ProfilePage() {
                 </AvatarFallback>
               </Avatar>
             </div>
-            <CardTitle className="text-xl">{profileData.name}</CardTitle>
+            <CardTitle className="text-xl">{name}</CardTitle>
             <CardDescription className="mt-2">
               <Badge variant="secondary" className="text-sm">
-                {profileData.role}
+                {roleLabel}
               </Badge>
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          {/* <CardContent className="space-y-4">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Building2 className="h-4 w-4" />
-              <span>{profileData.department}</span>
+              <span>—</span>
             </div>
             <Separator />
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Tham gia:</span>
-                <span>{new Date(profileData.joinDate).toLocaleDateString("vi-VN")}</span>
+                <span>{joinDate || "—"}</span>
               </div>
             </div>
-          </CardContent>
+          </CardContent> */}
         </Card>
 
         {/* Details Card */}
@@ -108,18 +174,18 @@ export default function ProfilePage() {
                   <User className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Họ và tên</p>
-                    <p className="text-sm text-muted-foreground">{profileData.name}</p>
+                    <p className="text-sm text-muted-foreground">{name}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3">
+                {/* <div className="flex items-start gap-3">
                   <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Ngày sinh</p>
                     <p className="text-sm text-muted-foreground">
-                      {new Date(profileData.dateOfBirth).toLocaleDateString("vi-VN")}
+                      —
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -135,37 +201,37 @@ export default function ProfilePage() {
                   <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Email</p>
-                    <p className="text-sm text-muted-foreground">{profileData.email}</p>
+                    <p className="text-sm text-muted-foreground">{email}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Phone className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Số điện thoại</p>
-                    <p className="text-sm text-muted-foreground">{profileData.phone}</p>
+                    <p className="text-sm text-muted-foreground">{phone || "—"}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 md:col-span-2">
+                {/* <div className="flex items-start gap-3 md:col-span-2">
                   <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
                     <p className="text-sm font-medium">Địa chỉ</p>
-                    <p className="text-sm text-muted-foreground">{profileData.address}</p>
+                    <p className="text-sm text-muted-foreground">—</p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
             <Separator />
 
             {/* Bio */}
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Giới thiệu
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                {profileData.bio}
+                —
               </p>
-            </div>
+            </div> */}
           </CardContent>
         </Card>
       </div>
@@ -174,7 +240,7 @@ export default function ProfilePage() {
       <EditProfileModal
         open={isEditModalOpen}
         onOpenChange={setIsEditModalOpen}
-        profileData={profileData}
+        profileData={editProfileData}
         onUpdate={handleProfileUpdate}
       />
     </div>

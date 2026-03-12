@@ -89,26 +89,33 @@ export const adminNavMain: NavItem[] = [
         icon: User,
       },
       {
-        title: "Phía nv kỹ thuật",
-        url: "/admin/manage-reports-staff",
+        title: "Phía nhân viên kỹ thuật",
+        url: "/admin/manage-tasks",
         icon: UserCog,
       },
     ],
   },
   {
-    title: "Quản lý gói đăng ký",
+    title: "Quản lý dịch vụ",
     url: "/admin/plans",
     icon: DollarSign,
-    // items: [
-    //   {
-    //     title: "Tất cả bảng giá",
-    //     url: "/admin/pricing",
-    //   },
-    //   {
-    //     title: "Chi tiết bảng giá",
-    //     url: "/admin/pricing/detail",
-    //   },
-    // ],
+    items: [
+      {
+        title: "Gói đăng ký",
+        url: "/admin/plans",
+        icon: Package,
+      },
+      {
+        title: "Danh sách đã đăng ký",
+        url: "/admin/subscriptions",
+        icon: History,
+      },
+      {
+        title: "Bảng giá",
+        url: "/admin/pricing",
+        icon: DollarSign,
+      },
+    ],
   },
   {
     title: "Lịch sử giao dịch ",

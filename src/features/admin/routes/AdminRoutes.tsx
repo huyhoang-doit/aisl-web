@@ -12,8 +12,10 @@ import ManageLockerPage from "../pages/ManageLockerPage";
 import ManageCabinetPage from "../pages/ManageCabinetPage";
 import ManageLocationPage from "../pages/ManageLocationPage";
 import ManagePlanPage from "../pages/ManagePlanPage";
+import ManagePricingPage from "../pages/ManagePricingPage";
+import ManageSubscriptionPage from "../pages/ManageSubscriptionPage";
 import ManageCustomerReport from "../pages/ManageCustomerReport";
-import ManageTechnicalStaffReport from "../pages/ManageTechnicalStaffReport";
+import ManageTask from "../pages/ManageTask";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -27,11 +29,13 @@ const AdminRoutes = () => {
         <Route path="courier-requests" element={<ManageCourierRequest />} />
         <Route path="locked-accounts" element={<ManageLockedAccountsPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />
-        <Route path="manage-reports-staff" element={<ManageTechnicalStaffReport />} />
+        <Route path="manage-tasks" element={<ManageTask />} />
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="lockers" element={<ManageLockerPage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
         <Route path="plans" element={<ManagePlanPage />} />
+        <Route path="pricing" element={<ManagePricingPage />} />
+        <Route path="subscriptions" element={<ManageSubscriptionPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />
