@@ -6,6 +6,7 @@ import { roles } from "./shared/configs/role";
 import { RoleRoutes } from "./shared/routes/guards/RoleRoutes";
 import AdminRoutes from "./features/admin/routes/AdminRoutes";
 import StaffRoutes from "./features/staff/routes/StaffRoutes";
+import CustomerRoutes from "./features/customer/routes/CustomerRoutes";
 import NotFoundPage from "./shared/pages/NotFoundPage";
 import Login from "./features/auth/pages/Login";
 
@@ -14,6 +15,7 @@ function App() {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/app/*" element={<CustomerRoutes />} />
       
       {/* Unauthorized routes - chỉ cho phép khi chưa đăng nhập */}
       <Route element={<UnAuthorizedRoute />}>

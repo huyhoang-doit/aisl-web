@@ -110,4 +110,14 @@ export const userService = {
   delete: async (keycloakUserId: string): Promise<void> => {
     return api.delete<void>(`/users/${keycloakUserId}`);
   },
+
+  /**
+   * Cập nhật trạng thái Courier
+   */
+  updateCourierStatus: async (
+    keycloakUserId: string,
+    data: { status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED"; reason?: string }
+  ): Promise<UserResponse> => {
+    return api.put<UserResponse>(`/users/${keycloakUserId}/courier-status`, data);
+  },
 };

@@ -1,53 +1,20 @@
 import { useState, useMemo } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { DataTable, type Column, type SortConfig, type FilterConfig, type QuickFilter } from "@/shared/components/DataTable"
 import { CourierRequestDetailModal } from "../features/courierRequest/components/CourierRequestDetailModal"
 import { ApproveCourierRequestModal } from "../features/courierRequest/components/ApproveCourierRequestModal"
+import { userService } from "../features/user/services/user.service"
+import { toast } from "sonner"
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { CheckCircle2, XCircle, Eye } from "lucide-react"
 import type { CourierRequest } from "../features/courierRequest/types/courierRequest.types"
 
-// Mock data - Thay thế bằng API call thực tế
-const mockCourierRequests: CourierRequest[] = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    email: "nguyenvana@example.com",
-    phone: "+84 123 456 789",
-    address: "123 Đường ABC, Quận 1, TP.HCM",
-    status: "pending",
-    requestDate: new Date().toISOString(),
-    documents: ["CMND.pdf", "Bằng lái xe.pdf"],
-  },
-  {
-    id: "2",
-    name: "Trần Thị B",
-    email: "tranthib@example.com",
-    phone: "+84 987 654 321",
-    address: "456 Đường XYZ, Quận 2, TP.HCM",
-    status: "approved",
-    requestDate: new Date(Date.now() - 86400000).toISOString(),
-    reviewedDate: new Date().toISOString(),
-    reviewedBy: "Admin User",
-    documents: ["CMND.pdf"],
-  },
-  {
-    id: "3",
-    name: "Lê Văn C",
-    email: "levanc@example.com",
-    phone: "+84 555 123 456",
-    address: "789 Đường DEF, Quận 3, TP.HCM",
-    status: "rejected",
-    requestDate: new Date(Date.now() - 172800000).toISOString(),
-    reviewedDate: new Date(Date.now() - 86400000).toISOString(),
-    reviewedBy: "Admin User",
-    rejectionReason: "Thiếu giấy tờ cần thiết",
-    documents: ["CMND.pdf"],
-  },
-]
+// Constants for Courier role mappings (update based on your actual data/constants)
+const COURIER_ROLE = "courier"
 
 const ManageCourierRequest = () => {
-  const [requests, setRequests] = useState<CourierRequest[]>(mockCourierRequests)
+  const queryClient = useQueryClient()
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false)
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
@@ -59,6 +26,71 @@ const ManageCourierRequest = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+
+  // Extract status filter for backend filtering (assuming status is sent as a filter)
+  const statusFilter = useMemo(() => {
+    const statusF = filters.find(f => f.key === "status");
+    if(!statusF) return undefined;
+    const map: Record<string, string> = {
+      "Chưa kích hoạt": "NONE",
+      "Chờ duyệt": "PENDING",
+      "Đã duyệt": "APPROVED",
+      "Đã từ chối": "REJECTED",
+      "Đình chỉ": "SUSPENDED",
+      "Danh sách đen": "BLACKLISTED"
+    }
+    return map[statusF.value]
+  }, [filters]);
+
+  // Use real API call via react-query
+  const { data: usersResponse, isLoading } = useQuery({
+    queryKey: ["couriers", page, pageSize, searchQuery, statusFilter, sortConfig],
+    queryFn: () => userService.getAll({
+      page,
+      limit: pageSize,
+      role: COURIER_ROLE, // Only fetching users acting as couriers
+      search: searchQuery || undefined,
+      status: statusFilter,
+      orderBy: sortConfig?.key,
+      orderDirection: sortConfig?.direction === "asc" ? "ASC" : sortConfig?.direction === "desc" ? "DESC" : undefined
+    })
+  })
+
+  // Map backend users to format expected by UI until CourierRequest components are refactored
+  const requests: CourierRequest[] = useMemo(() => {
+    if (!usersResponse?.data?.users) return [];
+    return usersResponse.data.users.map((user: any) => ({
+      id: user.keycloakUserId,
+      name: user.fullName || "Unknown",
+      email: user.email || "N/A",
+      phone: user.phoneNumber || "N/A",
+      address: user.address || "", // Assuming address might not be available
+      // Map BE status to UI expectations (could be unified later)
+      status: ["NONE", "PENDING", "APPROVED", "REJECTED", "SUSPENDED", "BLACKLISTED"].includes(user.status) 
+              ? user.status 
+              : "PENDING",
+      requestDate: user.createdAt || new Date().toISOString(),
+      documents: [], // Handle parsing real documents if needed
+    }));
+  }, [usersResponse]);
+
+  const totalItemCount = usersResponse?.data?.pagination?.total || 0;
+
+  // Cập nhật trạng thái
+  const updateStatusMutation = useMutation({
+    mutationFn: (params: { id: string, status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED", reason?: string }) => 
+      userService.updateCourierStatus(params.id, { status: params.status, reason: params.reason }),
+    onSuccess: () => {
+      toast.success("Cập nhật trạng thái thành công");
+      queryClient.invalidateQueries({ queryKey: ["couriers"] });
+      setIsApproveModalOpen(false);
+      setIsRejectModalOpen(false);
+      setSelectedRequest(null);
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Cập nhật trạng thái thất bại");
+    }
+  });
 
   // Định nghĩa columns cho bảng
   const columns: Column<CourierRequest>[] = [
@@ -99,16 +131,19 @@ const ManageCourierRequest = () => {
       sortable: true,
       filterable: true,
       filterType: "select",
-      filterOptions: ["Chờ duyệt", "Đã duyệt", "Đã từ chối"],
+      filterOptions: ["Chưa kích hoạt", "Chờ duyệt", "Đã duyệt", "Đã từ chối", "Đình chỉ", "Danh sách đen"],
       accessor: (row) => {
-        const statusConfig = {
-          pending: { label: "Chờ duyệt", variant: "secondary" as const },
-          approved: { label: "Đã duyệt", variant: "default" as const },
-          rejected: { label: "Đã từ chối", variant: "destructive" as const },
+        const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+          NONE: { label: "Chưa kích hoạt", variant: "secondary" },
+          PENDING: { label: "Chờ duyệt", variant: "secondary" },
+          APPROVED: { label: "Đã duyệt", variant: "default" },
+          REJECTED: { label: "Đã từ chối", variant: "destructive" },
+          SUSPENDED: { label: "Đình chỉ", variant: "destructive" },
+          BLACKLISTED: { label: "Danh sách đen", variant: "destructive" },
         }
-        const config = statusConfig[row.status]
+        const config = statusConfig[row.status] || { label: row.status, variant: "secondary" };
         return (
-          <Badge variant={config.variant}>{config.label}</Badge>
+          <Badge variant={config.variant as any}>{config.label}</Badge>
         )
       },
     },
@@ -140,7 +175,7 @@ const ManageCourierRequest = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          {row.status === "pending" && (
+          {row.status === "PENDING" || row.status === "SUSPENDED" ? (
             <>
               <Button
                 variant="ghost"
@@ -150,10 +185,14 @@ const ManageCourierRequest = () => {
                   setIsApproveModalOpen(true)
                 }}
                 className="text-green-600 hover:text-green-700"
+                title="Kích hoạt/Duyệt"
               >
                 <CheckCircle2 className="h-4 w-4" />
               </Button>
-              <Button
+            </>
+          ) : null}
+          {row.status !== "REJECTED" && row.status !== "SUSPENDED" && row.status !== "BLACKLISTED" ? (
+             <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
@@ -161,11 +200,11 @@ const ManageCourierRequest = () => {
                   setIsRejectModalOpen(true)
                 }}
                 className="text-red-600 hover:text-red-700"
+                title="Từ chối/Đình chỉ"
               >
                 <XCircle className="h-4 w-4" />
               </Button>
-            </>
-          )}
+          ) : null}
         </div>
       ),
     },
@@ -201,96 +240,25 @@ const ManageCourierRequest = () => {
       label: "Trạng thái",
       placeholder: "Chọn trạng thái",
       options: [
+        { value: "Chưa kích hoạt", label: "Chưa kích hoạt" },
         { value: "Chờ duyệt", label: "Chờ duyệt" },
         { value: "Đã duyệt", label: "Đã duyệt" },
         { value: "Đã từ chối", label: "Đã từ chối" },
+        { value: "Đình chỉ", label: "Đình chỉ" },
+        { value: "Danh sách đen", label: "Danh sách đen" },
       ],
     },
   ]
 
-  // Filter và sort data
-  const filteredAndSortedData = useMemo(() => {
-    let result = [...requests]
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      result = result.filter(
-        (request) =>
-          request.name.toLowerCase().includes(query) ||
-          request.email.toLowerCase().includes(query) ||
-          request.phone.toLowerCase().includes(query) ||
-          request.address?.toLowerCase().includes(query)
-      )
-    }
-
-    // Apply filters
-    filters.forEach((filter) => {
-      if (filter.key === "status") {
-        const statusMap: Record<string, CourierRequest["status"]> = {
-          "Chờ duyệt": "pending",
-          "Đã duyệt": "approved",
-          "Đã từ chối": "rejected",
-        }
-        const statusValue = statusMap[filter.value]
-        if (statusValue) {
-          result = result.filter((request) => request.status === statusValue)
-        }
-      } else {
-        const value = filter.value.toLowerCase()
-        result = result.filter((request) => {
-          const fieldValue = String(request[filter.key as keyof CourierRequest] || "").toLowerCase()
-          return fieldValue.includes(value)
-        })
-      }
-    })
-
-    // Apply sorting
-    if (sortConfig) {
-      result.sort((a, b) => {
-        const aValue = a[sortConfig.key as keyof CourierRequest]
-        const bValue = b[sortConfig.key as keyof CourierRequest]
-
-        if (aValue === undefined || aValue === null) return 1
-        if (bValue === undefined || bValue === null) return -1
-
-        const comparison =
-          typeof aValue === "string" && typeof bValue === "string"
-            ? aValue.localeCompare(bValue)
-            : aValue < bValue
-            ? -1
-            : aValue > bValue
-            ? 1
-            : 0
-
-        return sortConfig.direction === "asc" ? comparison : -comparison
-      })
-    }
-
-    return result
-  }, [requests, searchQuery, filters, sortConfig])
-
-  // Pagination
-  const paginatedData = useMemo(() => {
-    const start = (page - 1) * pageSize
-    const end = start + pageSize
-    return filteredAndSortedData.slice(start, end)
-  }, [filteredAndSortedData, page, pageSize])
+  // We don't apply frontend-side filtering/sorting/pagination anymore, 
+  // since React-Query and parameter passing handle that with the backend.
+  // Using `requests` and `isLoading` below.
 
   // Xử lý duyệt/từ chối
   const handleApprove = async (request: CourierRequest, action: "approve" | "reject", reason?: string) => {
-    const updatedRequest: CourierRequest = {
-      ...request,
-      status: action === "approve" ? "approved" : "rejected",
-      reviewedDate: new Date().toISOString(),
-      reviewedBy: "Admin User", // Thay bằng user thực tế
-      rejectionReason: reason,
-    }
-    setRequests(requests.map((r) => (r.id === request.id ? updatedRequest : r)))
-    setIsApproveModalOpen(false)
-    setIsRejectModalOpen(false)
-    setSelectedRequest(null)
-    console.log(`${action === "approve" ? "Approving" : "Rejecting"} request:`, updatedRequest)
+    if (!request.id) return;
+    const newStatus = action === "approve" ? "APPROVED" : (request.status === "APPROVED" ? "SUSPENDED" : "REJECTED");
+    updateStatusMutation.mutate({ id: request.id, status: newStatus as any, reason });
   }
 
   return (
@@ -303,17 +271,17 @@ const ManageCourierRequest = () => {
       </div>
 
       <DataTable
-        data={paginatedData}
+        data={requests}
         columns={columns}
         keyExtractor={(row) => row.id || row.email}
         onCreate={undefined}
-        emptyMessage="Chưa có yêu cầu nào"
+        emptyMessage={isLoading ? "Đang tải dữ liệu..." : "Chưa có yêu cầu nào"}
         onSort={handleSort}
         onFilter={handleFilter}
         pagination={{
           page,
           pageSize,
-          total: filteredAndSortedData.length,
+          total: totalItemCount,
           onPageChange: setPage,
           onPageSizeChange: setPageSize,
           pageSizeOptions: [5, 10, 20, 50, 100],

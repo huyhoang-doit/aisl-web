@@ -4,7 +4,7 @@ export interface CourierRequest {
   email: string
   phone: string
   address?: string
-  status: "pending" | "approved" | "rejected"
+  status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED"
   requestDate?: string
   reviewedDate?: string
   reviewedBy?: string

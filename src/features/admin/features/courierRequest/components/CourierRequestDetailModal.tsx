@@ -29,12 +29,15 @@ export function CourierRequestDetailModal({
 }: CourierRequestDetailModalProps) {
   if (!request) return null
 
-  const statusConfig = {
-    pending: { label: "Chờ duyệt", variant: "secondary" as const },
-    approved: { label: "Đã duyệt", variant: "default" as const },
-    rejected: { label: "Đã từ chối", variant: "destructive" as const },
+  const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+    NONE: { label: "Chưa kích hoạt", variant: "secondary" as const },
+    PENDING: { label: "Chờ duyệt", variant: "secondary" as const },
+    APPROVED: { label: "Đã duyệt", variant: "default" as const },
+    REJECTED: { label: "Đã từ chối", variant: "destructive" as const },
+    SUSPENDED: { label: "Đình chỉ", variant: "destructive" as const },
+    BLACKLISTED: { label: "Danh sách đen", variant: "destructive" as const },
   }
-  const statusInfo = statusConfig[request.status]
+  const statusInfo = statusConfig[request.status] || { label: request.status, variant: "secondary" }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -122,8 +125,7 @@ export function CourierRequestDetailModal({
             </>
           )}
 
-          {/* Review Information */}
-          {request.status !== "pending" && (
+          {request.status !== "PENDING" && request.status !== "NONE" && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -158,7 +160,7 @@ export function CourierRequestDetailModal({
         </div>
 
         <DialogFooter>
-          {request.status === "pending" && (
+          {request.status === "PENDING" && (
             <>
               <Button
                 type="button"
