@@ -34,6 +34,9 @@ export const STATUS_CONFIG: Record<string, StatusEntry> = {
   IN_PROGRESS: { label: "Đang xử lý", variant: "progress" },
   RESOLVED: { label: "Đã xử lý", variant: "success" },
   CLOSED: { label: "Đã đóng", variant: "destructive" },
+  // --- Technical Task (task bảo trì) ---
+  OPEN: { label: "Chưa bắt đầu", variant: "warning" },
+  COMPLETED: { label: "Hoàn thành", variant: "success" },
 };
 
 /** Giá trị trạng thái user (giữ cho tương thích) */

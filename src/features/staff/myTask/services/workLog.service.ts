@@ -9,6 +9,7 @@ export interface WorkLogListResponse {
 }
 
 export interface CreateWorkLogPayload {
+  technicalTaskId: string;
   workDescription: string;
   beforePhotos?: File[];
 }
@@ -43,14 +44,15 @@ export const workLogService = {
    * Tạo work log (bắt đầu công việc) - upload ảnh before
    * POST /maintenance/tasks/:taskId/work-logs
    */
-  create: async (taskId: string, payload: CreateWorkLogPayload): Promise<WorkLogDetailResponse> => {
+  create: async (_taskId: string, payload: CreateWorkLogPayload): Promise<WorkLogDetailResponse> => {
     const form = new FormData();
+    form.append("technicalTaskId", payload.technicalTaskId);
     form.append("workDescription", payload.workDescription);
     if (payload.beforePhotos?.length) {
       payload.beforePhotos.forEach((f) => form.append("beforePhotos", f));
     }
     const res = await api.post<WorkLogDetail | WorkLogDetailResponse>(
-      `/maintenance/tasks/${taskId}/work-logs`,
+      `/maintenance/work-logs`,
       form
     );
     const data = res && typeof res === "object" && "data" in res ? (res as WorkLogDetailResponse).data : (res as WorkLogDetail);
@@ -60,13 +62,15 @@ export const workLogService = {
   /**
    * Danh sách work log theo task
    * GET /maintenance/work-logs/task/:taskId
+   * Response: { data: { workLogs: WorkLogDetail[] } }
    */
   getByTaskId: async (taskId: string): Promise<WorkLogDetail[]> => {
-    const res = await api.get<WorkLogDetail[] | { data: WorkLogDetail[] }>(
+    const res = await api.get<{ data: { workLogs?: WorkLogDetail[] } } | WorkLogDetail[]>(
       `/maintenance/work-logs/task/${taskId}`
     );
     if (Array.isArray(res)) return res;
-    return (res as { data: WorkLogDetail[] }).data ?? [];
+    const data = (res as { data?: { workLogs?: WorkLogDetail[] } }).data;
+    return data?.workLogs ?? [];
   },
 
   /**

@@ -57,10 +57,12 @@ export interface TaskListResponse {
   };
 }
 
-/** Work log (GET /maintenance/work-logs/:id, response từ create/update/complete) */
+/** Work log (GET /maintenance/work-logs/:id, GET by taskId trả data.workLogs) */
 export interface WorkLogDetail {
   id: string;
+  code?: string;
   technicalTaskId: string;
+  technicianId?: string;
   workDescription?: string;
   beforePhotoUrls?: string[];
   afterPhotoUrls?: string[];

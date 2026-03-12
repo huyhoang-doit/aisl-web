@@ -30,7 +30,7 @@ import { useUser } from "../features/user/hooks/useUser";
 import type { User } from "../features/user/types/user.types";
 import { toast } from "sonner";
 
-const staffListDefaultParams = { role: roles.TECHNICAL_STAFF };
+const staffListDefaultParams = { role: roles.TECHNICIAN };
 
 const ManageStaffPage = () => {
   const {

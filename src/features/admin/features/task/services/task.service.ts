@@ -7,7 +7,7 @@ import { api } from "@/shared/lib/api/client";
 import type { TaskDetail, TaskDetailResponse, TaskListResponse } from "../types/task.types";
 import type { Pagination } from "@/shared/types/pagination.types";
 
-export type TaskType = "REPAIR" | "INSPECTION" | "CLEANING" | string;
+export type TaskType = "REPAIR" | "INSPECTION" | "SETUP" | "MAINTENANCE" | string;
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 export interface CreateTaskPayload {
