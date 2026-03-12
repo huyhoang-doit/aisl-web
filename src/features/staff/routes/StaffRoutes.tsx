@@ -2,6 +2,7 @@ import StaffDashboardPage from "@/features/staff/pages/StaffDashboardPage"
 import ManageLockerAreaPage from "@/features/staff/pages/ManageLockerAreaPage"
 import ManageCustomerReport from "@/features/admin/pages/ManageCustomerReport"
 import ManageTask from "@/features/admin/pages/ManageTask"
+import MyTaskPages from "@/features/staff/pages/MyTaskPages"
 import { StaffLayout } from "@/features/staff/components/StaffLayout"
 import ProfilePage from "@/shared/pages/ProfilePage"
 import SettingPage from "@/shared/pages/SettingPage"
@@ -16,6 +17,7 @@ const StaffRoutes = () => {
         <Route path="list-lockers" element={<ManageLockerAreaPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />
         <Route path="manage-tasks" element={<ManageTask />} />
+        <Route path="my-tasks" element={<MyTaskPages />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="settings" element={<SettingPage />} />
         <Route index element={<StaffDashboardPage />} />

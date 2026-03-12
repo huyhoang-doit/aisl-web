@@ -50,7 +50,7 @@ function App() {
           <Route path="/admin/*" element={<AdminRoutes />} />
         </Route>
         
-        {/* Staff routes - yêu cầu role STAFF */}
+        {/* Staff routes - yêu cầu role TECHNICAL_STAFF */}
         <Route
           element={
             <RoleRoutes
