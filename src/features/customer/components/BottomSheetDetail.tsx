@@ -6,22 +6,29 @@ interface BottomSheetDetailProps {
 }
 
 export function BottomSheetDetail({ isOpen, onClose }: BottomSheetDetailProps) {
-  const [show, setShow] = useState(false);
+  const [isMounted, setIsMounted] = useState(isOpen);
+
+  // Sync state from props during render to avoid cascading renders in useEffect
+  if (isOpen && !isMounted) {
+    setIsMounted(true);
+  }
 
   useEffect(() => {
     if (isOpen) {
-      setShow(true);
       document.body.style.overflow = "hidden";
-    } else {
-      setTimeout(() => setShow(false), 200); // Wait for transition
-      document.body.style.overflow = "auto";
+    } else if (isMounted) {
+      const timer = setTimeout(() => {
+        setIsMounted(false);
+        document.body.style.overflow = "auto";
+      }, 200);
+      return () => clearTimeout(timer);
     }
     return () => {
       document.body.style.overflow = "auto";
     };
-  }, [isOpen]);
+  }, [isOpen, isMounted]);
 
-  if (!isOpen && !show) return null;
+  if (!isOpen && !isMounted) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
