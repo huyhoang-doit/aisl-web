@@ -23,6 +23,7 @@ import AdminNotificationListPage from "@/features/notification/pages/AdminNotifi
 import AdminNotificationDetailPage from "@/features/notification/pages/AdminNotificationDetailPage";
 import DispatchMapPage from "../pages/DispatchMapPage";
 import ManageTask from "../pages/ManageTask";
+import ManageVehiclesPage from "../pages/ManageVehiclesPage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -48,6 +49,7 @@ const AdminRoutes = () => {
         <Route path="notifications" element={<AdminNotificationListPage />} />
         <Route path="notifications/:id" element={<AdminNotificationDetailPage />} />
         <Route path="dispatch-map" element={<DispatchMapPage />} />
+        <Route path="vehicles" element={<ManageVehiclesPage />} />
         <Route path="pricing" element={<ManagePricingPage />} />
         <Route path="subscriptions" element={<ManageSubscriptionPage />} />
 

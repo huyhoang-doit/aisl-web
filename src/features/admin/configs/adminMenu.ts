@@ -24,11 +24,11 @@ export const adminNavMain: NavItem[] = [
     icon: LayoutDashboard,
     isActive: false,
   },
-  {
-    title: "Báo cáo doanh thu",
-    url: "/admin/revenue",
-    icon: BarChart3,
-  },
+  // {
+  //   title: "Báo cáo doanh thu",
+  //   url: "/admin/revenue",
+  //   icon: BarChart3,
+  // },
   {
     title: "Quản lý tài khoản",
     url: "/admin/users",
@@ -85,12 +85,17 @@ export const adminNavMain: NavItem[] = [
   },
   {
     title: "Điều phối Logistics",
-    url: "/admin/dispatch",
+    url: "/admin/dispatch-map",
     icon: MapPin,
     items: [
       {
         title: "Bản đồ Shipper",
         url: "/admin/dispatch-map",
+        icon: MapPin,
+      },
+      {
+        title: "Loại phương tiện",
+        url: "/admin/vehicles",
         icon: MapPin,
       },
     ],
