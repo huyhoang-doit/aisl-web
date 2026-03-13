@@ -233,7 +233,7 @@ const ManageUserPage = () => {
           toast.error("Vui lòng nhập mật khẩu");
           return;
         }
-        await authService.register({
+        await authService.createAccout({
           email: data.email,
           password: data.password,
           fullName: data.fullName,
