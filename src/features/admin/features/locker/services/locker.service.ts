@@ -45,6 +45,42 @@ export interface GetLockerCabinetParams {
   search?: string;
 }
 
+export interface SizeResponse {
+  id: string;
+  name: string;
+  description: string;
+  width: number;
+  height: number;
+  depth: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LeastUsedLocker {
+  id: string;
+  cabinetId?: string;
+  cabinetName?: string;
+  row: number;
+  column: number;
+  status: string;
+  hwState: string;
+  createdAt: string;
+  updatedAt: string;
+  sizeTypeId?: string;
+  sizeType?: SizeResponse;
+  lockerLabel: string;
+  isActive: boolean;
+  totalUsageTime: number;
+  slotIndex: number;
+}
+
+export interface LeastUsedResponse {
+  data: {
+    lockers: LeastUsedLocker[];
+    pagination: Pagination;
+  };
+}
+
 export const lockerService = {
   /**
    * Lấy danh sách lockers với phân trang và filter
@@ -108,5 +144,12 @@ export const lockerService = {
       ? `/cabinets/${cabinetId}/lockers?${query}`
       : `/cabinets/${cabinetId}/lockers`;
     return api.get<LockerListResponse>(url);
+  },
+
+  /**
+   * Lấy danh sách locker ít sử dụng nhất
+   */
+  getLeastUsed: async (cabinetId: string): Promise<LeastUsedResponse> => {
+    return api.get<LeastUsedResponse>(`/lockers/least-used?cabinetId=${cabinetId}`);
   },
 };

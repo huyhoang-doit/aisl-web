@@ -5,6 +5,8 @@ import {
   Settings,
   LogOut,
   Mail,
+  Check,
+  Loader2,
 } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 
@@ -22,6 +24,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu"
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs"
 import { Button } from "@/shared/components/ui/button"
 import {
   Popover,
@@ -31,31 +39,26 @@ import {
 import { Badge } from "@/shared/components/ui/badge"
 import { ToggleTheme } from "@/features/landing/components/toggle-theme"
 import { useAuthStore } from "@/features/auth"
-import { toast } from "sonner"
+import { useNotification } from "@/shared/hooks/useNotification"
 
-interface NavbarProps {
-  notifications?: Array<{
-    id: string
-    title: string
-    message: string
-    time: string
-    read?: boolean
-  }>
-}
-
-export function Navbar({ notifications = [] }: NavbarProps) {
+export function Navbar() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
-  const unreadCount = notifications.filter((n) => !n.read).length
-  
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    markAsRead,
+    markAllAsRead,
+  } = useNotification()
+
   // Determine role from path to build correct profile link
   const role = location.pathname.startsWith("/admin") ? "admin" : "staff"
   const profilePath = `/${role}/profile`
 
   const handleLogout = async () => {
     await logout()
-   
     navigate("/login")
   }
 
@@ -67,10 +70,10 @@ export function Navbar({ notifications = [] }: NavbarProps) {
   return (
     <div className="flex h-16 items-center justify-between gap-4">
       <div className="flex-1" />
-      
+
       <div className="flex items-center gap-2">
         <div className="hidden lg:flex">
-            <ToggleTheme />
+          <ToggleTheme />
         </div>
         {/* Notifications */}
         <Popover>
@@ -79,8 +82,7 @@ export function Navbar({ notifications = [] }: NavbarProps) {
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
                 <Badge
-                  variant="destructive"
-                  className="absolute right-0 top-0 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center shadow-sm shadow-primary/20"
+                  className="absolute right-0 top-0 h-4 w-4 rounded-full p-0 text-[10px] flex items-center justify-center bg-yellow-500 hover:bg-yellow-600 text-white shadow-sm"
                 >
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </Badge>
@@ -89,58 +91,63 @@ export function Navbar({ notifications = [] }: NavbarProps) {
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80 p-0" align="end">
-            <div className="flex items-center justify-between border-b px-4 py-3">
-              <h4 className="text-sm font-semibold">Thông báo</h4>
-              {unreadCount > 0 && (
-                <Badge variant="secondary">{unreadCount} mới</Badge>
-              )}
-            </div>
-            <div className="max-h-[400px] overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-8 text-center text-sm text-muted-foreground">
-                  <Bell className="mb-2 h-8 w-8 opacity-50" />
-                  <p>Không có thông báo</p>
-                </div>
-              ) : (
-                <div className="divide-y">
-                  {notifications.map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`px-4 py-3 hover:bg-accent transition-colors ${
-                        !notification.read ? "bg-accent/50" : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="mt-0.5">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 space-y-1">
-                          <p className="text-sm font-medium leading-none">
-                            {notification.title}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {notification.message}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {notification.time}
-                          </p>
-                        </div>
-                        {!notification.read && (
-                          <div className="h-2 w-2 rounded-full bg-primary" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            {notifications.length > 0 && (
-              <div className="border-t p-2">
-                <Button variant="ghost" className="w-full text-sm" asChild>
-                  <Link to="/notifications">Xem tất cả</Link>
-                </Button>
+            <Tabs defaultValue="all" className="w-full">
+              <div className="flex items-center justify-between px-4 py-2 border-b">
+                <h4 className="font-semibold text-sm">Thông báo</h4>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto px-2 py-1 text-xs text-muted-foreground hover:text-primary"
+                    onClick={markAllAsRead}
+                  >
+                    <Check className="mr-1 h-3 w-3" />
+                    Đọc hết
+                  </Button>
+                )}
               </div>
-            )}
+              <div className="px-4 py-2">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="all">
+                    Tất cả
+                  </TabsTrigger>
+                  <TabsTrigger value="unread" className="relative">
+                    Chưa đọc
+                    {unreadCount > 0 && (
+                      <Badge className="ml-1.5 h-4 min-w-[1rem] px-1 text-[10px] flex items-center justify-center rounded-full bg-yellow-500 hover:bg-yellow-600 text-white">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </Badge>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              <div className="max-h-[400px] overflow-y-auto">
+                <TabsContent value="all" className="m-0">
+                  <NotificationList
+                    notifications={notifications}
+                    isLoading={isLoading}
+                    onMarkAsRead={markAsRead}
+                  />
+                </TabsContent>
+                <TabsContent value="unread" className="m-0">
+                  <NotificationList
+                    notifications={notifications.filter((n) => !n.read)}
+                    isLoading={isLoading}
+                    onMarkAsRead={markAsRead}
+                    emptyMessage="Không có thông báo chưa đọc"
+                  />
+                </TabsContent>
+              </div>
+
+              {notifications.length > 0 && (
+                <div className="border-t p-2">
+                  <Button variant="ghost" className="w-full text-sm" asChild>
+                    <Link to={`/${role}/notifications`}>Xem tất cả</Link>
+                  </Button>
+                </div>
+              )}
+            </Tabs>
           </PopoverContent>
         </Popover>
 
@@ -220,3 +227,90 @@ export function Navbar({ notifications = [] }: NavbarProps) {
   )
 }
 
+function NotificationList({
+  notifications,
+  isLoading,
+  onMarkAsRead,
+  emptyMessage = "Không có thông báo",
+}: {
+  notifications: import("@/shared/types/notification.types").Notification[];
+  isLoading: boolean;
+  onMarkAsRead: (id: string) => void;
+  emptyMessage?: string;
+}) {
+  if (isLoading && notifications.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center text-sm text-muted-foreground">
+        <Loader2 className="mb-2 h-8 w-8 animate-spin opacity-50" />
+        <p>Đang tải thông báo...</p>
+      </div>
+    );
+  }
+
+  if (notifications.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center text-sm text-muted-foreground">
+        <Bell className="mb-2 h-8 w-8 opacity-50" />
+        <p>{emptyMessage}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="divide-y">
+      {notifications.map((notification) => (
+        <div
+          key={notification.id}
+          className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent cursor-pointer ${
+            !notification.read ? "bg-primary/5" : ""
+          }`}
+          onClick={() => {
+            if (!notification.read) {
+              onMarkAsRead(notification.id);
+            }
+          }}
+        >
+          {/* Avatar / Icon */}
+          <Avatar className="mt-0.5 h-9 w-9 border">
+            <AvatarImage src={notification.data?.avatar} />
+            <AvatarFallback className={`${!notification.read ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+              {notification.type === 'ORDER' ? (
+                <Mail className="h-4 w-4" />
+              ) : notification.type === 'SYSTEM' ? (
+                <Settings className="h-4 w-4" />
+              ) : (
+                <Bell className="h-4 w-4" />
+              )}
+            </AvatarFallback>
+          </Avatar>
+
+          <div className="flex-1 space-y-1">
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-sm leading-none">
+                <span className="font-semibold text-foreground">{notification.title}</span>{" "}
+                <span className="text-muted-foreground font-normal">{notification.body}</span>
+              </p>
+              {!notification.read && (
+                <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary ring-2 ring-background" />
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground font-medium">
+              {formatTimeAgo(notification.createdAt)}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function formatTimeAgo(timestamp: string | number): string {
+  if (!timestamp) return "Vừa xong";
+  const date = new Date(timestamp).getTime();
+
+  const seconds = Math.floor((Date.now() - date) / 1000)
+  if (seconds < 60) return "Vừa xong"
+  if (seconds < 3600) return `${Math.floor(seconds / 60)} phút trước`
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)} giờ trước`
+  return `${Math.floor(seconds / 86400)} ngày trước`
+}

@@ -1,12 +1,7 @@
 import {
   LayoutDashboard,
-  Package,
-  History,
-  AlertTriangle,
   Bell,
-  BarChart3,
   User,
-  UserCog,
   ClipboardList,
   Settings,
 } from "lucide-react"

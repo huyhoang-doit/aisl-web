@@ -6,6 +6,8 @@ import {
   EyeOff,
   Lock,
   Trash2,
+  Bell,
+  BellOff,
 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent } from "@/shared/components/ui/card"
@@ -13,6 +15,9 @@ import { Label } from "@/shared/components/ui/label"
 import { Switch } from "@/shared/components/ui/switch"
 import { Input } from "@/shared/components/ui/input"
 import { useTheme } from "next-themes"
+import { toast } from "sonner"
+import { useAuthStore } from "@/features/auth/store/auth.store"
+import { useFcmToken } from "@/shared/hooks/useFcmToken"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,17 +30,68 @@ import {
   AlertDialogTrigger,
 } from "@/shared/components/ui/alert-dialog"
 
+const FCM_DISMISSED_KEY = "fcm_popup_dismissed";
+
 export default function SettingPage() {
   const { theme, setTheme } = useTheme()
+  const { token: jwt } = useAuthStore()
+  const registerFcmToken = useFcmToken(jwt)
   const [showCurrentPassword, setShowCurrentPassword] = React.useState(false)
   const [showNewPassword, setShowNewPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+  const [notificationLoading, setNotificationLoading] = React.useState(false)
+
+  // Real notification permission state
+  const [notificationEnabled, setNotificationEnabled] = React.useState(() => {
+    if (typeof Notification === "undefined") return false
+    return Notification.permission === "granted"
+  })
 
   // Settings state
   const [settings, setSettings] = React.useState({
     theme: theme || "light",
-    notifications: true,
   })
+
+  const handleToggleNotification = async (checked: boolean) => {
+    if (typeof Notification === "undefined") {
+      toast.error("Trình duyệt không hỗ trợ thông báo.")
+      return
+    }
+
+    if (checked) {
+      // User wants to enable notifications
+      if (Notification.permission === "denied") {
+        toast.error(
+          "Thông báo đã bị chặn bởi trình duyệt. Vui lòng mở cài đặt trình duyệt (biểu tượng khóa trên thanh địa chỉ) để cho phép thông báo.",
+          { duration: 6000 }
+        )
+        return
+      }
+
+      setNotificationLoading(true)
+      try {
+        const success = await registerFcmToken()
+        if (success) {
+          setNotificationEnabled(true)
+          // Clear dismissed flag so FcmHandler knows it's been re-enabled
+          sessionStorage.removeItem(FCM_DISMISSED_KEY)
+          toast.success("Đã bật thông báo thành công!")
+        } else {
+          toast.error("Không thể bật thông báo. Vui lòng kiểm tra cài đặt trình duyệt.")
+        }
+      } catch {
+        toast.error("Đã xảy ra lỗi khi bật thông báo.")
+      } finally {
+        setNotificationLoading(false)
+      }
+    } else {
+      // User wants to disable — we can't revoke browser permission via JS,
+      // but we can mark it as dismissed so FcmHandler won't auto-register
+      sessionStorage.setItem(FCM_DISMISSED_KEY, "true")
+      setNotificationEnabled(false)
+      toast.info("Đã tắt thông báo. Để chặn hoàn toàn, hãy vào cài đặt trình duyệt.")
+    }
+  }
 
   // Password change state
   const [passwordData, setPasswordData] = React.useState({
@@ -123,13 +179,26 @@ export default function SettingPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
-              <Label htmlFor="notifications" className="text-base font-medium">Bật / Tắt thông báo</Label>
+              <div className="flex items-center gap-3">
+                {notificationEnabled ? (
+                  <Bell className="h-5 w-5 text-primary" />
+                ) : (
+                  <BellOff className="h-5 w-5 text-muted-foreground" />
+                )}
+                <div>
+                  <Label htmlFor="notifications" className="text-base font-medium">Bật / Tắt thông báo</Label>
+                  <p className="text-sm text-muted-foreground">
+                    {notificationEnabled
+                      ? "Đang nhận thông báo từ hệ thống"
+                      : "Thông báo đang tắt"}
+                  </p>
+                </div>
+              </div>
               <Switch
                 id="notifications"
-                checked={settings.notifications}
-                onCheckedChange={(checked) =>
-                  setSettings((prev) => ({ ...prev, notifications: checked }))
-                }
+                checked={notificationEnabled}
+                disabled={notificationLoading}
+                onCheckedChange={handleToggleNotification}
               />
             </div>
           </CardContent>

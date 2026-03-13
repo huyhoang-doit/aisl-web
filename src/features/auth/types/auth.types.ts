@@ -15,9 +15,18 @@ export interface User {
   updatedAt?: string;
 }
 
+export interface DeviceInfo {
+  deviceId: string;
+  ipAddress?: string;
+  userAgent: string;
+  platform: string;
+  fcmToken?: string;
+}
+
 export interface LoginInput {
   email: string;
   password: string;
+  deviceInfo?: DeviceInfo;
 }
 
 export interface RegisterInput {

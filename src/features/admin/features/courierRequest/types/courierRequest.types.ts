@@ -42,17 +42,17 @@ export interface CourierReviewPayload {
 
 /** Legacy type alias – giữ tương thích nếu có chỗ còn dùng */
 export interface CourierRequest {
-  id?: string;
-  name: string;
-  email: string;
-  phone: string;
-  address?: string;
-  status: CourierStatusValue;
-  requestDate?: string;
-  reviewedDate?: string;
-  reviewedBy?: string;
-  rejectionReason?: string;
-  documents?: string[];
-  createdAt?: string;
-  updatedAt?: string;
+  id?: string
+  name: string
+  email: string
+  phone: string
+  address?: string
+  status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED"
+  requestDate?: string
+  reviewedDate?: string
+  reviewedBy?: string
+  rejectionReason?: string
+  documents?: string[]
+  createdAt?: string
+  updatedAt?: string
 }

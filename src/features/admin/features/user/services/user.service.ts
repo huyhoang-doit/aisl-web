@@ -138,6 +138,16 @@ export const userService = {
   },
 
   /**
+   * Cập nhật trạng thái Courier
+   */
+  updateCourierStatus: async (
+    keycloakUserId: string,
+    data: { status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED"; reason?: string }
+  ): Promise<UserResponse> => {
+    return api.put<UserResponse>(`/users/${keycloakUserId}/courier-status`, data);
+  },
+
+  /**
    * Lấy danh sách vai trò (roles)
    */
   getRoles: async (): Promise<RolesResponse> => {

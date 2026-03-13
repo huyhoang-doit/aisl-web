@@ -42,9 +42,15 @@ export function CourierRequestDetailModal({
 }: CourierRequestDetailModalProps) {
   if (!application) return null
 
-  const statusLabel = STATUS_LABELS[application.status] ?? application.status
-  const vehicleLabel = VEHICLE_LABELS[application.vehicleType] ?? application.vehicleType
-  const isPending = application.status === CourierStatus.PENDING
+  const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+    NONE: { label: "Chưa kích hoạt", variant: "secondary" as const },
+    PENDING: { label: "Chờ duyệt", variant: "secondary" as const },
+    APPROVED: { label: "Đã duyệt", variant: "default" as const },
+    REJECTED: { label: "Đã từ chối", variant: "destructive" as const },
+    SUSPENDED: { label: "Đình chỉ", variant: "destructive" as const },
+    BLACKLISTED: { label: "Danh sách đen", variant: "destructive" as const },
+  }
+  const statusInfo = statusConfig[request.status] || { label: request.status, variant: "secondary" }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -138,7 +144,7 @@ export function CourierRequestDetailModal({
             </>
           )}
 
-          {!isPending && (application.reviewNote || application.reviewedAt) && (
+          {request.status !== "PENDING" && request.status !== "NONE" && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -167,7 +173,7 @@ export function CourierRequestDetailModal({
         </div>
 
         <DialogFooter>
-          {isPending && (
+          {request.status === "PENDING" && (
             <>
               <Button
                 type="button"

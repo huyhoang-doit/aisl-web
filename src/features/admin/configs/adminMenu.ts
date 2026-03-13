@@ -7,13 +7,13 @@ import {
   Bell,
   MapPin,
   Box,
-  Lock,
   User,
   UserCog,
   UserRoundPen,
   Boxes,
   AlertTriangle,
   History,
+  ServerCog,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -75,6 +75,23 @@ export const adminNavMain: NavItem[] = [
         title: "Tủ",
         url: "/admin/lockers",
         icon: Box,
+      },
+      {
+        title: "Setup Tủ Mới (RPi)",
+        url: "/admin/setup-cabinet",
+        icon: ServerCog,
+      },
+    ],
+  },
+  {
+    title: "Điều phối Logistics",
+    url: "/admin/dispatch",
+    icon: MapPin,
+    items: [
+      {
+        title: "Bản đồ Shipper",
+        url: "/admin/dispatch-map",
+        icon: MapPin,
       },
     ],
   },

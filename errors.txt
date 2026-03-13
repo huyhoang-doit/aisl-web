@@ -1,0 +1,42 @@
+src/features/admin/configs/adminMenu.ts(10,3): error TS6133: 'Lock' is declared but its value is never read.
+src/features/admin/features/cabinet/components/LocationSelector.tsx(3,10): error TS6133: 'useEffect' is declared but its value is never read.
+src/features/admin/features/cabinet/components/LocationSelector.tsx(5,1): error TS6133: 'Checkbox' is declared but its value is never read.
+src/features/admin/features/location/components/SelectLocationMap.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/features/admin/features/location/components/SelectLocationMap.tsx(2,1): error TS6192: All imports in import declaration are unused.
+src/features/admin/features/location/components/SelectLocationMap.tsx(6,10): error TS2307: Cannot find module 'https://cdn.esm.sh/react-leaflet' or its corresponding type declarations.
+src/features/admin/features/staffReport/modals/TechnicalStaffReportDetailModal.tsx(73,37): error TS2538: Type 'undefined' cannot be used as an index type.
+src/features/admin/features/staffReport/modals/TechnicalStaffReportDetailModal.tsx(74,39): error TS2538: Type 'undefined' cannot be used as an index type.
+src/features/admin/features/staffReport/modals/TechnicalStaffReportDetailModal.tsx(125,33): error TS2769: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number | Date'.
+      Type 'undefined' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'string | undefined' is not assignable to parameter of type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
+src/features/admin/pages/ManageCustomerReport.tsx(5,32): error TS6133: 'ImageIcon' is declared but its value is never read.
+src/features/admin/pages/ManageLocationPage.tsx(16,25): error TS6133: 'Column' is declared but its value is never read.
+src/features/admin/pages/ManageLockedAccountsPage.tsx(7,10): error TS6133: 'Lock' is declared but its value is never read.
+src/features/admin/pages/ManageLockedAccountsPage.tsx(9,1): error TS6192: All imports in import declaration are unused.
+src/features/landing/components/navbar.tsx(53,7): error TS6133: 'featureList' is declared but its value is never read.
+src/features/landing/components/sections/community.tsx(1,1): error TS6133: 'DiscordIcon' is declared but its value is never read.
+src/shared/components/EditProfileModal.tsx(6,1): error TS6133: 'Label' is declared but its value is never read.
+src/shared/components/layouts/index.ts(3,31): error TS2305: Module '"./AppLayout"' has no exported member 'Notification'.
+src/shared/components/ui/pagination.tsx(1,1): error TS6133: 'React' is declared but its value is never read.
+src/shared/lib/api/client.ts(23,5): error TS2322: Type 'Promise<AxiosResponse<T, any, {}>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponse<T, any, {}>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponse<T, any, {}>'.
+src/shared/lib/api/client.ts(34,5): error TS2322: Type 'Promise<AxiosResponse<T, any, {}>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponse<T, any, {}>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponse<T, any, {}>'.
+src/shared/lib/api/client.ts(45,5): error TS2322: Type 'Promise<AxiosResponse<T, any, {}>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponse<T, any, {}>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponse<T, any, {}>'.
+src/shared/lib/api/client.ts(56,5): error TS2322: Type 'Promise<AxiosResponse<T, any, {}>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponse<T, any, {}>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponse<T, any, {}>'.
+src/shared/lib/api/client.ts(63,5): error TS2322: Type 'Promise<AxiosResponse<T, any, {}>>' is not assignable to type 'Promise<T>'.
+  Type 'AxiosResponse<T, any, {}>' is not assignable to type 'T'.
+    'T' could be instantiated with an arbitrary type which could be unrelated to 'AxiosResponse<T, any, {}>'.
+src/shared/pages/ProfilePage.tsx(33,9): error TS6133: 'rolePrefix' is declared but its value is never read.
+src/shared/routes/guards/UnAuthorizedRoute.tsx(14,14): error TS2551: Property 'role' does not exist on type 'User'. Did you mean 'roles'?
+src/shared/routes/guards/UnAuthorizedRoute.tsx(18,14): error TS2551: Property 'role' does not exist on type 'User'. Did you mean 'roles'?

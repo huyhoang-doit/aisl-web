@@ -17,17 +17,31 @@ export const axiosInstance: AxiosInstance = axios.create({
   },
 });
 
+import { getDeviceId } from '@/shared/utils/device';
+
+// ... (existing imports)
+
+// ... (existing code)
+
 /**
  * Request Interceptor
- * Thêm token vào header trước khi gửi request
+ * Thêm token và device info vào header trước khi gửi request
  */
 axiosInstance.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
     // Lấy token từ localStorage
     const token = localStorage.getItem('token');
     
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // Add Device Info headers
+    if (config.headers) {
+      const deviceId = await getDeviceId();
+      config.headers['x-device-id'] = deviceId;
+      config.headers['x-user-agent'] = navigator.userAgent;
+      config.headers['x-platform'] = navigator.platform;
     }
 
     // Gửi FormData: không set Content-Type để axios/browser set multipart/form-data với boundary
@@ -85,6 +99,9 @@ axiosInstance.interceptors.response.use(
 
       return Promise.reject(apiError);
     } else if (error.request) {
+      console.log('Status:', error.request.status);
+console.log('Response URL:', error.request.responseURL);
+console.log('Ready State:', error.request.readyState);
       // Request đã được gửi nhưng không nhận được response
       return Promise.reject({
         message: 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.',

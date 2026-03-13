@@ -1,73 +1,99 @@
-import { useState } from "react"
-import { DataTable, type Column, type SortConfig, type QuickFilter } from "@/shared/components/DataTable"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs"
+import { useState, useMemo } from "react"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { DataTable, type Column, type SortConfig, type FilterConfig, type QuickFilter } from "@/shared/components/DataTable"
 import { CourierRequestDetailModal } from "../features/courierRequest/components/CourierRequestDetailModal"
 import { ApproveCourierRequestModal } from "../features/courierRequest/components/ApproveCourierRequestModal"
+import { userService } from "../features/user/services/user.service"
+import { toast } from "sonner"
+import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { CheckCircle2, XCircle, Eye } from "lucide-react"
-import type { CourierApplication, VehicleTypeValue } from "../features/courierRequest/types/courierRequest.types"
-import { CourierStatus, VehicleType } from "../features/courierRequest/types/courierRequest.types"
-import {
-  useCourierApplication,
-  type CourierStatusTab,
-} from "../features/courierRequest/hooks/useCourierApplication"
+import type { CourierRequest } from "../features/courierRequest/types/courierRequest.types"
 
-/** Các tab theo trạng thái */
-const COURIER_STATUS_TABS: CourierStatusTab[] = [
-  CourierStatus.PENDING,
-  CourierStatus.APPROVED,
-  CourierStatus.REJECTED,
-]
-
-const STATUS_LABELS: Record<CourierStatusTab, string> = {
-  [CourierStatus.PENDING]: "Chờ duyệt",
-  [CourierStatus.APPROVED]: "Đã duyệt",
-  [CourierStatus.REJECTED]: "Đã từ chối",
-}
-
-/** Màu tab khi active */
-const TAB_COLOR_CLASS: Record<CourierStatusTab, string> = {
-  [CourierStatus.PENDING]:
-    "data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:border-amber-300 border border-transparent border-border",
-  [CourierStatus.APPROVED]:
-    "data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 data-[state=active]:border-emerald-300 border border-transparent border-border",
-  [CourierStatus.REJECTED]:
-    "data-[state=active]:bg-red-100 data-[state=active]:text-red-800 data-[state=active]:border-red-300 border border-transparent border-border",
-}
-
-const VEHICLE_LABELS: Record<VehicleTypeValue, string> = {
-  [VehicleType.BIKE]: "Xe đạp",
-  [VehicleType.MOTORBIKE]: "Xe máy",
-  [VehicleType.CAR]: "Ô tô",
-}
+// Constants for Courier role mappings (update based on your actual data/constants)
+const COURIER_ROLE = "courier"
 
 const ManageCourierRequest = () => {
-  const [currentTab, setCurrentTab] = useState<CourierStatusTab>(CourierStatus.PENDING)
-
-  const {
-    applications,
-    total,
-    isLoading,
-    page,
-    pageSize,
-    setPage,
-    setPageSize,
-    handleSearch,
-    handleFilter,
-    handleClearFilters,
-    approve,
-    reject,
-    isApproving,
-    isRejecting,
-  } = useCourierApplication({ defaultPageSize: 10, status: currentTab })
-
+  const queryClient = useQueryClient()
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false)
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-  const [selectedApplication, setSelectedApplication] = useState<CourierApplication | null>(null)
-  const [, setSortConfig] = useState<SortConfig | null>(null)
+  const [selectedRequest, setSelectedRequest] = useState<CourierRequest | null>(null)
 
-  const columns: Column<CourierApplication>[] = [
+  // State cho các tính năng mới
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
+  const [filters, setFilters] = useState<FilterConfig[]>([])
+  const [searchQuery, setSearchQuery] = useState("")
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+
+  // Extract status filter for backend filtering (assuming status is sent as a filter)
+  const statusFilter = useMemo(() => {
+    const statusF = filters.find(f => f.key === "status");
+    if(!statusF) return undefined;
+    const map: Record<string, string> = {
+      "Chưa kích hoạt": "NONE",
+      "Chờ duyệt": "PENDING",
+      "Đã duyệt": "APPROVED",
+      "Đã từ chối": "REJECTED",
+      "Đình chỉ": "SUSPENDED",
+      "Danh sách đen": "BLACKLISTED"
+    }
+    return map[statusF.value]
+  }, [filters]);
+
+  // Use real API call via react-query
+  const { data: usersResponse, isLoading } = useQuery({
+    queryKey: ["couriers", page, pageSize, searchQuery, statusFilter, sortConfig],
+    queryFn: () => userService.getAll({
+      page,
+      limit: pageSize,
+      role: COURIER_ROLE, // Only fetching users acting as couriers
+      search: searchQuery || undefined,
+      status: statusFilter,
+      orderBy: sortConfig?.key,
+      orderDirection: sortConfig?.direction === "asc" ? "ASC" : sortConfig?.direction === "desc" ? "DESC" : undefined
+    })
+  })
+
+  // Map backend users to format expected by UI until CourierRequest components are refactored
+  const requests: CourierRequest[] = useMemo(() => {
+    if (!usersResponse?.data?.users) return [];
+    return usersResponse.data.users.map((user: any) => ({
+      id: user.keycloakUserId,
+      name: user.fullName || "Unknown",
+      email: user.email || "N/A",
+      phone: user.phoneNumber || "N/A",
+      address: user.address || "", // Assuming address might not be available
+      // Map BE status to UI expectations (could be unified later)
+      status: ["NONE", "PENDING", "APPROVED", "REJECTED", "SUSPENDED", "BLACKLISTED"].includes(user.status) 
+              ? user.status 
+              : "PENDING",
+      requestDate: user.createdAt || new Date().toISOString(),
+      documents: [], // Handle parsing real documents if needed
+    }));
+  }, [usersResponse]);
+
+  const totalItemCount = usersResponse?.data?.pagination?.total || 0;
+
+  // Cập nhật trạng thái
+  const updateStatusMutation = useMutation({
+    mutationFn: (params: { id: string, status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED", reason?: string }) => 
+      userService.updateCourierStatus(params.id, { status: params.status, reason: params.reason }),
+    onSuccess: () => {
+      toast.success("Cập nhật trạng thái thành công");
+      queryClient.invalidateQueries({ queryKey: ["couriers"] });
+      setIsApproveModalOpen(false);
+      setIsRejectModalOpen(false);
+      setSelectedRequest(null);
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || "Cập nhật trạng thái thất bại");
+    }
+  });
+
+  // Định nghĩa columns cho bảng
+  const columns: Column<CourierRequest>[] = [
     {
       key: "legalName",
       header: "Họ và tên",
@@ -96,10 +122,21 @@ const ManageCourierRequest = () => {
       sortable: true,
       filterable: true,
       filterType: "select",
-      filterOptions: Object.values(VehicleType).map((v) => VEHICLE_LABELS[v]),
-      accessor: (row) => (
-        <div className="text-muted-foreground">{VEHICLE_LABELS[row.vehicleType] ?? row.vehicleType}</div>
-      ),
+      filterOptions: ["Chưa kích hoạt", "Chờ duyệt", "Đã duyệt", "Đã từ chối", "Đình chỉ", "Danh sách đen"],
+      accessor: (row) => {
+        const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+          NONE: { label: "Chưa kích hoạt", variant: "secondary" },
+          PENDING: { label: "Chờ duyệt", variant: "secondary" },
+          APPROVED: { label: "Đã duyệt", variant: "default" },
+          REJECTED: { label: "Đã từ chối", variant: "destructive" },
+          SUSPENDED: { label: "Đình chỉ", variant: "destructive" },
+          BLACKLISTED: { label: "Danh sách đen", variant: "destructive" },
+        }
+        const config = statusConfig[row.status] || { label: row.status, variant: "secondary" };
+        return (
+          <Badge variant={config.variant as any}>{config.label}</Badge>
+        )
+      },
     },
     {
       key: "createdAt",
@@ -129,7 +166,7 @@ const ManageCourierRequest = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          {row.status === CourierStatus.PENDING && (
+          {row.status === "PENDING" || row.status === "SUSPENDED" ? (
             <>
               <Button
                 variant="ghost"
@@ -139,11 +176,14 @@ const ManageCourierRequest = () => {
                   setIsApproveModalOpen(true)
                 }}
                 className="text-green-600 hover:text-green-700"
-                disabled={isApproving || isRejecting}
+                title="Kích hoạt/Duyệt"
               >
                 <CheckCircle2 className="h-4 w-4" />
               </Button>
-              <Button
+            </>
+          ) : null}
+          {row.status !== "REJECTED" && row.status !== "SUSPENDED" && row.status !== "BLACKLISTED" ? (
+             <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => {
@@ -151,12 +191,11 @@ const ManageCourierRequest = () => {
                   setIsRejectModalOpen(true)
                 }}
                 className="text-red-600 hover:text-red-700"
-                disabled={isApproving || isRejecting}
+                title="Từ chối/Đình chỉ"
               >
                 <XCircle className="h-4 w-4" />
               </Button>
-            </>
-          )}
+          ) : null}
         </div>
       ),
     },
@@ -190,16 +229,25 @@ const ManageCourierRequest = () => {
       hideAllOption: true,
       defaultValue: "Mới nhất",
       options: [
-        { value: "Mới nhất", label: "Mới nhất" },
-        { value: "Cũ nhất", label: "Cũ nhất" },
+        { value: "Chưa kích hoạt", label: "Chưa kích hoạt" },
+        { value: "Chờ duyệt", label: "Chờ duyệt" },
+        { value: "Đã duyệt", label: "Đã duyệt" },
+        { value: "Đã từ chối", label: "Đã từ chối" },
+        { value: "Đình chỉ", label: "Đình chỉ" },
+        { value: "Danh sách đen", label: "Danh sách đen" },
       ],
     },
   ]
 
-  const emptyMessages: Record<CourierStatusTab, string> = {
-    [CourierStatus.PENDING]: "Chưa có đơn nào chờ duyệt",
-    [CourierStatus.APPROVED]: "Chưa có đơn nào đã duyệt",
-    [CourierStatus.REJECTED]: "Chưa có đơn nào đã từ chối",
+  // We don't apply frontend-side filtering/sorting/pagination anymore, 
+  // since React-Query and parameter passing handle that with the backend.
+  // Using `requests` and `isLoading` below.
+
+  // Xử lý duyệt/từ chối
+  const handleApprove = async (request: CourierRequest, action: "approve" | "reject", reason?: string) => {
+    if (!request.id) return;
+    const newStatus = action === "approve" ? "APPROVED" : (request.status === "APPROVED" ? "SUSPENDED" : "REJECTED");
+    updateStatusMutation.mutate({ id: request.id, status: newStatus as any, reason });
   }
 
   return (
@@ -211,54 +259,33 @@ const ManageCourierRequest = () => {
         </p>
       </div>
 
-      <Tabs
-        value={currentTab}
-        onValueChange={(value) => {
-          setCurrentTab(value as CourierStatusTab)
+      <DataTable
+        data={requests}
+        columns={columns}
+        keyExtractor={(row) => row.id || row.email}
+        onCreate={undefined}
+        emptyMessage={isLoading ? "Đang tải dữ liệu..." : "Chưa có yêu cầu nào"}
+        onSort={handleSort}
+        onFilter={handleFilter}
+        pagination={{
+          page,
+          pageSize,
+          total: totalItemCount,
+          onPageChange: setPage,
+          onPageSizeChange: setPageSize,
+          pageSizeOptions: [5, 10, 20, 50, 100],
+        }}
+        searchable={true}
+        searchPlaceholder="Tìm kiếm theo tên, email, số điện thoại..."
+        onSearch={handleSearch}
+        quickFilters={quickFilters}
+        onQuickFilterChange={handleQuickFilterChange}
+        onClearFilters={() => {
+          setFilters([])
+          setSearchQuery("")
           setPage(1)
         }}
-        className="w-full"
-      >
-        <TabsList className="flex justify-start flex-wrap h-auto gap-1 p-1 bg-muted/50">
-          {COURIER_STATUS_TABS.map((status) => (
-            <TabsTrigger
-              key={status}
-              value={status}
-              className={TAB_COLOR_CLASS[status]}
-            >
-              {STATUS_LABELS[status]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {COURIER_STATUS_TABS.map((tabValue) => (
-          <TabsContent key={tabValue} value={tabValue} className="space-y-4 mt-4">
-            <DataTable
-              data={applications}
-              columns={columns}
-              keyExtractor={(row) => row.id}
-              emptyMessage={emptyMessages[tabValue]}
-              onSort={handleSort}
-              onFilter={handleFilter}
-              pagination={{
-                page,
-                pageSize,
-                total,
-                onPageChange: setPage,
-                onPageSizeChange: setPageSize,
-                pageSizeOptions: [5, 10, 20, 50],
-              }}
-              searchable
-              searchPlaceholder="Tìm theo tên, biển số xe..."
-              onSearch={handleSearch}
-              quickFilters={quickFilters}
-              onQuickFilterChange={() => setPage(1)}
-              onClearFilters={handleClearFilters}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-        ))}
-      </Tabs>
+      />
 
       <CourierRequestDetailModal
         open={isDetailModalOpen}
