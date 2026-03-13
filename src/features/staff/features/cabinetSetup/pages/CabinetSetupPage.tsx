@@ -38,6 +38,7 @@ export default function CabinetSetupPage() {
     mode: "onChange",
     defaultValues: {
       locationId: "",
+      cabinetId: "",
       macAddress: "",
       totalRows: 4,
       totalColumns: 6,
@@ -52,7 +53,7 @@ export default function CabinetSetupPage() {
 
   const isStepValid = async () => {
     let fieldsToValidate: (keyof SetupCabinetFormValues)[] = [];
-    if (currentStep === 0) fieldsToValidate = ["locationId", "macAddress"];
+    if (currentStep === 0) fieldsToValidate = ["locationId", "cabinetId", "macAddress"];
     if (currentStep === 1) fieldsToValidate = ["totalRows", "totalColumns", "heartbeatInterval", "openDoorTimeout"];
     if (currentStep === 2) fieldsToValidate = ["mqttBrokerHost", "mqttBrokerPort"];
     
@@ -78,7 +79,7 @@ export default function CabinetSetupPage() {
     try {
       const payload = {
         ...values,
-        operatorId: user?.id || "unknown-operator", // Lấy ID của nhân viên đang thao tác
+        operatorId: user?.id || "unknown-operator",
       };
       
       const response = await cabinetSetupService.setupCabinet(payload);

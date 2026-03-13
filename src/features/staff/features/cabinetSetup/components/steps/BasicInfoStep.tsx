@@ -14,16 +14,29 @@ import {
 } from "@/shared/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { locationService } from "@/features/admin/features/location/services/location.service";
+import { cabinetSetupService } from "../../services/cabinetSetup.service";
+import { useWatch } from "react-hook-form";
 
 interface BasicInfoStepProps {
   form: UseFormReturn<SetupCabinetFormValues>;
 }
 
 export function BasicInfoStep({ form }: BasicInfoStepProps) {
+  const locationId = useWatch({
+    control: form.control,
+    name: "locationId",
+  });
+
   // Fetch locations
   const { data: areas, isLoading } = useQuery({
     queryKey: ["lockerAreas"],
     queryFn: () => locationService.getAll({ page: 1, limit: 100 }),
+  });
+
+  const { data: cabinetsData, isLoading: isLoadingCabinets } = useQuery({
+    queryKey: ["cabinets-by-location", locationId],
+    queryFn: () => cabinetSetupService.getCabinetsByLocation(locationId!, { page: 1, limit: 100 }),
+    enabled: !!locationId,
   });
 
   const locations = areas?.data.locations || [];
@@ -43,7 +56,13 @@ export function BasicInfoStep({ form }: BasicInfoStepProps) {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Location (Chi nhánh)</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select 
+              onValueChange={(value) => {
+                field.onChange(value);
+                form.setValue("cabinetId", ""); // Reset cabinet when location changes
+              }} 
+              defaultValue={field.value}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder={isLoading ? "Loading..." : "Chọn Location"} />
@@ -53,6 +72,44 @@ export function BasicInfoStep({ form }: BasicInfoStepProps) {
                 {locations.map((area: any) => (
                   <SelectItem key={area.id} value={area.id}>
                     {area.name} - {area.address}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <FormField
+        control={form.control}
+        name="cabinetId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Cabinet (Cụm tủ)</FormLabel>
+            <Select 
+              onValueChange={(value) => {
+                field.onChange(value);
+                // Auto fill MAC address and layout if cabinet is found
+                const selectedCabinet = cabinetsData?.data?.cabinets?.find(c => c.id === value);
+                if (selectedCabinet) {
+                  form.setValue("macAddress", selectedCabinet.macAddress);
+                  form.setValue("totalRows", selectedCabinet.totalRows);
+                  form.setValue("totalColumns", selectedCabinet.totalColumns);
+                }
+              }} 
+              value={field.value}
+              disabled={!locationId || isLoadingCabinets}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingCabinets ? "Loading..." : (!locationId ? "Vui lòng chọn Location trước" : "Chọn cụm tủ")} />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {cabinetsData?.data?.cabinets?.map((cabinet) => (
+                  <SelectItem key={cabinet.id} value={cabinet.id}>
+                    {cabinet.name}
                   </SelectItem>
                 ))}
               </SelectContent>

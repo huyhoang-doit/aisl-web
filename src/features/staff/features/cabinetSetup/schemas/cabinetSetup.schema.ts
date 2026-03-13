@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const basicInfoSchema = z.object({
   locationId: z.string().min(1, "Vui lòng chọn Location"),
+  cabinetId: z.string().min(1, "Vui lòng chọn Cabinet"),
   macAddress: z.string().regex(/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/, "MAC Address không hợp lệ (VD: DC:A6:32:00:00:00)"),
 });
 

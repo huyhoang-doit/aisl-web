@@ -39,14 +39,16 @@ export function SetupProgressStep({ totalLockers, onReset, onComplete }: SetupPr
   // Giả lập quá trình Setup đang diễn ra (Mocking WebSocket messages)
   useEffect(() => {
     let currentTest = 0;
+    let currentOk = 0;
+    let currentFail = 0;
     setState("IN_PROGRESS");
 
     const timer = setInterval(() => {
       if (currentTest >= totalLockers) {
         clearInterval(timer);
         // Xác định kết quả cuối cùng
-        if (failCount === 0 && okCount === totalLockers) setState("COMPLETED");
-        else if (okCount === 0) setState("ABORTED");
+        if (currentFail === 0 && currentOk === totalLockers) setState("COMPLETED");
+        else if (currentOk === 0) setState("ABORTED");
         else setState("PARTIAL");
         return;
       }
@@ -68,14 +70,19 @@ export function SetupProgressStep({ totalLockers, onReset, onComplete }: SetupPr
       );
 
       setTestedCount(currentTest + 1);
-      if (isOk) setOkCount((prev) => prev + 1);
-      else setFailCount((prev) => prev + 1);
+      if (isOk) {
+        setOkCount((prev) => prev + 1);
+        currentOk++;
+      } else {
+        setFailCount((prev) => prev + 1);
+        currentFail++;
+      }
 
       currentTest++;
     }, 1500); // Mỗi locker test mất 1.5s
 
     return () => clearInterval(timer);
-  }, [totalLockers]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [totalLockers]);
 
   const progressPercent = (testedCount / totalLockers) * 100;
 
