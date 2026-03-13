@@ -9,6 +9,13 @@ import StaffRoutes from "./features/staff/routes/StaffRoutes";
 import CustomerRoutes from "./features/customer/routes/CustomerRoutes";
 import NotFoundPage from "./shared/pages/NotFoundPage";
 import Login from "./features/auth/pages/Login";
+import KioskWelcomePage from "./features/kiosk/pages/KioskWelcomePage";
+import KioskLoginPage from "./features/kiosk/pages/KioskLoginPage";
+import KioskHomePage from "./features/kiosk/pages/KioskHomePage";
+import KioskRentPage from "./features/kiosk/pages/KioskRentPage";
+import KioskOpenPage from "./features/kiosk/pages/KioskOpenPage";
+import KioskSendPage from "./features/kiosk/pages/KioskSendPage";
+import KioskInputOTPPage from "./features/kiosk/pages/KioskInputOTPPage";
 
 function App() {
   return (
@@ -16,6 +23,15 @@ function App() {
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/app/*" element={<CustomerRoutes />} />
+
+      {/* Kiosk routes - màn hình dọc, thao tác tại kiosk */}
+      <Route path="/kiosk" element={<KioskWelcomePage />} />
+      <Route path="/kiosk/login" element={<KioskLoginPage />} />
+      <Route path="/kiosk/home" element={<KioskHomePage />} />
+      <Route path="/kiosk/rent" element={<KioskRentPage />} />
+      <Route path="/kiosk/open" element={<KioskOpenPage />} />
+      <Route path="/kiosk/send" element={<KioskSendPage />} />
+      <Route path="/kiosk/input-otp" element={<KioskInputOTPPage />} />
       
       {/* Unauthorized routes - chỉ cho phép khi chưa đăng nhập */}
       <Route element={<UnAuthorizedRoute />}>
@@ -36,11 +52,11 @@ function App() {
           <Route path="/admin/*" element={<AdminRoutes />} />
         </Route>
         
-        {/* Staff routes - yêu cầu role STAFF */}
+        {/* Staff routes - yêu cầu role TECHNICAL_STAFF */}
         <Route
           element={
             <RoleRoutes
-              requiredRole={roles.TECHNICAL_STAFF}
+              requiredRole={roles.TECHNICIAN}
               redirectTo="/not-found"
             />
           }

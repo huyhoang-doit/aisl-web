@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import { Button } from "@/shared/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 import {
   Calendar,
   User,
@@ -18,14 +19,21 @@ import {
   FileText,
   Loader2,
   AlertCircle,
+  Users,
+  ClipboardList,
+  Eye,
 } from "lucide-react";
-import type { CustomerReport } from "../types/customerReport.types";
+import StatusComponent from "@/shared/components/StatusComponent";
+import type { CustomerReport, AssignedStaffItem } from "../types/customerReport.types";
 import { maintenanceReportService } from "../services/maintenanceReport.service";
+import { TaskDetailModal } from "@/features/admin/features/task/modals/TaskDetailModal";
 
 interface CustomerReportDetailModalProps {
   open: boolean;
+  // eslint-disable-next-line no-unused-vars -- callback param for consumer
   onOpenChange: (open: boolean) => void;
   reportId: string | null;
+  // eslint-disable-next-line no-unused-vars -- callback param for consumer
   onAssign?: (report: CustomerReport) => void;
 }
 
@@ -43,19 +51,223 @@ const priorityConfig = {
   urgent: { label: "Khẩn cấp", variant: "destructive" as const },
 };
 
-const statusConfig: Record<string, { label: string; variant: "secondary" | "default" | "destructive" }> = {
-  PENDING: { label: "Chờ xử lý", variant: "secondary" },
-  ASSIGNED: { label: "Đã phân công", variant: "default" },
-  IN_PROGRESS: { label: "Đang xử lý", variant: "default" },
-  COMPLETED: { label: "Hoàn thành", variant: "default" },
-  REJECTED: { label: "Từ chối", variant: "destructive" },
-};
-
 function extractReportFromResponse(response: unknown): CustomerReport | null {
   const r = response as { data?: CustomerReport | { data?: CustomerReport } };
   if (r?.data && typeof (r.data as CustomerReport).id !== "undefined") return r.data as CustomerReport;
   if (r?.data && typeof (r.data as { data?: CustomerReport }).data !== "undefined") return (r.data as { data: CustomerReport }).data;
   return null;
+}
+
+const TASK_TYPE_LABELS: Record<string, string> = {
+  REPAIR: "Sửa chữa",
+  INSPECTION: "Kiểm tra",
+  CLEANING: "Vệ sinh",
+};
+
+function ReportInfoContent({
+  report,
+  hasCustomerInfo,
+  hasIssueType,
+}: {
+  report: CustomerReport;
+  hasCustomerInfo: boolean;
+  hasIssueType: boolean;
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          Thông tin báo cáo
+        </h3>
+        <div className="grid gap-4 md:grid-cols-2">
+          {(report.code != null && report.code !== "") && (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">Mã báo cáo</div>
+              <div className="text-sm text-muted-foreground font-mono">{report.code}</div>
+            </div>
+          )}
+          <div className="space-y-1">
+            <div className="text-sm font-medium flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Ngày báo cáo
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {(report.createdAt ?? report.reportedAt)
+                ? new Date(report.createdAt ?? report.reportedAt!).toLocaleString("vi-VN")
+                : "-"}
+            </div>
+          </div>
+          {hasIssueType && (
+            <div className="space-y-1">
+              <div className="text-sm font-medium">Loại vấn đề</div>
+              <Badge variant={issueTypeConfig[report.issueType!].variant}>{issueTypeConfig[report.issueType!].label}</Badge>
+            </div>
+          )}
+          <div className="space-y-1">
+            <div className="text-sm font-medium flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              Locker
+            </div>
+            <div className="text-sm text-muted-foreground font-mono">
+              {report.lockerLabel ?? report.lockerCode ?? report.lockerId ?? "-"}
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-medium">Cabinet</div>
+            <div className="text-sm text-muted-foreground">
+              {report.cabinetName ?? report.cabinetCode ?? report.cabinetId ?? "-"}
+            </div>
+          </div>
+        </div>
+      </div>
+      {hasCustomerInfo && (
+        <>
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Thông tin khách hàng
+            </h3>
+            <div className="grid gap-4 md:grid-cols-2">
+              {report.customerName && (
+                <div className="space-y-1">
+                  <div className="text-sm font-medium flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Họ và tên
+                  </div>
+                  <div className="text-sm text-muted-foreground">{report.customerName}</div>
+                </div>
+              )}
+              {report.customerEmail && (
+                <div className="space-y-1">
+                  <div className="text-sm font-medium flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Email
+                  </div>
+                  <div className="text-sm text-muted-foreground">{report.customerEmail}</div>
+                </div>
+              )}
+              {report.customerPhone && (
+                <div className="space-y-1">
+                  <div className="text-sm font-medium flex items-center gap-2">
+                    <Phone className="h-4 w-4" />
+                    Số điện thoại
+                  </div>
+                  <div className="text-sm text-muted-foreground">{report.customerPhone}</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+      <Separator />
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+          Mô tả
+        </h3>
+        <div className="space-y-1">
+          <div className="text-sm font-medium flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Chi tiết
+          </div>
+          <div className="text-sm text-muted-foreground p-3 rounded-md bg-muted/50">
+            {report.description ?? report.issueDescription ?? "-"}
+          </div>
+        </div>
+      </div>
+      {((report.photoUrls?.length ?? 0) > 0 || (report.images?.length ?? 0) > 0) && (
+        <>
+          <Separator />
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+              Hình ảnh đính kèm
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {(report.photoUrls ?? report.images ?? []).map((imageUrl, index) => (
+                <div
+                  key={index}
+                  className="relative aspect-square rounded-md overflow-hidden border border-border bg-muted"
+                >
+                  <img
+                    src={imageUrl}
+                    alt={`Hình ảnh ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function AssignedStaffContent({
+  assignedStaff,
+  assignmentSummary,
+  onViewTask,
+}: {
+  assignedStaff: AssignedStaffItem[];
+  assignmentSummary?: { totalTasks: number; openTasks: number; inProgressTasks: number; completedTasks: number };
+  // eslint-disable-next-line no-unused-vars -- callback param for consumer
+  onViewTask?: (taskId: string) => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {assignmentSummary != null && (
+        <div className="flex flex-wrap gap-2">
+          <Badge variant="secondary">Tổng: {assignmentSummary.totalTasks} task</Badge>
+          <Badge variant="outline">Mở: {assignmentSummary.openTasks}</Badge>
+          <Badge variant="outline">Đang xử lý: {assignmentSummary.inProgressTasks}</Badge>
+          <Badge variant="outline">Hoàn thành: {assignmentSummary.completedTasks}</Badge>
+        </div>
+      )}
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="text-left p-3 font-medium">Nhân viên</th>
+              <th className="text-left p-3 font-medium">Mã task</th>
+              <th className="text-left p-3 font-medium">Loại</th>
+              <th className="text-left p-3 font-medium">Trạng thái</th>
+              <th className="text-left p-3 font-medium">Ưu tiên</th>
+              <th className="text-left p-3 font-medium">Ngày phân công</th>
+              {onViewTask && <th className="text-left p-3 font-medium w-[80px]">Thao tác</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {assignedStaff.map((item) => (
+              <tr key={item.taskId} className="border-b last:border-0">
+                <td className="p-3 font-medium">{item.staffName}</td>
+                <td className="p-3 font-mono text-xs">{item.taskCode}</td>
+                <td className="p-3">{TASK_TYPE_LABELS[item.taskType] ?? item.taskType}</td>
+                <td className="p-3">
+                  <StatusComponent status={item.taskStatus} />
+                </td>
+                <td className="p-3">{item.priority}</td>
+                <td className="p-3 text-muted-foreground">
+                  {item.assignedAt ? new Date(item.assignedAt).toLocaleString("vi-VN") : "-"}
+                </td>
+                {onViewTask && (
+                  <td className="p-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => onViewTask(item.taskId)}
+                      title="Xem chi tiết task"
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 }
 
 export function CustomerReportDetailModal({
@@ -67,9 +279,11 @@ export function CustomerReportDetailModal({
   const [report, setReport] = useState<CustomerReport | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [taskDetailTaskId, setTaskDetailTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open || !reportId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setReport(null);
       setError(null);
       return;
@@ -99,12 +313,12 @@ export function CustomerReportDetailModal({
   if (!open) return null;
 
   const status = report?.status ?? "PENDING";
-  const statusInfo = statusConfig[status] ?? { label: status, variant: "secondary" as const };
   const hasCustomerInfo = report && (report.customerName || report.customerEmail || report.customerPhone);
   const hasIssueType = report?.issueType && issueTypeConfig[report.issueType];
   const hasPriority = report?.priority && priorityConfig[report.priority];
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         {isLoading && (
@@ -134,12 +348,36 @@ export function CustomerReportDetailModal({
               </DialogDescription>
             </div>
             <div className="flex items-center gap-2 mr-5">
-              <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+              <StatusComponent status={report.status} />
               {hasPriority && report && <Badge variant={priorityConfig[report.priority!].variant}>{priorityConfig[report.priority!].label}</Badge>}
             </div>
           </div>
         </DialogHeader>
 
+        {report.assignedStaff?.length ? (
+          <Tabs defaultValue="report" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="report" className="active-tab flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" />
+                Thông tin báo cáo
+              </TabsTrigger>
+              <TabsTrigger value="staff" className="active-tab flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Danh sách nhân viên
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="report" className="mt-4">
+              <ReportInfoContent report={report} hasCustomerInfo={!!hasCustomerInfo} hasIssueType={!!hasIssueType} />
+            </TabsContent>
+            <TabsContent value="staff" className="mt-4">
+              <AssignedStaffContent
+                assignedStaff={report.assignedStaff}
+                assignmentSummary={report.assignmentSummary}
+                onViewTask={(taskId) => setTaskDetailTaskId(taskId)}
+              />
+            </TabsContent>
+          </Tabs>
+        ) : (
         <div className="space-y-6">
           {/* Thông tin báo cáo */}
           <div className="space-y-4">
@@ -275,8 +513,8 @@ export function CustomerReportDetailModal({
             </>
           )}
 
-          {/* Thông tin phân công */}
-          {report.assignedTo && (
+          {/* Thông tin phân công (khi không dùng assignedStaff) */}
+          {report.assignedTo && !report.assignedStaff?.length && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -304,12 +542,22 @@ export function CustomerReportDetailModal({
             </>
           )}
         </div>
+        )}
 
         <div className="flex items-center justify-end gap-2 pt-4 border-t">
-          {report && !report.assignedTo && status === "PENDING" && onAssign && (
-            <Button onClick={() => onAssign(report)}>
-              Phân công nhân viên kỹ thuật
-            </Button>
+          {report && onAssign && (
+            <>
+              {!report.assignedStaff?.length && status === "PENDING" && (
+                <Button onClick={() => onAssign(report)}>
+                  Phân công nhân viên kỹ thuật
+                </Button>
+              )}
+              {report.assignedStaff?.length && ["ASSIGNED", "IN_PROGRESS"].includes(status) && (
+                <Button onClick={() => onAssign(report)}>
+                  Phân công thêm
+                </Button>
+              )}
+            </>
           )}
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Đóng
@@ -319,6 +567,12 @@ export function CustomerReportDetailModal({
         )}
       </DialogContent>
     </Dialog>
+    <TaskDetailModal
+      open={!!taskDetailTaskId}
+      onOpenChange={(open) => !open && setTaskDetailTaskId(null)}
+      taskId={taskDetailTaskId}
+    />
+    </>
   );
 }
 

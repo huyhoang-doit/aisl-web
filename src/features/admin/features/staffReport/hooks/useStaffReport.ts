@@ -6,10 +6,10 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import type { TechnicalStaffReport } from "@/features/admin/features/customerReport/types/customerReport.types";
 import {
-  maintenanceTaskService,
+  taskService,
   type UpdateTaskStatusPayload,
   type CreateTaskPayload,
-} from "@/features/admin/features/customerReport/services/maintenanceTask.service";
+} from "@/features/admin/features/task/services/task.service";
 
 export interface TaskListParams {
   page?: number;
@@ -85,7 +85,7 @@ export function useStaffReport(options: UseStaffReportOptions = {}): UseStaffRep
   const loadTasks = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await maintenanceTaskService.getAll(params);
+      const response = await taskService.getAll(params);
       setTasks(extractTasks(response));
       setTotal(extractPagination(response).total);
     } catch (error) {
@@ -108,7 +108,7 @@ export function useStaffReport(options: UseStaffReportOptions = {}): UseStaffRep
   const updateTaskStatus = useCallback(async (taskId: string, payload: UpdateTaskStatusPayload) => {
     try {
       setIsUpdating(true);
-      await maintenanceTaskService.updateStatus(taskId, payload);
+      await taskService.updateStatus(taskId, payload);
       toast.success("Cập nhật trạng thái thành công");
       refetch();
     } catch (error) {
@@ -123,7 +123,7 @@ export function useStaffReport(options: UseStaffReportOptions = {}): UseStaffRep
   const assignTask = useCallback(async (payload: CreateTaskPayload) => {
     try {
       setIsAssigning(true);
-      await maintenanceTaskService.create(payload);
+      await taskService.create(payload);
       toast.success("Phân công thành công");
       refetch();
     } catch (error) {

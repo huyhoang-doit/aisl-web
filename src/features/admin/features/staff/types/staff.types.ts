@@ -4,7 +4,7 @@ export interface Staff {
   email: string
   phone: string
   role: string
-  status?: "active" | "inactive" | "locked"
+  status?: "ACTIVE" | "INACTIVE" | "BLOCKED"
   department?: string
   position?: string
   createdAt?: string

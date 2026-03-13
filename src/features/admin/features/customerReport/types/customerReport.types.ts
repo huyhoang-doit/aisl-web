@@ -1,3 +1,22 @@
+/** Một nhân viên được phân công + task tương ứng (từ API detail report) */
+export interface AssignedStaffItem {
+  staffId: string;
+  staffName: string;
+  taskId: string;
+  taskCode: string;
+  taskType: string;
+  taskStatus: string;
+  priority: string;
+  assignedAt: string;
+}
+
+export interface AssignmentSummary {
+  totalTasks: number;
+  openTasks: number;
+  inProgressTasks: number;
+  completedTasks: number;
+}
+
 /** API response structure từ GET /maintenance/reports */
 export interface CustomerReportApi {
   id: string;
@@ -32,6 +51,9 @@ export interface CustomerReport extends CustomerReportApi {
   reportedAt?: string;
   completedAt?: string;
   images?: string[];
+  /** Danh sách nhân viên đã được phân công (từ API detail khi đã assign) */
+  assignedStaff?: AssignedStaffItem[];
+  assignmentSummary?: AssignmentSummary;
 }
 
 export interface TechnicalStaffReport {

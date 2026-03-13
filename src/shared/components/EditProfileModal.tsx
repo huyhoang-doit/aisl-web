@@ -1,14 +1,13 @@
 import * as React from "react"
 import { useForm } from "react-hook-form"
+import { toast } from "sonner"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
-import { Label } from "@/shared/components/ui/label"
-import { Textarea } from "@/shared/components/ui/textarea"
+import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,11 +28,27 @@ export interface ProfileData {
   bio: string
 }
 
+export interface ProfileUpdatePayload {
+  fullName: string
+  email: string
+  phoneNumber: string
+  /** File avatar – gửi multipart/form-data field "files" */
+  avatarFile?: File
+}
+
 interface EditProfileModalProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  /* eslint-disable-next-line no-unused-vars -- callback param names are for type documentation */
+  onOpenChange: (isOpen: boolean) => void
   profileData: ProfileData
-  onUpdate: (data: ProfileData) => void
+  /* eslint-disable-next-line no-unused-vars -- callback param names are for type documentation */
+  onUpdate: (data: ProfileUpdatePayload) => void | Promise<void>
+}
+
+type EditProfileFormValues = {
+  fullName: string
+  email: string
+  phoneNumber: string
 }
 
 export function EditProfileModal({
@@ -42,21 +57,51 @@ export function EditProfileModal({
   profileData,
   onUpdate,
 }: EditProfileModalProps) {
-  const form = useForm<ProfileData>({
-    defaultValues: profileData,
+  const [avatarFile, setAvatarFile] = React.useState<File | null>(null)
+  const avatarPreview = React.useMemo(
+    () => (avatarFile ? URL.createObjectURL(avatarFile) : null),
+    [avatarFile]
+  )
+
+  const form = useForm<EditProfileFormValues>({
+    defaultValues: {
+      fullName: profileData.name,
+      email: profileData.email,
+      phoneNumber: profileData.phone,
+    },
   })
 
   React.useEffect(() => {
     if (open) {
-      form.reset(profileData)
+      form.reset({
+        fullName: profileData.name,
+        email: profileData.email,
+        phoneNumber: profileData.phone,
+      })
+      setAvatarFile(null)
     }
   }, [open, profileData, form])
 
-  const onSubmit = (data: ProfileData) => {
-    onUpdate(data)
-    onOpenChange(false)
-    // Here you would typically make an API call to update the profile
-    console.log("Profile updated:", data)
+  React.useEffect(() => {
+    return () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview)
+    }
+  }, [avatarPreview])
+
+  const onSubmit = async (values: EditProfileFormValues) => {
+    try {
+      await onUpdate({
+        fullName: values.fullName,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+        avatarFile: avatarFile ?? undefined,
+      })
+      toast.success("Cập nhật hồ sơ thành công")
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Không thể cập nhật hồ sơ"
+      toast.error(msg)
+      throw e
+    }
   }
 
   return (
@@ -71,16 +116,47 @@ export function EditProfileModal({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Personal Information */}
+            {/* Avatar */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Thông tin cá nhân
+                Ảnh đại diện
               </h3>
-              
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Preview" className="h-full w-full object-cover rounded-full" />
+                  ) : (
+                    <>
+                      <AvatarImage src={profileData.avatar} alt={profileData.name} />
+                      <AvatarFallback className="text-lg">
+                        {profileData.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
+                      </AvatarFallback>
+                    </>
+                  )}
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <Input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)}
+                  />
+                  <p className="text-xs text-muted-foreground">Định dạng: JPG, PNG, WebP</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                Thông tin có thể chỉnh sửa
+              </h3>
               <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="fullName"
                   rules={{
                     required: "Họ và tên là bắt buộc",
                     minLength: {
@@ -90,7 +166,7 @@ export function EditProfileModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Họ và tên</FormLabel>
+                      <FormLabel>Họ và tên *</FormLabel>
                       <FormControl>
                         <Input placeholder="Nhập họ và tên" {...field} />
                       </FormControl>
@@ -98,33 +174,6 @@ export function EditProfileModal({
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="dateOfBirth"
-                  rules={{
-                    required: "Ngày sinh là bắt buộc",
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Ngày sinh</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Thông tin liên hệ
-              </h3>
-              
-              <div className="grid gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="email"
@@ -137,7 +186,7 @@ export function EditProfileModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email *</FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="email@example.com" {...field} />
                       </FormControl>
@@ -145,10 +194,9 @@ export function EditProfileModal({
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="phoneNumber"
                   rules={{
                     required: "Số điện thoại là bắt buộc",
                     pattern: {
@@ -158,7 +206,7 @@ export function EditProfileModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số điện thoại</FormLabel>
+                      <FormLabel>Số điện thoại *</FormLabel>
                       <FormControl>
                         <Input type="tel" placeholder="+84 123 456 789" {...field} />
                       </FormControl>
@@ -167,87 +215,7 @@ export function EditProfileModal({
                   )}
                 />
               </div>
-
-              <FormField
-                control={form.control}
-                name="address"
-                rules={{
-                  required: "Địa chỉ là bắt buộc",
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Địa chỉ</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nhập địa chỉ đầy đủ" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
-
-            {/* Bio */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Giới thiệu
-              </h3>
-              
-              <FormField
-                control={form.control}
-                name="bio"
-                rules={{
-                  maxLength: {
-                    value: 500,
-                    message: "Giới thiệu không được vượt quá 500 ký tự",
-                  },
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Giới thiệu về bản thân</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Viết một vài dòng giới thiệu về bản thân..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      {field.value?.length || 0}/500 ký tự
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Read-only fields */}
-            {/* <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Thông tin hệ thống
-              </h3>
-              
-              <div className="grid gap-4 md:grid-cols-2">
-                <FormItem>
-                  <FormLabel>Vai trò</FormLabel>
-                  <FormControl>
-                    <Input value={profileData.role} disabled className="bg-muted" />
-                  </FormControl>
-                  <FormDescription>
-                    Vai trò không thể thay đổi
-                  </FormDescription>
-                </FormItem>
-
-                <FormItem>
-                  <FormLabel>Phòng ban</FormLabel>
-                  <FormControl>
-                    <Input value={profileData.department} disabled className="bg-muted" />
-                  </FormControl>
-                  <FormDescription>
-                    Phòng ban không thể thay đổi
-                  </FormDescription>
-                </FormItem>
-              </div>
-            </div> */}
 
             <DialogFooter>
               <Button

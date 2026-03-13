@@ -12,15 +12,18 @@ import ManageLockerPage from "../pages/ManageLockerPage";
 import ManageCabinetPage from "../pages/ManageCabinetPage";
 import ManageLocationPage from "../pages/ManageLocationPage";
 import ManagePlanPage from "../pages/ManagePlanPage";
+import ManagePricingPage from "../pages/ManagePricingPage";
+import ManageSubscriptionPage from "../pages/ManageSubscriptionPage";
 import ManageCustomerReport from "../pages/ManageCustomerReport";
 import ManageTransactionPage from "../pages/ManageTransactionPage";
 import ManageOrderPage from "../pages/ManageOrderPage";
 import ManageHardwarePage from "../pages/ManageHardwarePage";
-import ManageTechnicalStaffReport from "../pages/ManageTechnicalStaffReport";
 import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/CabinetSetupPage";
 import AdminNotificationListPage from "@/features/notification/pages/AdminNotificationListPage";
 import AdminNotificationDetailPage from "@/features/notification/pages/AdminNotificationDetailPage";
 import DispatchMapPage from "../pages/DispatchMapPage";
+import ManageTask from "../pages/ManageTask";
+import ManageVehiclesPage from "../pages/ManageVehiclesPage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -34,7 +37,7 @@ const AdminRoutes = () => {
         <Route path="courier-requests" element={<ManageCourierRequest />} />
         <Route path="locked-accounts" element={<ManageLockedAccountsPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />
-        <Route path="manage-reports-staff" element={<ManageTechnicalStaffReport />} />
+        <Route path="manage-tasks" element={<ManageTask />} />
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="lockers" element={<ManageLockerPage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
@@ -46,6 +49,9 @@ const AdminRoutes = () => {
         <Route path="notifications" element={<AdminNotificationListPage />} />
         <Route path="notifications/:id" element={<AdminNotificationDetailPage />} />
         <Route path="dispatch-map" element={<DispatchMapPage />} />
+        <Route path="vehicles" element={<ManageVehiclesPage />} />
+        <Route path="pricing" element={<ManagePricingPage />} />
+        <Route path="subscriptions" element={<ManageSubscriptionPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />

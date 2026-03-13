@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   DataTable,
   type Column,
@@ -10,6 +10,8 @@ import {
 } from "../features/user/components/CreateOrUpdateUserModal";
 import UserDetailModal from "../features/user/components/UserDetailModal";
 import UserRoleComponent from "../features/user/components/UserRoleComponent";
+import { useRoles } from "../features/user/hooks/useRoles";
+import { getRoleDisplayName } from "@/shared/configs/role";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +32,7 @@ import type { User } from "../features/user/types/user.types";
 import { toast } from "sonner";
 
 const ManageUserPage = () => {
+  const { roles } = useRoles();
   const {
     users,
     total,
@@ -44,6 +47,15 @@ const ManageUserPage = () => {
     handleFilter,
     handleClearFilters,
   } = useUser({ defaultPageSize: 10 });
+
+  const roleFilterOptions = useMemo(
+    () =>
+      roles.filter((r) => r.name !== "admin_client").map((r) => ({
+        value: r.name,
+        label: getRoleDisplayName(r.name),
+      })),
+    [roles]
+  );
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -122,12 +134,7 @@ const ManageUserPage = () => {
       label: "Vai trò",
       allStringValue: "Tất cả vai trò",
       placeholder: "Chọn vai trò",
-      options: [
-        { value: "Quản trị viên", label: "Quản trị viên" },
-        { value: "Nhân viên", label: "Nhân viên" },
-        { value: "Người vận chuyển", label: "Người vận chuyển" },
-        { value: "Khách hàng", label: "Khách hàng" },
-      ],
+      options: roleFilterOptions,
     },
   ];
 
@@ -226,7 +233,7 @@ const ManageUserPage = () => {
           toast.error("Vui lòng nhập mật khẩu");
           return;
         }
-        await authService.register({
+        await authService.createAccout({
           email: data.email,
           password: data.password,
           fullName: data.fullName,

@@ -37,9 +37,10 @@ function buildListParams(
   }
   filters.forEach((filter) => {
     if (filter.key === "role" && filter.value) {
+      // filter.value là role name từ API (vd: ADMIN, CUSTOMER) hoặc label cũ
       const roleMap: Record<string, string> = {
         "Quản trị viên": roles.ADMIN,
-        "Nhân viên": roles.TECHNICAL_STAFF,
+        "Nhân viên kỹ thuật": roles.TECHNICIAN,
         "Người vận chuyển": roles.COURIER,
         "Khách hàng": roles.CUSTOMER,
       };
@@ -64,6 +65,8 @@ export interface UseUserOptions {
   defaultPageSize?: number;
   fetchOnMount?: boolean;
   defaultParams?: Partial<UserListParams>;
+  /** Bộ lọc mặc định (vd. filter theo role) */
+  initialFilters?: FilterConfig[];
 }
 
 export interface UseUserReturn {
@@ -86,7 +89,7 @@ export interface UseUserReturn {
 }
 
 export function useUser(options: UseUserOptions = {}): UseUserReturn {
-  const { defaultPageSize = 10, fetchOnMount = true, defaultParams } = options;
+  const { defaultPageSize = 10, fetchOnMount = true, defaultParams, initialFilters = [] } = options;
 
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
@@ -94,7 +97,7 @@ export function useUser(options: UseUserOptions = {}): UseUserReturn {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSizeState] = useState(defaultPageSize);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState<FilterConfig[]>([]);
+  const [filters, setFilters] = useState<FilterConfig[]>(initialFilters);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const params = useMemo(() => {
