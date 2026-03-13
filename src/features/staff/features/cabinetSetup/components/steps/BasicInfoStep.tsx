@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
@@ -40,6 +41,25 @@ export function BasicInfoStep({ form }: BasicInfoStepProps) {
   });
 
   const locations = areas?.data.locations || [];
+
+  // Auto-fill from URL parameters if available
+  const cabinetId = useWatch({ control: form.control, name: "cabinetId" });
+  
+  useEffect(() => {
+    if (cabinetId && cabinetsData?.data?.cabinets) {
+      const selected = cabinetsData.data.cabinets.find(c => c.id === cabinetId);
+      if (selected) {
+        // Only set if current values are empty to avoid overwriting user changes 
+        // OR if they match the defaults but the cabinet has specific values
+        const currentMac = form.getValues("macAddress");
+        if (!currentMac) {
+          form.setValue("macAddress", selected.macAddress);
+          form.setValue("totalRows", selected.totalRows);
+          form.setValue("totalColumns", selected.totalColumns);
+        }
+      }
+    }
+  }, [cabinetId, cabinetsData, form]);
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">

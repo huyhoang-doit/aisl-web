@@ -13,7 +13,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form";
 import { toast } from "sonner";
 import { Check, ChevronRight, ServerCog } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { cabinetSetupService } from "../services/cabinetSetup.service";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
@@ -31,14 +31,18 @@ export default function CabinetSetupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [setupResult, setSetupResult] = useState<{ cabinetId: string; totalLockers: number } | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
+
+  const paramLocationId = searchParams.get("locationId") || "";
+  const paramCabinetId = searchParams.get("cabinetId") || "";
 
   const form = useForm<SetupCabinetFormValues>({
     resolver: zodResolver(setupCabinetSchema),
     mode: "onChange",
     defaultValues: {
-      locationId: "",
-      cabinetId: "",
+      locationId: paramLocationId,
+      cabinetId: paramCabinetId,
       macAddress: "",
       totalRows: 4,
       totalColumns: 6,
