@@ -8,6 +8,7 @@ const ROLE_LABELS: Record<string, string> = {
   [roles.TECHNICAL_STAFF]: "Nhân viên",
   [roles.COURIER]: "Người vận chuyển",
   [roles.CUSTOMER]: "Khách hàng",
+  [roles.TECHNICIAN]: "Nhân viên",
 };
 
 function getRoleLabel(roleName: string): string {

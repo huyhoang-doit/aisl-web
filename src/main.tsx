@@ -7,6 +7,8 @@ import './index.css'
 import App from './App.tsx'
 import { Toaster } from './shared/components/ui/sonner.tsx';
 import { NotificationProvider } from './shared/contexts';
+import 'leaflet/dist/leaflet.css';
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,6 +18,7 @@ const queryClient = new QueryClient({
     },
   },
 })
+
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

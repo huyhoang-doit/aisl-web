@@ -1,26 +1,23 @@
 import React from "react";
 import { Badge } from "@/shared/components/ui/badge";
-import {
-  type StatusValue,
-  type StatusVariant,
-  STATUS_CONFIG,
-  normalizeStatus,
-} from "./statusConfig";
+import { getStatusEntry } from "./statusConfig";
 
 export interface StatusComponentProps {
-  /** Giá trị từ API: string "ACTIVE" | "INACTIVE" | "BLOCKED" hoặc object { value, code } */
+  /** Giá trị từ API: string (vd "PENDING", "ACTIVE") hoặc object { value, code } */
   status?: string | Record<string, unknown>;
-  /** Override config (optional) */
-  config?: Partial<Record<StatusValue, { label: string; variant: StatusVariant }>>;
+  /** Override className cho Badge */
   className?: string;
 }
 
-const StatusComponent: React.FC<StatusComponentProps> = ({ status, config, className }) => {
-  const value = normalizeStatus(status);
-  const resolved = { ...STATUS_CONFIG[value], ...config?.[value] };
+/**
+ * Badge trạng thái dùng chung: chỉ cần truyền props status,
+ * màu và label lấy từ statusConfig. Thêm trạng thái mới thì thêm vào config.
+ */
+const StatusComponent: React.FC<StatusComponentProps> = ({ status, className }) => {
+  const { label, variant } = getStatusEntry(status);
   return (
-    <Badge variant={resolved.variant} className={className}>
-      {resolved.label}
+    <Badge variant={variant} className={className}>
+      {label}
     </Badge>
   );
 };

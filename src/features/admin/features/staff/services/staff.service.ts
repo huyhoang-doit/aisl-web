@@ -44,7 +44,7 @@ export const staffService = {
   getTechnicalStaff: async (params?: StaffListParams): Promise<Staff[]> => {
     const response = await staffService.getAll({
       ...params,
-      role: 'TECHNICAL_STAFF',
+      role: 'TECHNICIAN',
       status: 'ACTIVE',
     });
     const data = response.data;

@@ -55,7 +55,7 @@ const Login = () => {
       // Redirect dựa trên role
       if (user?.roles.includes(roles.ADMIN)) {
         navigate("/admin/dashboard", { replace: true });
-      } else if (user?.roles.includes(roles.TECHNICAL_STAFF)) {
+      } else if (user?.roles.includes(roles.TECHNICIAN)) {
         navigate("/staff/dashboard", { replace: true });
       } else {
         navigate("/", { replace: true });

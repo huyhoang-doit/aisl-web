@@ -95,39 +95,30 @@ const ManageCourierRequest = () => {
   // Định nghĩa columns cho bảng
   const columns: Column<CourierRequest>[] = [
     {
-      key: "name",
+      key: "legalName",
       header: "Họ và tên",
       sortable: true,
       filterable: true,
       filterType: "text",
       filterPlaceholder: "Tìm theo tên",
       accessor: (row) => (
-        <div className="font-medium">{row.name}</div>
+        <div className="font-medium">{row.legalName || "—"}</div>
       ),
     },
     {
-      key: "email",
-      header: "Email",
+      key: "licensePlate",
+      header: "Biển số xe",
       sortable: true,
       filterable: true,
       filterType: "text",
-      filterPlaceholder: "Tìm theo email",
+      filterPlaceholder: "Tìm theo biển số",
       accessor: (row) => (
-        <div className="text-muted-foreground">{row.email}</div>
+        <div className="font-mono text-sm">{row.licensePlate || "—"}</div>
       ),
     },
     {
-      key: "phone",
-      header: "Số điện thoại",
-      sortable: true,
-      filterable: true,
-      filterType: "text",
-      filterPlaceholder: "Tìm theo số điện thoại",
-      accessor: (row) => row.phone,
-    },
-    {
-      key: "status",
-      header: "Trạng thái",
+      key: "vehicleType",
+      header: "Loại xe",
       sortable: true,
       filterable: true,
       filterType: "select",
@@ -148,13 +139,13 @@ const ManageCourierRequest = () => {
       },
     },
     {
-      key: "requestDate",
-      header: "Ngày yêu cầu",
+      key: "createdAt",
+      header: "Ngày tạo",
       sortable: true,
       filterable: false,
       accessor: (row) => (
         <div className="text-sm text-muted-foreground">
-          {row.requestDate ? new Date(row.requestDate).toLocaleDateString("vi-VN") : "-"}
+          {row.createdAt ? new Date(row.createdAt).toLocaleDateString("vi-VN") : "—"}
         </div>
       ),
     },
@@ -169,7 +160,7 @@ const ManageCourierRequest = () => {
             variant="ghost"
             size="sm"
             onClick={() => {
-              setSelectedRequest(row)
+              setSelectedApplication(row)
               setIsDetailModalOpen(true)
             }}
           >
@@ -181,7 +172,7 @@ const ManageCourierRequest = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedRequest(row)
+                  setSelectedApplication(row)
                   setIsApproveModalOpen(true)
                 }}
                 className="text-green-600 hover:text-green-700"
@@ -196,7 +187,7 @@ const ManageCourierRequest = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedRequest(row)
+                  setSelectedApplication(row)
                   setIsRejectModalOpen(true)
                 }}
                 className="text-red-600 hover:text-red-700"
@@ -210,35 +201,33 @@ const ManageCourierRequest = () => {
     },
   ]
 
-  // Xử lý sorting
-  const handleSort = (sort: SortConfig | null) => {
-    setSortConfig(sort)
+  const handleSort = (_sort: SortConfig | null) => {
+    setSortConfig(_sort)
     setPage(1)
   }
 
-  // Xử lý filtering
-  const handleFilter = (newFilters: FilterConfig[]) => {
-    setFilters(newFilters)
-    setPage(1)
+  const handleApproveSubmit = async (
+    application: CourierApplication,
+    action: "approve" | "reject",
+    reviewNote: string
+  ) => {
+    if (action === "approve") {
+      await approve(application.id, { reviewNote })
+    } else {
+      await reject(application.id, { reviewNote })
+    }
+    setIsApproveModalOpen(false)
+    setIsRejectModalOpen(false)
+    setSelectedApplication(null)
   }
 
-  // Xử lý search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query)
-    setPage(1)
-  }
-
-  // Xử lý quick filter change
-  const handleQuickFilterChange = () => {
-    setPage(1)
-  }
-
-  // Định nghĩa quick filters
   const quickFilters: QuickFilter[] = [
     {
-      key: "status",
-      label: "Trạng thái",
-      placeholder: "Chọn trạng thái",
+      key: "sortOrder",
+      label: "Sắp xếp",
+      placeholder: "Sắp xếp",
+      hideAllOption: true,
+      defaultValue: "Mới nhất",
       options: [
         { value: "Chưa kích hoạt", label: "Chưa kích hoạt" },
         { value: "Chờ duyệt", label: "Chờ duyệt" },
@@ -266,7 +255,7 @@ const ManageCourierRequest = () => {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Duyệt người chuyển phát</h1>
         <p className="text-muted-foreground mt-2">
-          Duyệt các yêu cầu đăng ký làm người chuyển phát trong hệ thống
+          Duyệt các đơn đăng ký làm người chuyển phát trong hệ thống
         </p>
       </div>
 
@@ -298,38 +287,35 @@ const ManageCourierRequest = () => {
         }}
       />
 
-      {/* Modal chi tiết */}
       <CourierRequestDetailModal
         open={isDetailModalOpen}
         onOpenChange={setIsDetailModalOpen}
-        request={selectedRequest}
-        onApprove={(request) => {
-          setSelectedRequest(request)
+        application={selectedApplication}
+        onApprove={(app) => {
+          setSelectedApplication(app)
           setIsDetailModalOpen(false)
           setIsApproveModalOpen(true)
         }}
-        onReject={(request) => {
-          setSelectedRequest(request)
+        onReject={(app) => {
+          setSelectedApplication(app)
           setIsDetailModalOpen(false)
           setIsRejectModalOpen(true)
         }}
       />
 
-      {/* Modal duyệt */}
       <ApproveCourierRequestModal
         open={isApproveModalOpen}
         onOpenChange={setIsApproveModalOpen}
-        request={selectedRequest}
-        onSubmit={handleApprove}
+        application={selectedApplication}
+        onSubmit={handleApproveSubmit}
         action="approve"
       />
 
-      {/* Modal từ chối */}
       <ApproveCourierRequestModal
         open={isRejectModalOpen}
         onOpenChange={setIsRejectModalOpen}
-        request={selectedRequest}
-        onSubmit={handleApprove}
+        application={selectedApplication}
+        onSubmit={handleApproveSubmit}
         action="reject"
       />
     </div>

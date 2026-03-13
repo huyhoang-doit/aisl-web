@@ -32,6 +32,8 @@ export interface UpdateUserPayload {
   notificationType?: NotificationType;
   /** Chỉ gửi khi đổi mật khẩu */
   password?: string;
+  /** Avatar – gửi trong field "files", dùng multipart/form-data */
+  file?: File;
 }
 
 export interface UserResponse {
@@ -55,6 +57,17 @@ export interface UserListParams {
   search?: string;
   orderBy?: string;
   orderDirection?: "ASC" | "DESC";
+}
+
+export interface Role {
+  id: string;
+  name: string;
+}
+
+export interface RolesResponse {
+  data: {
+    roles: Role[];
+  };
 }
 
 export const userService = {
@@ -98,10 +111,23 @@ export const userService = {
   },
 
   /**
-   * Cập nhật user
+   * Cập nhật user.
+   * Có file (avatar) → multipart/form-data, field "files".
+   * Không có file → JSON.
    */
   update: async (keycloakUserId: string, data: UpdateUserPayload): Promise<UserResponse> => {
-    return api.put<UserResponse>(`/users/${keycloakUserId}`, data);
+    const { file, ...rest } = data;
+    if (file) {
+      const formData = new FormData();
+      Object.entries(rest).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, String(value));
+        }
+      });
+      formData.append("files", file);
+      return api.put<UserResponse>(`/users/${keycloakUserId}`, formData);
+    }
+    return api.put<UserResponse>(`/users/${keycloakUserId}`, rest);
   },
 
   /**
@@ -119,5 +145,12 @@ export const userService = {
     data: { status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED"; reason?: string }
   ): Promise<UserResponse> => {
     return api.put<UserResponse>(`/users/${keycloakUserId}/courier-status`, data);
+  },
+
+  /**
+   * Lấy danh sách vai trò (roles)
+   */
+  getRoles: async (): Promise<RolesResponse> => {
+    return api.get<RolesResponse>("/roles");
   },
 };

@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import type { CustomerReport } from "../types/customerReport.types";
 import { maintenanceReportService, type CreateReportPayload } from "../services/maintenanceReport.service";
-import { maintenanceTaskService, type CreateTaskPayload } from "../services/maintenanceTask.service";
+import { taskService, type CreateTaskPayload } from "@/features/admin/features/task/services/task.service";
 import type { FilterConfig } from "@/shared/components/DataTable";
 
 export interface ReportListParams {
@@ -14,6 +14,8 @@ export interface ReportListParams {
   limit?: number;
   status?: string;
   search?: string;
+  orderBy?: string;
+  orderDirection?: "ASC" | "DESC";
 }
 
 function extractReports(response: unknown): CustomerReport[] {
@@ -40,17 +42,23 @@ function extractPagination(response: unknown): { total: number } {
   };
 }
 
-const STATUS_MAP: Record<string, string> = {
-  "Chờ xử lý": "PENDING",
-  "Đã phân công": "ASSIGNED",
-  "Đang xử lý": "IN_PROGRESS",
-  "Hoàn thành": "COMPLETED",
-  "Từ chối": "REJECTED",
+const SORT_ORDER_MAP: Record<string, "ASC" | "DESC"> = {
+  "Mới nhất": "DESC",
+  "Cũ nhất": "ASC",
 };
+
+export type IncidentReportStatusTab =
+  | "PENDING"
+  | "ASSIGNED"
+  | "IN_PROGRESS"
+  | "RESOLVED"
+  | "CLOSED";
 
 export interface UseCustomerReportOptions {
   defaultPageSize?: number;
   fetchOnMount?: boolean;
+  /** Tab trạng thái – mỗi tab query theo status tương ứng */
+  status?: IncidentReportStatusTab;
 }
 
 export interface UseCustomerReportReturn {
@@ -70,12 +78,14 @@ export interface UseCustomerReportReturn {
   handleClearFilters: () => void;
   createReport: (data: CreateReportPayload) => Promise<void>;
   assignTask: (payload: CreateTaskPayload) => Promise<void>;
+  /** Tạo nhiều task cho một report (mỗi nhân viên một task) */
+  assignTasks: (payloads: CreateTaskPayload[]) => Promise<void>;
   isCreating: boolean;
   isAssigning: boolean;
 }
 
 export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCustomerReportReturn {
-  const { defaultPageSize = 10, fetchOnMount = true } = options;
+  const { defaultPageSize = 10, fetchOnMount = true, status: tabStatus } = options;
 
   const [reports, setReports] = useState<CustomerReport[]>([]);
   const [total, setTotal] = useState(0);
@@ -90,15 +100,20 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
 
   const params = useMemo<ReportListParams>(
     () => {
-      const statusFilter = filters.find((f) => f.key === "status")?.value;
+      const sortOrderFilter = filters.find((f) => f.key === "sortOrder")?.value;
+      const orderDirection = sortOrderFilter && SORT_ORDER_MAP[sortOrderFilter]
+        ? SORT_ORDER_MAP[sortOrderFilter]
+        : "DESC";
       return {
         page,
         limit: pageSize,
         search: searchQuery.trim() || undefined,
-        status: statusFilter ? STATUS_MAP[statusFilter] || statusFilter : undefined,
+        status: tabStatus ?? undefined,
+        orderBy: "createdAt",
+        orderDirection,
       };
     },
-    [page, pageSize, searchQuery, filters]
+    [page, pageSize, searchQuery, filters, tabStatus]
   );
 
   const loadReports = useCallback(async () => {
@@ -142,11 +157,33 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
   const assignTask = useCallback(async (payload: CreateTaskPayload) => {
     try {
       setIsAssigning(true);
-      await maintenanceTaskService.create(payload);
+      await taskService.create(payload);
       toast.success("Phân công nhân viên thành công");
       refetch();
     } catch (error) {
       console.error("Error assigning task:", error);
+      toast.error("Có lỗi xảy ra khi phân công");
+      throw error;
+    } finally {
+      setIsAssigning(false);
+    }
+  }, [refetch]);
+
+  const assignTasks = useCallback(async (payloads: CreateTaskPayload[]) => {
+    if (!payloads.length) return;
+    try {
+      setIsAssigning(true);
+      for (const payload of payloads) {
+        await taskService.create(payload);
+      }
+      toast.success(
+        payloads.length === 1
+          ? "Phân công nhân viên thành công"
+          : `Đã tạo ${payloads.length} task phân công thành công`
+      );
+      refetch();
+    } catch (error) {
+      console.error("Error assigning tasks:", error);
       toast.error("Có lỗi xảy ra khi phân công");
       throw error;
     } finally {
@@ -192,6 +229,7 @@ export function useCustomerReport(options: UseCustomerReportOptions = {}): UseCu
     handleClearFilters,
     createReport,
     assignTask,
+    assignTasks,
     isCreating,
     isAssigning,
   };

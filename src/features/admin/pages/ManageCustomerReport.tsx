@@ -1,17 +1,53 @@
 import { useState } from "react";
 import { DataTable, type Column, type SortConfig, type QuickFilter } from "@/shared/components/DataTable";
-import { Badge } from "@/shared/components/ui/badge";
+import StatusComponent from "@/shared/components/StatusComponent";
 import { Button } from "@/shared/components/ui/button";
-import { Eye, UserCheck, Plus, ImageIcon } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { Eye, UserCheck, Plus } from "lucide-react";
 import CustomerReportDetailModal from "../features/customerReport/modals/CustomerReportDetailModal";
 import AssignTechnicalStaffModal from "../features/customerReport/modals/AssignTechnicalStaffModal";
 import CreateReportModal from "../features/customerReport/modals/CreateReportModal";
-import { useCustomerReport } from "../features/customerReport/hooks/useCustomerReport";
-import { useTechnicalStaff } from "../features/staff/hooks/useTechnicalStaff";
+import {
+  useCustomerReport,
+  type IncidentReportStatusTab,
+} from "../features/customerReport/hooks/useCustomerReport";
 import type { CustomerReport } from "../features/customerReport/types/customerReport.types";
-import type { CreateTaskPayload } from "../features/customerReport/services/maintenanceTask.service";
+import type { CreateTaskPayload } from "../features/task/services/task.service";
+
+/** Enum trạng thái báo cáo sự cố (backend) */
+const INCIDENT_STATUS_TABS: IncidentReportStatusTab[] = [
+  "PENDING",
+  "ASSIGNED",
+  "IN_PROGRESS",
+  "RESOLVED",
+  "CLOSED",
+];
+
+const STATUS_LABELS: Record<IncidentReportStatusTab, string> = {
+  PENDING: "Chờ xử lý",
+  ASSIGNED: "Đã phân công",
+  IN_PROGRESS: "Đang xử lý",
+  RESOLVED: "Đã xử lý",
+  CLOSED: "Đã đóng",
+};
+
+/** Màu tab theo trạng thái: active state */
+const TAB_COLOR_CLASS: Record<IncidentReportStatusTab, string> = {
+  PENDING:
+    "data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:border-amber-300 border border-transparent border-border",
+  ASSIGNED:
+    "data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800 data-[state=active]:border-blue-300 border border-transparent border-border",
+  IN_PROGRESS:
+    "data-[state=active]:bg-sky-100 data-[state=active]:text-sky-800 data-[state=active]:border-sky-300 border border-transparent border-border",
+  RESOLVED:
+    "data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 data-[state=active]:border-emerald-300 border border-transparent border-border",
+  CLOSED:
+    "data-[state=active]:bg-red-100 data-[state=active]:text-red-800 data-[state=active]:border-red-300 border border-transparent border-border",
+};
 
 const ManageCustomerReport = () => {
+  const [currentTab, setCurrentTab] = useState<IncidentReportStatusTab>("PENDING");
+
   const {
     reports: customerReports,
     total,
@@ -24,11 +60,9 @@ const ManageCustomerReport = () => {
     handleFilter,
     handleClearFilters,
     createReport,
-    assignTask,
+    assignTasks,
     isCreating,
-  } = useCustomerReport({ defaultPageSize: 10 });
-
-  const { staffList: technicalStaff } = useTechnicalStaff();
+  } = useCustomerReport({ defaultPageSize: 10, status: currentTab });
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
@@ -38,15 +72,6 @@ const ManageCustomerReport = () => {
 
   const [, setSortConfig] = useState<SortConfig | null>(null);
 
-  const STATUS_CONFIG: Record<string, { label: string; variant: "secondary" | "default" | "destructive" }> = {
-    PENDING: { label: "Chờ xử lý", variant: "secondary" },
-    ASSIGNED: { label: "Đã phân công", variant: "default" },
-    IN_PROGRESS: { label: "Đang xử lý", variant: "default" },
-    COMPLETED: { label: "Hoàn thành", variant: "default" },
-    REJECTED: { label: "Từ chối", variant: "destructive" },
-  };
-
-  // Định nghĩa columns cho bảng (theo API response: code, title, description, lockerLabel, cabinetName, status, createdAt)
   const columns: Column<CustomerReport>[] = [
     {
       key: "code",
@@ -68,16 +93,6 @@ const ManageCustomerReport = () => {
       filterPlaceholder: "Tìm theo tiêu đề",
       accessor: (row) => <div className="font-medium">{row.title ?? "-"}</div>,
     },
-    // {
-    //   key: "description",
-    //   header: "Mô tả",
-    //   sortable: true,
-    //   accessor: (row) => (
-    //     <div className="text-sm text-muted-foreground max-w-[200px] truncate">
-    //       {row.description ?? "-"}
-    //     </div>
-    //   ),
-    // },
     {
       key: "lockerLabel",
       header: "Locker",
@@ -107,8 +122,7 @@ const ManageCustomerReport = () => {
         if (count === 0) return <span className="text-muted-foreground text-sm">-</span>;
         return (
           <div className="flex items-center gap-1.5 text-sm">
-            {/* <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" /> */}
-            <span>{count} ảnh</span> {/* TODO: Add image preview */}
+            <span>{count} ảnh</span>
             {urls[0] && (
               <div className="w-8 h-8 rounded overflow-hidden border border-border shrink-0">
                 <img src={urls[0]} alt="" className="w-full h-full object-cover" />
@@ -122,23 +136,8 @@ const ManageCustomerReport = () => {
       key: "status",
       header: "Trạng thái",
       sortable: true,
-      filterable: true,
-      filterType: "select",
-      filterOptions: ["Chờ xử lý", "Đã phân công", "Đang xử lý", "Hoàn thành", "Từ chối"],
-      accessor: (row) => {
-        const status = row.status ?? "PENDING";
-        const config = STATUS_CONFIG[status] ?? { label: status, variant: "secondary" as const };
-        return <Badge variant={config.variant}>{config.label}</Badge>;
-      },
+      accessor: (row) => <StatusComponent status={row.status} />,
     },
-    // {
-    //   key: "assignedToName",
-    //   header: "Nhân viên kỹ thuật",
-    //   sortable: true,
-    //   accessor: (row) => (
-    //     <div className="text-muted-foreground">{row.assignedToName ?? "Chưa phân công"}</div>
-    //   ),
-    // },
     {
       key: "createdAt",
       header: "Ngày báo cáo",
@@ -153,29 +152,16 @@ const ManageCustomerReport = () => {
     },
   ];
 
-  // Quick filters
   const quickFilters: QuickFilter[] = [
     {
-      key: "status",
-      label: "Trạng thái",
-      placeholder: "Chọn trạng thái",
+      key: "sortOrder",
+      label: "Sắp xếp",
+      placeholder: "Sắp xếp",
+      hideAllOption: true,
+      defaultValue: "Mới nhất",
       options: [
-        { value: "Chờ xử lý", label: "Chờ xử lý" },
-        { value: "Đã phân công", label: "Đã phân công" },
-        { value: "Đang xử lý", label: "Đang xử lý" },
-        { value: "Hoàn thành", label: "Hoàn thành" },
-        { value: "Từ chối", label: "Từ chối" },
-      ],
-    },
-    {
-      key: "priority",
-      label: "Độ ưu tiên",
-      placeholder: "Chọn độ ưu tiên",
-      options: [
-        { value: "Thấp", label: "Thấp" },
-        { value: "Trung bình", label: "Trung bình" },
-        { value: "Cao", label: "Cao" },
-        { value: "Khẩn cấp", label: "Khẩn cấp" },
+        { value: "Mới nhất", label: "Mới nhất" },
+        { value: "Cũ nhất", label: "Cũ nhất" },
       ],
     },
   ];
@@ -196,8 +182,8 @@ const ManageCustomerReport = () => {
     setIsAssignModalOpen(true);
   };
 
-  const handleAssignSubmit = async (payload: CreateTaskPayload) => {
-    await assignTask(payload);
+  const handleAssignSubmit = async (payloads: CreateTaskPayload[]) => {
+    await assignTasks(payloads);
     setIsAssignModalOpen(false);
     setSelectedReport(null);
   };
@@ -222,16 +208,30 @@ const ManageCustomerReport = () => {
     {
       label: "Phân công",
       icon: <UserCheck className="h-4 w-4" />,
-      onClick: (report: CustomerReport) => {
-        const status = (report.status ?? "PENDING").toUpperCase();
-        if (status !== "ASSIGNED" && status !== "IN_PROGRESS" && status !== "COMPLETED") {
-          handleAssign(report);
-        }
-      },
+      onClick: handleAssign,
       variant: "ghost" as const,
       className: "text-primary hover:text-primary hover:bg-primary/10",
+      visible: (row: CustomerReport) =>
+        (row.status ?? "PENDING").toUpperCase() === "PENDING",
+    },
+    {
+      label: "Phân công thêm",
+      icon: <UserCheck className="h-4 w-4" />,
+      onClick: handleAssign,
+      variant: "ghost" as const,
+      className: "text-primary hover:text-primary hover:bg-primary/10",
+      visible: (row: CustomerReport) =>
+        (row.status ?? "").toUpperCase() === "ASSIGNED",
     },
   ];
+
+  const emptyMessages: Record<IncidentReportStatusTab, string> = {
+    PENDING: "Chưa có báo cáo nào chờ xử lý",
+    ASSIGNED: "Chưa có báo cáo nào đã phân công",
+    IN_PROGRESS: "Chưa có báo cáo nào đang xử lý",
+    RESOLVED: "Chưa có báo cáo nào đã xử lý",
+    CLOSED: "Chưa có báo cáo nào đã đóng",
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -248,32 +248,55 @@ const ManageCustomerReport = () => {
         </Button>
       </div>
 
-      <DataTable
-        data={customerReports}
-        columns={columns}
-        keyExtractor={(row) => row.id}
-        customActions={customActions}
-        emptyMessage="Chưa có báo cáo nào"
-        isLoading={isLoading}
-        onSort={handleSort}
-        onFilter={handleFilter}
-        pagination={{
-          page,
-          pageSize,
-          total,
-          onPageChange: setPage,
-          onPageSizeChange: setPageSize,
-          pageSizeOptions: [5, 10, 20, 50],
+      <Tabs
+        value={currentTab}
+        onValueChange={(value) => {
+          setCurrentTab(value as IncidentReportStatusTab);
+          setPage(1);
         }}
-        searchable={true}
-        searchPlaceholder="Tìm kiếm theo tiêu đề, mã báo cáo..."
-        onSearch={handleSearch}
-        quickFilters={quickFilters}
-        onQuickFilterChange={() => setPage(1)}
-        onClearFilters={() => {
-          handleClearFilters();
-        }}
-      />
+        className="w-full"
+      >
+        <TabsList className="flex justify-start flex-wrap h-auto gap-1 p-1 bg-muted/50">
+          {INCIDENT_STATUS_TABS.map((status) => (
+            <TabsTrigger
+              key={status}
+              value={status}
+              className={TAB_COLOR_CLASS[status]}
+            >
+              {STATUS_LABELS[status]}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        {INCIDENT_STATUS_TABS.map((tabValue) => (
+          <TabsContent key={tabValue} value={tabValue} className="space-y-4 mt-4">
+            <DataTable
+              data={customerReports}
+              columns={columns}
+              keyExtractor={(row) => row.id}
+              customActions={customActions}
+              emptyMessage={emptyMessages[tabValue]}
+              isLoading={isLoading}
+              onSort={handleSort}
+              onFilter={handleFilter}
+              pagination={{
+                page,
+                pageSize,
+                total,
+                onPageChange: setPage,
+                onPageSizeChange: setPageSize,
+                pageSizeOptions: [5, 10, 20, 50],
+              }}
+              searchable={true}
+              searchPlaceholder="Tìm kiếm theo tiêu đề, mã báo cáo..."
+              onSearch={handleSearch}
+              quickFilters={quickFilters}
+              onQuickFilterChange={() => setPage(1)}
+              onClearFilters={() => handleClearFilters()}
+            />
+          </TabsContent>
+        ))}
+      </Tabs>
 
       {selectedReportId != null && (
         <CustomerReportDetailModal
@@ -289,7 +312,6 @@ const ManageCustomerReport = () => {
           open={isAssignModalOpen}
           onOpenChange={handleAssignModalClose}
           report={selectedReport}
-          technicalStaffList={technicalStaff}
           onSubmit={handleAssignSubmit}
         />
       )}

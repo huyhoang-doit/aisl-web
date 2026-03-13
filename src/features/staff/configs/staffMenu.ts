@@ -1,13 +1,9 @@
 import {
   LayoutDashboard,
-  Package,
-  History,
-  AlertTriangle,
   Bell,
-  BarChart3,
   User,
-  UserCog,
-  ServerCog,
+  ClipboardList,
+  Settings,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -19,61 +15,19 @@ export const staffNavMain: NavItem[] = [
     isActive: false,
   },
   {
-    title: "Báo cáo doanh thu",
-    url: "/staff/revenue",
-    icon: BarChart3,
+    title: "Task của tôi",
+    url: "/staff/my-tasks",
+    icon: ClipboardList,
   },
   {
-    title: "Quản lý lockers ",
-    url: "/staff/list-lockers",
-    icon: Package,
-    // items: [
-    //   {
-    //     title: "Tất cả khu vực",
-    //     url: "/staff/lockers",
-    //   },
-    //   {
-    //     title: "Chi tiết tủ",
-    //     url: "/staff/lockers/detail",
-    //   },
-    // ],
+    title: "Hồ sơ của tôi",
+    url: "/staff/profile",
+    icon: User,
   },
   {
-    title: "Cài đặt Tủ (Cabinet)",
-    url: "/staff/setup-cabinet",
-    icon: ServerCog,
-  },
-  {
-    title: "Quản lý báo cáo",
-    url: "/staff/manage-reports",
-    icon: AlertTriangle,
-    items: [
-      {
-        title: "Phía khách hàng",
-        url: "/staff/manage-reports",
-        icon: User,
-      },
-      {
-        title: "Phía nv kỹ thuật",
-        url: "/staff/manage-reports",
-        icon: UserCog,
-      },
-    ],
-  },
-  {
-    title: "Lịch sử giao dịch ",
-    url: "/staff/transactions",
-    icon: History,
-    // items: [
-    //   {
-    //     title: "Tất cả giao dịch",
-    //     url: "/staff/transactions",
-    //   },
-    //   {
-    //     title: "Chi tiết giao dịch",
-    //     url: "/staff/transactions/detail",
-    //   },
-    // ],
+    title: "Cài đặt",
+    url: "/staff/settings",
+    icon: Settings,
   },
 ]
 
@@ -83,5 +37,6 @@ export const staffNavSecondary: NavItem[] = [
     url: "/staff/notifications",
     icon: Bell,
   },
+  
 ]
 
