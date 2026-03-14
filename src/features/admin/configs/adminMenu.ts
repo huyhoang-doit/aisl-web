@@ -3,7 +3,6 @@ import {
   Users,
   Package,
   DollarSign,
-  BarChart3,
   Bell,
   MapPin,
   Box,
@@ -14,6 +13,7 @@ import {
   AlertTriangle,
   History,
   ServerCog,
+  Activity,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -75,6 +75,11 @@ export const adminNavMain: NavItem[] = [
         title: "Tủ",
         url: "/admin/lockers",
         icon: Box,
+      },
+      {
+        title: "Giám sát hệ thống",
+        url: "/admin/hardware-monitor",
+        icon: Activity,
       },
       {
         title: "Setup Tủ Mới (RPi)",
