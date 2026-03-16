@@ -32,8 +32,8 @@ export function LayoutStep({ form }: LayoutStepProps) {
   const maxRows = Math.max(1, selectedCabinet?.totalRows || 0);
   const maxCols = Math.max(1, selectedCabinet?.totalColumns || 0);
   
-  const isExceedingRows = selectedCabinet ? rows > maxRows : false;
-  const isExceedingCols = selectedCabinet ? cols > maxCols : false;
+  const isExceedingRows = selectedCabinet?.totalRows || 0;
+  const isExceedingCols = selectedCabinet?.totalColumns || 0;
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
