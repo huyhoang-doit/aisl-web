@@ -24,6 +24,7 @@ export const setupCabinetSchema = z.object({
   ...basicInfoSchema.shape,
   ...layoutSchema.shape,
   ...mqttSettingsSchema.shape,
+  deviceAttachmentIds: z.array(z.string()).optional(),
 });
 
 export type BasicInfoFormValues = z.infer<typeof basicInfoSchema>;

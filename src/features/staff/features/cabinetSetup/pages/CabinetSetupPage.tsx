@@ -52,6 +52,7 @@ export default function CabinetSetupPage() {
       mqttBrokerPort: 1883,
       mqttUsername: "",
       mqttPassword: "",
+      deviceAttachmentIds: [],
     },
   });
 

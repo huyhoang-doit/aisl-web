@@ -11,6 +11,32 @@ export interface SetupCabinetRequest {
   heartbeatInterval?: number;
   openDoorTimeout?: number;
   operatorId: string;
+  deviceAttachmentIds?: string[];
+}
+
+export interface DeviceAttachment {
+  id: string;
+  cabinetId: string | null;
+  cabinetConfigId: string | null;
+  name: string;
+  serialNumber: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GetDeviceAttachmentsResponse {
+  statusCode: number;
+  message: string;
+  data: {
+    deviceAttachments: DeviceAttachment[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+    };
+  };
 }
 
 export interface SetupCabinetResponse {
