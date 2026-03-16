@@ -13,7 +13,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form";
 import { toast } from "sonner";
 import { Check, ChevronRight, ServerCog } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { cabinetSetupService } from "../services/cabinetSetup.service";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 
@@ -31,13 +31,18 @@ export default function CabinetSetupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [setupResult, setSetupResult] = useState<{ cabinetId: string; totalLockers: number } | null>(null);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
+
+  const paramLocationId = searchParams.get("locationId") || "";
+  const paramCabinetId = searchParams.get("cabinetId") || "";
 
   const form = useForm<SetupCabinetFormValues>({
     resolver: zodResolver(setupCabinetSchema),
     mode: "onChange",
     defaultValues: {
-      locationId: "",
+      locationId: paramLocationId,
+      cabinetId: paramCabinetId,
       macAddress: "",
       totalRows: 4,
       totalColumns: 6,
@@ -52,7 +57,7 @@ export default function CabinetSetupPage() {
 
   const isStepValid = async () => {
     let fieldsToValidate: (keyof SetupCabinetFormValues)[] = [];
-    if (currentStep === 0) fieldsToValidate = ["locationId", "macAddress"];
+    if (currentStep === 0) fieldsToValidate = ["locationId", "cabinetId", "macAddress"];
     if (currentStep === 1) fieldsToValidate = ["totalRows", "totalColumns", "heartbeatInterval", "openDoorTimeout"];
     if (currentStep === 2) fieldsToValidate = ["mqttBrokerHost", "mqttBrokerPort"];
     
@@ -78,7 +83,7 @@ export default function CabinetSetupPage() {
     try {
       const payload = {
         ...values,
-        operatorId: user?.id || "unknown-operator", // Lấy ID của nhân viên đang thao tác
+        operatorId: user?.id || "unknown-operator",
       };
       
       const response = await cabinetSetupService.setupCabinet(payload);

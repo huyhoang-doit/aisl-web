@@ -1,12 +1,13 @@
 export interface HardwareMonitorStats {
   cabinetId: string;
   name: string;
-  connectionStatus: "ONLINE" | "OFFLINE";
-  lastHeartbeatAt: string;
+  locationName: string;
+  isOnline: boolean;
+  lastHeartbeat: string;
   totalLockers: number;
   onlineLockers: number;
   offlineLockers: number;
-  inUseLockers: number;
+  openDoors: number;
 }
 
 export interface HardwareMonitorQueryParams {
@@ -17,9 +18,14 @@ export interface HardwareMonitorQueryParams {
 }
 
 export interface PaginatedHardwareMonitor {
-  items: HardwareMonitorStats[];
-  total: number;
-  page: number;
-  limit: number;
-  totalPages: number;
+  statusCode: number;
+  message: string;
+  data: {
+    statuses: HardwareMonitorStats[];
+    pagination: {
+      total: number;
+      page: number;
+      limit: number;
+    };
+  };
 }

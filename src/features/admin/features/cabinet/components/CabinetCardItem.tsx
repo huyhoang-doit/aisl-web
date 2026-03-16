@@ -1,8 +1,10 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Calendar, Cpu, Network } from "lucide-react";
+import { Calendar, Cpu, Network, ServerCog } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Cabinet } from "../types/cabinet.types";
+import { Button } from "@/shared/components/ui/button";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface CabinetCardItemProps {
   cabinet: Cabinet;
@@ -10,6 +12,16 @@ interface CabinetCardItemProps {
 }
 
 const CabinetCardItem: React.FC<CabinetCardItemProps> = ({ cabinet, onClick }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isStaff = location.pathname.startsWith("/staff");
+  const prefix = isStaff ? "/staff" : "/admin";
+
+  const handleSetup = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`${prefix}/setup-cabinet?cabinetId=${cabinet.id}&locationId=${cabinet.locationId}`);
+  };
+
   return (
     <Card
       className={cn(
@@ -26,6 +38,15 @@ const CabinetCardItem: React.FC<CabinetCardItemProps> = ({ cabinet, onClick }) =
               {cabinet.macAddress}
             </CardDescription>
           </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="shrink-0 h-8 gap-1.5"
+            onClick={handleSetup}
+          >
+            <ServerCog className="h-3.5 w-3.5" />
+            <span>Setup</span>
+          </Button>
         </div>
       </CardHeader>
       <CardContent>

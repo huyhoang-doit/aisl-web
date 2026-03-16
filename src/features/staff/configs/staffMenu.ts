@@ -4,6 +4,10 @@ import {
   User,
   ClipboardList,
   Settings,
+  Package,
+  MapPin,
+  Boxes,
+  ServerCog,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -13,6 +17,28 @@ export const staffNavMain: NavItem[] = [
     url: "/staff/dashboard",
     icon: LayoutDashboard,
     isActive: false,
+  },
+  {
+    title: "Quản lý tủ Locker",
+    url: "/staff/locations",
+    icon: Package,
+    items: [
+      {
+        title: "Địa điểm",
+        url: "/staff/locations",
+        icon: MapPin,
+      },
+      {
+        title: "Cụm tủ",
+        url: "/staff/cabinets",
+        icon: Boxes,
+      },
+      {
+        title: "Setup Tủ Mới (RPi)",
+        url: "/staff/setup-cabinet",
+        icon: ServerCog,
+      },
+    ],
   },
   {
     title: "Task của tôi",

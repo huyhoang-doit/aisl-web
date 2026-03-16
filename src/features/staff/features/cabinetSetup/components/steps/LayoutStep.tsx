@@ -2,6 +2,11 @@ import type { UseFormReturn } from "react-hook-form";
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/shared/components/ui/form";
 import { Input } from "@/shared/components/ui/input";
 import type { SetupCabinetFormValues } from "../../schemas/cabinetSetup.schema";
+import { useWatch } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
+import { cabinetSetupService } from "../../services/cabinetSetup.service";
+import { Alert, AlertDescription, AlertTitle } from "@/shared/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
 interface LayoutStepProps {
   form: UseFormReturn<SetupCabinetFormValues>;
@@ -11,6 +16,24 @@ export function LayoutStep({ form }: LayoutStepProps) {
   const { watch } = form;
   const rows = watch("totalRows") || 0;
   const cols = watch("totalColumns") || 0;
+  
+  const locationId = useWatch({ control: form.control, name: "locationId" });
+  const cabinetId = useWatch({ control: form.control, name: "cabinetId" });
+
+  const { data: cabinetsData } = useQuery({
+    queryKey: ["cabinets-by-location", locationId],
+    queryFn: () => cabinetSetupService.getCabinetsByLocation(locationId!, { page: 1, limit: 100 }),
+    enabled: !!locationId,
+  });
+
+  const selectedCabinet = cabinetsData?.data?.cabinets?.find((c: any) => c.id === cabinetId);
+  
+  // Xử lý trường hợp DB trả về 0x0 thì coi như tối thiểu 1x1 để UI không bị dị thường
+  const maxRows = Math.max(1, selectedCabinet?.totalRows || 0);
+  const maxCols = Math.max(1, selectedCabinet?.totalColumns || 0);
+  
+  const isExceedingRows = selectedCabinet?.totalRows || 0;
+  const isExceedingCols = selectedCabinet?.totalColumns || 0;
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -20,6 +43,17 @@ export function LayoutStep({ form }: LayoutStepProps) {
           Cấu hình số lượng hàng và cột thực tế trên tủ Locker
         </p>
       </div>
+
+      {(isExceedingRows || isExceedingCols) && (
+        <Alert variant="destructive" className="bg-destructive/10 text-destructive border-destructive/20">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Cảnh báo: Vượt quá giới hạn vật lý</AlertTitle>
+          <AlertDescription>
+            Số {isExceedingRows ? "hàng" : ""}{isExceedingRows && isExceedingCols ? " và " : ""}{isExceedingCols ? "cột" : ""} bạn nhập 
+            vượt quá thiết kế của cụm tủ ({maxRows}x{maxCols}).
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <FormField
