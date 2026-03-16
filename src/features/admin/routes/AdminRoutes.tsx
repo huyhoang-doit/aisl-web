@@ -24,6 +24,7 @@ import AdminNotificationDetailPage from "@/features/notification/pages/AdminNoti
 import DispatchMapPage from "../pages/DispatchMapPage";
 import ManageTask from "../pages/ManageTask";
 import ManageVehiclesPage from "../pages/ManageVehiclesPage";
+import ManageDeviceAttachmentPage from "../pages/ManageDeviceAttachmentPage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -52,6 +53,7 @@ const AdminRoutes = () => {
         <Route path="vehicles" element={<ManageVehiclesPage />} />
         <Route path="pricing" element={<ManagePricingPage />} />
         <Route path="subscriptions" element={<ManageSubscriptionPage />} />
+        <Route path="device-attachments" element={<ManageDeviceAttachmentPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />

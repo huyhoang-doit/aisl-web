@@ -14,6 +14,7 @@ import {
   History,
   ServerCog,
   Activity,
+  Monitor,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -75,6 +76,11 @@ export const adminNavMain: NavItem[] = [
         title: "Tủ",
         url: "/admin/lockers",
         icon: Box,
+      },
+      {
+        title: "Thiết bị gắn tủ",
+        url: "/admin/device-attachments",
+        icon: Monitor,
       },
       {
         title: "Giám sát hệ thống",
