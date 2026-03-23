@@ -154,14 +154,28 @@ const ManageDeviceAttachmentPage = () => {
 
   const handleSubmit = async (data: DeviceAttachmentFormData) => {
     try {
-      const payload = {
-        cabinetId: data.cabinetId,
-        cabinetConfigId: data.cabinetConfigId,
+      const payload: {
+        cabinetId?: string;
+        cabinetConfigId?: string;
+        name: string;
+        serialNumber: string;
+        description?: string;
+        isActive: boolean;
+      } = {
         name: data.name,
         serialNumber: data.serialNumber,
-        description: data.description || undefined,
         isActive: data.isActive,
       };
+
+      if (data.cabinetId) {
+        payload.cabinetId = data.cabinetId;
+      }
+      if (data.cabinetConfigId) {
+        payload.cabinetConfigId = data.cabinetConfigId;
+      }
+      if (data.description && data.description.trim()) {
+        payload.description = data.description.trim();
+      }
 
       if (modalMode === "create") {
         await deviceAttachmentService.create(payload);

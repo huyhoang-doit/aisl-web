@@ -30,11 +30,11 @@ const PricingCardItem: React.FC<PricingCardItemProps> = ({ pricing, onClick }) =
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold">{pricing.name}</CardTitle>
-            {pricing.description && (
+            {/* {pricing.description && (
               <CardDescription className="mt-1 line-clamp-2">
                 {pricing.description}
               </CardDescription>
-            )}
+            )} */}
           </div>
           <StatusComponent status={pricing.orderType} />
         </div>
@@ -45,7 +45,7 @@ const PricingCardItem: React.FC<PricingCardItemProps> = ({ pricing, onClick }) =
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <DollarSign className="h-4 w-4" />
-                <span>Phí/block</span>
+                <span>Phí</span>
               </div>
               <p className="text-xl font-bold text-primary">
                 {formatPrice(pricing.feePerBlock)}
@@ -54,7 +54,7 @@ const PricingCardItem: React.FC<PricingCardItemProps> = ({ pricing, onClick }) =
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <DollarSign className="h-4 w-4" />
-                <span>Phí trễ/block</span>
+                <span>Phí trễ</span>
               </div>
               <p className="text-xl font-bold text-primary">
                 {formatPrice(pricing.lateFeePerBlock)}

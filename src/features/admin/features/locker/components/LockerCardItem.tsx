@@ -38,12 +38,12 @@ const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
             </CardTitle>
           </div>
           <div className="flex flex-col gap-2 items-end">
-            <Badge variant={statusInfo.variant}>
+            {/* <Badge variant={statusInfo.variant}>
               {statusInfo.label}
             </Badge>
             <Badge variant="outline" className="text-xs">
               {sizeName}
-            </Badge>
+            </Badge> */}
           </div>
         </div>
       </CardHeader>

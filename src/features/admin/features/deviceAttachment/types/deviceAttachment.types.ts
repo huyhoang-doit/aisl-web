@@ -4,8 +4,8 @@
  */
 export interface DeviceAttachment {
   id: string;
-  cabinetId: string;
-  cabinetConfigId: string;
+  cabinetId?: string;
+  cabinetConfigId?: string;
   name: string;
   serialNumber: string;
   description?: string;

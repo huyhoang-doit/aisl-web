@@ -150,10 +150,10 @@ export const adminNavMain: NavItem[] = [
       },
     ],
   },
-  {
-    title: "Lịch sử giao dịch ",
-    url: "/admin/transactions",
-    icon: History,
+  // {
+  //   title: "Lịch sử giao dịch ",
+  //   url: "/admin/transactions",
+  //   icon: History,
     // items: [
     //   {
     //     title: "Tất cả giao dịch",
@@ -164,15 +164,15 @@ export const adminNavMain: NavItem[] = [
     //     url: "/staff/transactions/detail",
     //   },
     // ],
-  },
+  // },
  
 ]
 
 export const adminNavSecondary: NavItem[] = [
-  {
-    title: "Thông báo",
-    url: "/admin/notifications",
-    icon: Bell,
-  },
+  // {
+  //   title: "Thông báo",
+  //   url: "/admin/notifications",
+  //   icon: Bell,
+  // },
 ]
 
