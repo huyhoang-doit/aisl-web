@@ -20,6 +20,7 @@ export interface TaskDetailIncidentReport {
   id: string;
   code: string;
   reportedById: string;
+  reporterName?: string;
   lockerId: string;
   lockerLabel: string;
   cabinetId: string;
@@ -37,7 +38,9 @@ export interface TaskDetail {
   code: string;
   incidentReportId: string;
   assignedToId: string;
+  assignedToName?: string;
   assignedById: string;
+  assignedByName?: string;
   taskType: "REPAIR" | "INSPECTION" | "CLEANING" | string;
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | string;
   status: string;

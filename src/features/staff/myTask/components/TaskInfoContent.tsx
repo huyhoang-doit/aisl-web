@@ -26,6 +26,16 @@ export function TaskInfoContent({ task }: TaskInfoContentProps) {
             <div className="text-sm text-muted-foreground font-mono">{task.code}</div>
           </div>
           <div className="space-y-1">
+            <div className="text-sm font-medium">Người phụ trách</div>
+            <div className="text-sm text-muted-foreground">{task.assignedToName ?? "-"}</div>
+            <div className="text-xs text-muted-foreground font-mono">{task.assignedToId ?? "-"}</div>
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-medium">Người giao việc</div>
+            <div className="text-sm text-muted-foreground">{task.assignedByName ?? "-"}</div>
+            <div className="text-xs text-muted-foreground font-mono">{task.assignedById ?? "-"}</div>
+          </div>
+          <div className="space-y-1">
             <div className="text-sm font-medium">Loại task</div>
             <div className="text-sm text-muted-foreground">
               {TASK_TYPE_LABELS[task.taskType] ?? task.taskType}
@@ -65,6 +75,15 @@ export function TaskInfoContent({ task }: TaskInfoContentProps) {
                 <div className="text-sm font-medium">Mã báo cáo</div>
                 <div className="text-sm text-muted-foreground font-mono">
                   {task.incidentReport.code}
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm font-medium">Người báo cáo</div>
+                <div className="text-sm text-muted-foreground">
+                  {task.incidentReport.reporterName ?? "-"}
+                </div>
+                <div className="text-xs text-muted-foreground font-mono">
+                  {task.incidentReport.reportedById ?? "-"}
                 </div>
               </div>
               <div className="space-y-1">

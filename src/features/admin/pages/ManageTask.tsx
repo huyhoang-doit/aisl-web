@@ -152,13 +152,16 @@ const ManageTask = () => {
     },
     {
       key: "assignedToId",
-      header: "ID người phụ trách",
+      header: "Người phụ trách",
       sortable: true,
       filterable: true,
       filterType: "text",
-      filterPlaceholder: "Lọc theo ID",
+      filterPlaceholder: "Lọc theo ID người phụ trách",
       accessor: (row) => (
-        <div className="font-mono text-xs text-muted-foreground">{row.assignedToId ?? "-"}</div>
+        <div>
+          <div className="font-medium">{row.assignedToName ?? "-"}</div>
+          <div className="font-mono text-xs text-muted-foreground">{row.assignedToId ?? "-"}</div>
+        </div>
       ),
     },
     {

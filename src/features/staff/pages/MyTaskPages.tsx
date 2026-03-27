@@ -123,6 +123,17 @@ const MyTaskPages = () => {
       ),
     },
     {
+      key: "assignedBy",
+      header: "Người giao việc",
+      sortable: true,
+      accessor: (row) => (
+        <div>
+          <div className="font-medium">{row.assignedByName ?? "-"}</div>
+          <div className="font-mono text-xs text-muted-foreground">{row.assignedById ?? "-"}</div>
+        </div>
+      ),
+    },
+    {
       key: "priority",
       header: "Độ ưu tiên",
       sortable: true,
