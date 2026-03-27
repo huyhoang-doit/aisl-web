@@ -150,21 +150,23 @@ export const adminNavMain: NavItem[] = [
       },
     ],
   },
-  // {
-  //   title: "Lịch sử giao dịch ",
-  //   url: "/admin/transactions",
-  //   icon: History,
-    // items: [
-    //   {
-    //     title: "Tất cả giao dịch",
-    //     url: "/staff/transactions",
-    //   },
-    //   {
-    //     title: "Chi tiết giao dịch",
-    //     url: "/staff/transactions/detail",
-    //   },
-    // ],
-  // },
+  {
+    title: "Logs ",
+    url: "/admin/device-logs",
+    icon: History,
+    items: [
+      {
+        title: "Logs thiết bị",
+        url: "/admin/device-logs",
+        icon: Monitor,
+      },
+      {
+        title: "Logs hoạt động",
+        url: "/admin/activity-logs",
+        icon: Activity,
+      },
+    ],
+  },
  
 ]
 

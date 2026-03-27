@@ -143,6 +143,7 @@ export interface DataTableProps<T> {
   quickFilters?: QuickFilter[];
   onQuickFilterChange?: (key: string, value: string) => void;
   onClearFilters?: () => void;
+  hasExternalFilters?: boolean;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -183,7 +184,8 @@ export function DataTable<T extends Record<string, any>>({
   // Quick Filters (default stable ref to avoid useEffect loop when not passed)
   quickFilters = EMPTY_QUICK_FILTERS,
   onQuickFilterChange,
-  onClearFilters
+  onClearFilters,
+  hasExternalFilters = false
 }: DataTableProps<T>) {
   const [sortConfig, setSortConfig] = React.useState<SortConfig | null>(
     defaultSort || null
@@ -411,12 +413,14 @@ export function DataTable<T extends Record<string, any>>({
         </div>
 
         <div className="flex items-center gap-2">
-          {filters.length > 0 && (
+          {(filters.length > 0 || hasExternalFilters) && (
             <Button
               onClick={() => {
                 setFilters([]);
                 setShowFilters(false);
+                setSearchQuery("");
                 onFilter?.([]);
+                onSearch?.("");
                 onClearFilters?.();
               }}
               size="default"
