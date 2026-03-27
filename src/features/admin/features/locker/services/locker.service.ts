@@ -152,4 +152,11 @@ export const lockerService = {
   getLeastUsed: async (cabinetId: string): Promise<LeastUsedResponse> => {
     return api.get<LeastUsedResponse>(`/lockers/least-used?cabinetId=${cabinetId}`);
   },
+
+  /**
+   * Clear setup của locker theo ID
+   */
+  clearSetup: async (id: string): Promise<void> => {
+    return api.post<void>(`/lockers/${id}/clear-setup`);
+  },
 };
