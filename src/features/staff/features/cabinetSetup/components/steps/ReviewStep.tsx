@@ -69,31 +69,6 @@ export function ReviewStep({ form }: ReviewStepProps) {
             </dl>
           </div>
 
-          <div className="h-px bg-border" />
-
-          {/* Section 3 */}
-          <div>
-            <h4 className="font-semibold mb-2 text-primary">3. Kết nối mạng (MQTT)</h4>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-              <div className="flex flex-col min-w-0">
-                <dt className="text-muted-foreground">Broker IP / Port:</dt>
-                <dd className="font-medium break-all">{values.mqttBrokerHost}:{values.mqttBrokerPort}</dd>
-              </div>
-              <div className="flex flex-col">
-                <dt className="text-muted-foreground">Xác thực:</dt>
-                <dd className="font-medium">
-                  {values.mqttUsername ? (
-                    <div className="flex flex-col">
-                      <span>Username: {values.mqttUsername}</span>
-                      <span className="text-xs text-muted-foreground">Mật khẩu: ••••••••</span>
-                    </div>
-                  ) : (
-                    'Không (Anonymous)'
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </div>
 
         </div>
       </div>

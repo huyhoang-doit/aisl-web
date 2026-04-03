@@ -36,14 +36,17 @@ export function LayoutStep({ form }: LayoutStepProps) {
   const isExceedingCols = selectedCabinet?.totalColumns || 0;
 
   const { data: attachmentsData, isLoading: isLoadingAttachments } = useQuery({
-    queryKey: ["device-attachments", cabinetId],
+    queryKey: ["device-attachments"],
     queryFn: () => cabinetSetupService.getDeviceAttachments({ 
       page: 1, 
-      limit: 100, 
-      cabinetConfigId: cabinetId 
+      limit: 100
     }),
-    enabled: !!cabinetId,
   });
+
+  // Filter devices: show those unassigned OR assigned to this specific cabinet
+  const availableAttachments = attachmentsData?.data?.deviceAttachments?.filter((device: any) => 
+    !device.cabinetConfigId || device.cabinetConfigId === cabinetId
+  ) || [];
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
@@ -156,9 +159,9 @@ export function LayoutStep({ form }: LayoutStepProps) {
               <FormItem>
                 {isLoadingAttachments ? (
                   <p className="text-sm text-muted-foreground">Đang tải danh sách thiết bị...</p>
-                ) : attachmentsData?.data?.deviceAttachments?.length ? (
+                ) : availableAttachments.length ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {attachmentsData.data.deviceAttachments.map((attachment: any) => (
+                    {availableAttachments.map((attachment: any) => (
                       <div 
                         key={attachment.id} 
                         className={`flex items-start space-x-3 space-y-0 rounded-md border p-4 cursor-pointer transition-colors ${

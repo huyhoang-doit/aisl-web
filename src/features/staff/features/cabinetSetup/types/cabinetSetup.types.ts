@@ -4,10 +4,6 @@ export interface SetupCabinetRequest {
   macAddress: string;
   totalRows: number;
   totalColumns: number;
-  mqttBrokerHost: string;
-  mqttBrokerPort: number;
-  mqttUsername?: string;
-  mqttPassword?: string;
   heartbeatInterval?: number;
   openDoorTimeout?: number;
   operatorId: string;
@@ -16,7 +12,6 @@ export interface SetupCabinetRequest {
 
 export interface DeviceAttachment {
   id: string;
-  cabinetId: string | null;
   cabinetConfigId: string | null;
   name: string;
   serialNumber: string;
@@ -45,6 +40,8 @@ export interface SetupCabinetResponse {
   mqttTopicPrefix: string;
   message: string;
   success: boolean;
+  mqttBrokerHost: string;
+  mqttBrokerPort: number;
 }
 
 export interface CabinetBasicInfo {
@@ -56,7 +53,7 @@ export interface CabinetBasicInfo {
   connectionStatus: "ONLINE" | "OFFLINE";
   locationName: string;
   address: string;
-  deviceAttachments: any[];
+  deviceAttachments: DeviceAttachment[];
 }
 
 export interface LocationWithCabinetsResponse {

@@ -13,21 +13,12 @@ export const layoutSchema = z.object({
   openDoorTimeout: z.number().min(1, "Open door timeout tối thiểu 1s").max(60, "Open door timeout tối đa 60s"),
 });
 
-export const mqttSettingsSchema = z.object({
-  mqttBrokerHost: z.string().min(1, "Vui lòng nhập MQTT Broker Host"),
-  mqttBrokerPort: z.number().min(1, "Vui lòng nhập Port hợp lệ").max(65535, "Port tối đa 65535"),
-  mqttUsername: z.string().optional(),
-  mqttPassword: z.string().optional(),
-});
-
 export const setupCabinetSchema = z.object({
   ...basicInfoSchema.shape,
   ...layoutSchema.shape,
-  ...mqttSettingsSchema.shape,
   deviceAttachmentIds: z.array(z.string()).optional(),
 });
 
 export type BasicInfoFormValues = z.infer<typeof basicInfoSchema>;
 export type LayoutFormValues = z.infer<typeof layoutSchema>;
-export type MqttSettingsFormValues = z.infer<typeof mqttSettingsSchema>;
 export type SetupCabinetFormValues = z.infer<typeof setupCabinetSchema>;
