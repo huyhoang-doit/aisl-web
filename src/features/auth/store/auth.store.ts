@@ -98,11 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
     logout: async () => {
       try {
         // Gọi API logout (nếu có)
-        await authService.logout();
-      } catch (error) {
-        // Nếu API logout fail, vẫn tiếp tục logout local
-        console.error('Logout API error:', error);
-      } finally {
+        // await authService.logout();
         // Xóa token và user info
         localStorage.removeItem('token');
         localStorage.removeItem('userInfo');
@@ -114,6 +110,21 @@ export const useAuthStore = create<AuthState>((set, get) => {
         });
 
         toast.success('Đăng xuất thành công');
+      } catch (error) {
+        // Nếu API logout fail, vẫn tiếp tục logout local
+        console.error('Logout API error:', error);
+      } finally {
+        // Xóa token và user info
+        // localStorage.removeItem('token');
+        // localStorage.removeItem('userInfo');
+        
+        // set({
+        //   user: null,
+        //   token: null,
+        //   isAuthenticated: false,
+        // });
+
+        // toast.success('Đăng xuất thành công');
       }
     },
 

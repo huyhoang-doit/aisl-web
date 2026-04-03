@@ -14,6 +14,7 @@ import {
   History,
   ServerCog,
   Activity,
+  Monitor,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -75,6 +76,11 @@ export const adminNavMain: NavItem[] = [
         title: "Tủ",
         url: "/admin/lockers",
         icon: Box,
+      },
+      {
+        title: "Thiết bị gắn tủ",
+        url: "/admin/device-attachments",
+        icon: Monitor,
       },
       {
         title: "Giám sát hệ thống",
@@ -145,28 +151,30 @@ export const adminNavMain: NavItem[] = [
     ],
   },
   {
-    title: "Lịch sử giao dịch ",
-    url: "/admin/transactions",
+    title: "Logs ",
+    url: "/admin/device-logs",
     icon: History,
-    // items: [
-    //   {
-    //     title: "Tất cả giao dịch",
-    //     url: "/staff/transactions",
-    //   },
-    //   {
-    //     title: "Chi tiết giao dịch",
-    //     url: "/staff/transactions/detail",
-    //   },
-    // ],
+    items: [
+      {
+        title: "Logs thiết bị",
+        url: "/admin/device-logs",
+        icon: Monitor,
+      },
+      {
+        title: "Logs hoạt động",
+        url: "/admin/activity-logs",
+        icon: Activity,
+      },
+    ],
   },
  
 ]
 
 export const adminNavSecondary: NavItem[] = [
-  {
-    title: "Thông báo",
-    url: "/admin/notifications",
-    icon: Bell,
-  },
+  // {
+  //   title: "Thông báo",
+  //   url: "/admin/notifications",
+  //   icon: Bell,
+  // },
 ]
 

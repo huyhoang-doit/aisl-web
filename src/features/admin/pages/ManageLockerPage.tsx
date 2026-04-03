@@ -17,9 +17,10 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Settings } from "lucide-react";
+import { RefreshCw, Settings } from "lucide-react";
 import type { Locker } from "../features/locker/types/locker.types";
 import ManageSizeModal from "../features/locker/modals/ManageSizeModal";
+import ClearLockerSetupModal from "../features/locker/modals/ClearLockerSetupModal";
 import { lockerService } from "../features/locker/services/locker.service";
 import { useLocker } from "../features/locker/hooks/useLocker";
 import { toast } from "sonner";
@@ -52,6 +53,7 @@ const ManageLockerPage = () => {
   const [selectedLocker, setSelectedLocker] = useState<Locker | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "update">("create");
   const [isManageSizeModalOpen, setIsManageSizeModalOpen] = useState(false);
+  const [isClearSetupModalOpen, setIsClearSetupModalOpen] = useState(false);
 
   const quickFilters: QuickFilter[] = [
     {
@@ -168,13 +170,22 @@ const ManageLockerPage = () => {
             Quản lý các locker trong hệ thống
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setIsManageSizeModalOpen(true)}
-        >
-          <Settings className="h-4 w-4 mr-2" />
-          Quản lý kích thước
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="destructive"
+            onClick={() => setIsClearSetupModalOpen(true)}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Clear setup locker
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setIsManageSizeModalOpen(true)}
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Quản lý kích thước
+          </Button>
+        </div>
       </div>
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -286,6 +297,13 @@ const ManageLockerPage = () => {
       <ManageSizeModal
         open={isManageSizeModalOpen}
         onOpenChange={setIsManageSizeModalOpen}
+      />
+
+      <ClearLockerSetupModal
+        open={isClearSetupModalOpen}
+        onOpenChange={setIsClearSetupModalOpen}
+        defaultCabinetId={selectedCabinetId}
+        onSuccess={refetch}
       />
     </div>
   );
