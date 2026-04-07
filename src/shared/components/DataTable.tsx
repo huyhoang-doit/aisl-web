@@ -187,6 +187,7 @@ export function DataTable<T extends Record<string, any>>({
   onClearFilters,
   hasExternalFilters = false
 }: DataTableProps<T>) {
+  console.log("🚀 ~ DataTable ~ data:", data)
   const [sortConfig, setSortConfig] = React.useState<SortConfig | null>(
     defaultSort || null
   );

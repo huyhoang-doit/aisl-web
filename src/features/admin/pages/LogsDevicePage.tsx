@@ -36,6 +36,7 @@ const LogsDevicePage = () => {
     handleFromDateChange,
     handleToDateChange,
   } = useDeviceLogs(50);
+    console.log("🚀 ~ LogsDevicePage ~ logs:", logs)
 
   const handleCabinetChange = useCallback(
     (value: string) => {
