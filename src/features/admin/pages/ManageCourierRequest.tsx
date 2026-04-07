@@ -8,7 +8,7 @@ import { toast } from "sonner"
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
 import { CheckCircle2, XCircle, Eye } from "lucide-react"
-import type { CourierRequest } from "../features/courierRequest/types/courierRequest.types"
+import type { CourierApplication } from "../features/courierRequest/types/courierRequest.types"
 
 // Constants for Courier role mappings (update based on your actual data/constants)
 const COURIER_ROLE = "courier"
@@ -18,7 +18,7 @@ const ManageCourierRequest = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false)
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false)
-  const [selectedRequest, setSelectedRequest] = useState<CourierRequest | null>(null)
+  const [selectedApplication, setSelectedApplication] = useState<CourierApplication | null>(null)
 
   // State cho các tính năng mới
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
@@ -57,35 +57,43 @@ const ManageCourierRequest = () => {
   })
 
   // Map backend users to format expected by UI until CourierRequest components are refactored
-  const requests: CourierRequest[] = useMemo(() => {
+  const requests: CourierApplication[] = useMemo(() => {
     if (!usersResponse?.data?.users) return [];
     return usersResponse.data.users.map((user: any) => ({
-      id: user.keycloakUserId,
-      name: user.fullName || "Unknown",
+      id: user.id || user.keycloakUserId,
+      userId: user.id,
+      legalName: user.fullName || "Unknown",
       email: user.email || "N/A",
       phone: user.phoneNumber || "N/A",
-      address: user.address || "", // Assuming address might not be available
-      // Map BE status to UI expectations (could be unified later)
+      licensePlate: user.licensePlate || "N/A",
+      vehicleType: user.vehicleType || "BIKE",
+      frontVehicleImageUrl: user.frontVehicleImageUrl || "",
+      backVehicleImageUrl: user.backVehicleImageUrl || "",
+      portraitUrl: user.portraitUrl || "",
       status: ["NONE", "PENDING", "APPROVED", "REJECTED", "SUSPENDED", "BLACKLISTED"].includes(user.status) 
               ? user.status 
               : "PENDING",
-      requestDate: user.createdAt || new Date().toISOString(),
-      documents: [], // Handle parsing real documents if needed
-    }));
+      reviewedById: user.reviewedById || "",
+      reviewNote: user.reviewNote || "",
+      reviewedAt: user.reviewedAt || "",
+      rejectionCount: user.rejectionCount || 0,
+      createdAt: user.createdAt || new Date().toISOString(),
+      updatedAt: user.updatedAt || new Date().toISOString(),
+    } as CourierApplication));
   }, [usersResponse]);
 
   const totalItemCount = usersResponse?.data?.pagination?.total || 0;
 
   // Cập nhật trạng thái
   const updateStatusMutation = useMutation({
-    mutationFn: (params: { id: string, status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED", reason?: string }) => 
-      userService.updateCourierStatus(params.id, { status: params.status, reason: params.reason }),
+    mutationFn: (params: { id: string, status: string, reason?: string }) => 
+      userService.updateCourierStatus(params.id, { status: params.status as any, reason: params.reason }),
     onSuccess: () => {
       toast.success("Cập nhật trạng thái thành công");
       queryClient.invalidateQueries({ queryKey: ["couriers"] });
       setIsApproveModalOpen(false);
       setIsRejectModalOpen(false);
-      setSelectedRequest(null);
+      setSelectedApplication(null);
     },
     onError: (error: any) => {
       toast.error(error?.message || "Cập nhật trạng thái thất bại");
@@ -93,7 +101,7 @@ const ManageCourierRequest = () => {
   });
 
   // Định nghĩa columns cho bảng
-  const columns: Column<CourierRequest>[] = [
+  const columns: Column<CourierApplication>[] = [
     {
       key: "legalName",
       header: "Họ và tên",
@@ -124,7 +132,7 @@ const ManageCourierRequest = () => {
       filterType: "select",
       filterOptions: ["Chưa kích hoạt", "Chờ duyệt", "Đã duyệt", "Đã từ chối", "Đình chỉ", "Danh sách đen"],
       accessor: (row) => {
-        const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+        const statusConfig: Record<string, { label: string; variant: "secondary" | "default" | "destructive" }> = {
           NONE: { label: "Chưa kích hoạt", variant: "secondary" },
           PENDING: { label: "Chờ duyệt", variant: "secondary" },
           APPROVED: { label: "Đã duyệt", variant: "default" },
@@ -132,7 +140,8 @@ const ManageCourierRequest = () => {
           SUSPENDED: { label: "Đình chỉ", variant: "destructive" },
           BLACKLISTED: { label: "Danh sách đen", variant: "destructive" },
         }
-        const config = statusConfig[row.status] || { label: row.status, variant: "secondary" };
+        const status = row.status;
+        const config = statusConfig[status] || { label: status, variant: "secondary" };
         return (
           <Badge variant={config.variant as any}>{config.label}</Badge>
         )
@@ -166,7 +175,7 @@ const ManageCourierRequest = () => {
           >
             <Eye className="h-4 w-4" />
           </Button>
-          {row.status === "PENDING" || row.status === "SUSPENDED" ? (
+          {row.status === "PENDING" ? (
             <>
               <Button
                 variant="ghost"
@@ -182,7 +191,7 @@ const ManageCourierRequest = () => {
               </Button>
             </>
           ) : null}
-          {row.status !== "REJECTED" && row.status !== "SUSPENDED" && row.status !== "BLACKLISTED" ? (
+          {row.status !== "REJECTED" ? (
              <Button
                 variant="ghost"
                 size="sm"
@@ -208,17 +217,25 @@ const ManageCourierRequest = () => {
 
   const handleApproveSubmit = async (
     application: CourierApplication,
-    action: "approve" | "reject",
+    _action: "approve" | "reject",
     reviewNote: string
   ) => {
-    if (action === "approve") {
-      await approve(application.id, { reviewNote })
-    } else {
-      await reject(application.id, { reviewNote })
-    }
-    setIsApproveModalOpen(false)
-    setIsRejectModalOpen(false)
-    setSelectedApplication(null)
+    const newStatus = _action === "approve" ? "APPROVED" : "REJECTED";
+    updateStatusMutation.mutate({ id: application.id, status: newStatus, reason: reviewNote })
+  }
+
+  const handleFilter = (_filters: FilterConfig[]) => {
+    setFilters(_filters)
+    setPage(1)
+  }
+
+  const handleSearch = (_search: string) => {
+    setSearchQuery(_search)
+    setPage(1)
+  }
+
+  const handleQuickFilterChange = () => {
+    setPage(1)
   }
 
   const quickFilters: QuickFilter[] = [
@@ -243,13 +260,6 @@ const ManageCourierRequest = () => {
   // since React-Query and parameter passing handle that with the backend.
   // Using `requests` and `isLoading` below.
 
-  // Xử lý duyệt/từ chối
-  const handleApprove = async (request: CourierRequest, action: "approve" | "reject", reason?: string) => {
-    if (!request.id) return;
-    const newStatus = action === "approve" ? "APPROVED" : (request.status === "APPROVED" ? "SUSPENDED" : "REJECTED");
-    updateStatusMutation.mutate({ id: request.id, status: newStatus as any, reason });
-  }
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div>
@@ -262,7 +272,7 @@ const ManageCourierRequest = () => {
       <DataTable
         data={requests}
         columns={columns}
-        keyExtractor={(row) => row.id || row.email}
+        keyExtractor={(row) => row.id || row.userId}
         onCreate={undefined}
         emptyMessage={isLoading ? "Đang tải dữ liệu..." : "Chưa có yêu cầu nào"}
         onSort={handleSort}

@@ -154,14 +154,7 @@ const ManageDeviceAttachmentPage = () => {
 
   const handleSubmit = async (data: DeviceAttachmentFormData) => {
     try {
-      const payload: {
-        cabinetId?: string;
-        cabinetConfigId?: string;
-        name: string;
-        serialNumber: string;
-        description?: string;
-        isActive: boolean;
-      } = {
+      const payload: any = {
         name: data.name,
         serialNumber: data.serialNumber,
         isActive: data.isActive,

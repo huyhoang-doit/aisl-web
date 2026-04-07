@@ -67,8 +67,8 @@ export function TechnicalStaffReportDetailModal({
 
   const statusInfo = statusConfig[report.status];
   const customerReport = report.customerReport;
-  const issueInfo = issueTypeConfig[customerReport.issueType];
-  const priorityInfo = priorityConfig[customerReport.priority];
+  const issueInfo = customerReport.issueType ? issueTypeConfig[customerReport.issueType as keyof typeof issueTypeConfig] : { label: "N/A", variant: "secondary" };
+  const priorityInfo = customerReport.priority ? priorityConfig[customerReport.priority as keyof typeof priorityConfig] : { label: "N/A", variant: "secondary" };
 
   const handleAssign = () => {
     setIsAssignModalOpen(true);
@@ -89,8 +89,8 @@ export function TechnicalStaffReportDetailModal({
                 </DialogDescription>
               </div>
               <div className="flex items-center gap-2 mr-5">
-                <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
-                <Badge variant={priorityInfo.variant}>{priorityInfo.label}</Badge>
+                <Badge variant={statusInfo.variant as any}>{statusInfo.label}</Badge>
+                <Badge variant={priorityInfo.variant as any}>{priorityInfo.label}</Badge>
               </div>
             </div>
           </DialogHeader>
@@ -119,13 +119,13 @@ export function TechnicalStaffReportDetailModal({
                       Ngày báo cáo
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {new Date(customerReport.reportedAt).toLocaleString("vi-VN")}
+                      {customerReport.reportedAt ? new Date(customerReport.reportedAt).toLocaleString("vi-VN") : "—"}
                     </div>
                   </div>
 
                   <div className="space-y-1">
                     <div className="text-sm font-medium">Loại vấn đề</div>
-                    <Badge variant={issueInfo.variant}>{issueInfo.label}</Badge>
+                    <Badge variant={issueInfo.variant as any}>{issueInfo.label}</Badge>
                   </div>
 
                   <div className="space-y-1">
@@ -257,7 +257,7 @@ export function TechnicalStaffReportDetailModal({
                         Ngày phân công
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {new Date(report.createdAt).toLocaleString("vi-VN")}
+                        {report.createdAt ? new Date(report.createdAt).toLocaleString("vi-VN") : "—"}
                       </div>
                     </div>
                   )}
@@ -443,7 +443,8 @@ export function TechnicalStaffReportDetailModal({
           }}
           onSubmit={async (payload) => {
             if (onAssign) {
-              await onAssign(payload);
+              const taskPayload = Array.isArray(payload) ? payload[0] : payload;
+              await onAssign(taskPayload as any);
             }
             setIsAssignModalOpen(false);
           }}

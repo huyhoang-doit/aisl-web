@@ -1,4 +1,3 @@
-import DiscordIcon from "@/shared/components/icons/discord-icon";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,

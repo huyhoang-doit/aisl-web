@@ -10,14 +10,8 @@ import { Button } from "@/shared/components/ui/button"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
 import { Calendar, CheckCircle2, XCircle, Car, ImageIcon } from "lucide-react"
-import type { CourierApplication, CourierStatusValue, VehicleTypeValue } from "../types/courierRequest.types"
+import type { CourierApplication, VehicleTypeValue } from "../types/courierRequest.types"
 import { CourierStatus, VehicleType } from "../types/courierRequest.types"
-
-const STATUS_LABELS: Record<CourierStatusValue, string> = {
-  [CourierStatus.PENDING]: "Chờ duyệt",
-  [CourierStatus.APPROVED]: "Đã duyệt",
-  [CourierStatus.REJECTED]: "Đã từ chối",
-}
 
 const VEHICLE_LABELS: Record<VehicleTypeValue, string> = {
   [VehicleType.BIKE]: "Xe đạp",
@@ -42,7 +36,7 @@ export function CourierRequestDetailModal({
 }: CourierRequestDetailModalProps) {
   if (!application) return null
 
-  const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+  const statusConfig: Record<string, { label: string; variant: "secondary" | "default" | "destructive" }> = {
     NONE: { label: "Chưa kích hoạt", variant: "secondary" as const },
     PENDING: { label: "Chờ duyệt", variant: "secondary" as const },
     APPROVED: { label: "Đã duyệt", variant: "default" as const },
@@ -50,7 +44,9 @@ export function CourierRequestDetailModal({
     SUSPENDED: { label: "Đình chỉ", variant: "destructive" as const },
     BLACKLISTED: { label: "Danh sách đen", variant: "destructive" as const },
   }
-  const statusInfo = statusConfig[request.status] || { label: request.status, variant: "secondary" }
+  const statusInfo = statusConfig[application.status] || { label: application.status, variant: "secondary" }
+  const isPending = application.status === CourierStatus.PENDING
+  const vehicleLabel = application.vehicleType ? VEHICLE_LABELS[application.vehicleType as VehicleTypeValue] : "—"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,7 +61,7 @@ export function CourierRequestDetailModal({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <Badge variant={isPending ? "secondary" : application.status === CourierStatus.APPROVED ? "default" : "destructive"}>
-              {statusLabel}
+              {statusInfo.label}
             </Badge>
             {application.createdAt && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -144,7 +140,7 @@ export function CourierRequestDetailModal({
             </>
           )}
 
-          {request.status !== "PENDING" && request.status !== "NONE" && (
+          {application.status !== "PENDING" && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -173,7 +169,7 @@ export function CourierRequestDetailModal({
         </div>
 
         <DialogFooter>
-          {request.status === "PENDING" && (
+          {application.status === "PENDING" && (
             <>
               <Button
                 type="button"

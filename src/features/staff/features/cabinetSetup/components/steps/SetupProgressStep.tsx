@@ -6,6 +6,8 @@ import { Button } from "@/shared/components/ui/button";
 interface SetupProgressStepProps {
   cabinetId: string;
   totalLockers: number;
+  mqttBrokerHost: string;
+  mqttBrokerPort: number;
   onReset: () => void;
   onComplete: () => void;
 }
@@ -22,7 +24,7 @@ interface LockerStatus {
   errorCode?: string;
 }
 
-export function SetupProgressStep({ totalLockers, onReset, onComplete }: SetupProgressStepProps) {
+export function SetupProgressStep({ totalLockers, mqttBrokerHost, mqttBrokerPort, onReset, onComplete }: SetupProgressStepProps) {
   const [state, setState] = useState<SetupState>("INITIALIZING");
   const [testedCount, setTestedCount] = useState(0);
   const [okCount, setOkCount] = useState(0);
@@ -115,7 +117,14 @@ export function SetupProgressStep({ totalLockers, onReset, onComplete }: SetupPr
         </h3>
         <p className="text-muted-foreground max-w-sm mx-auto">
           {state === "IN_PROGRESS" && "Raspberry Pi đang lần lượt mở từng ô tủ để kiểm tra động cơ servo và cảm biến khoá cửa."}
-          {state === "COMPLETED" && "Cabinet đã sẵn sàng hoạt động với 100% khoá tủ đạt chuẩn."}
+          {state === "COMPLETED" && (
+            <>
+              Cabinet đã sẵn sàng hoạt động với 100% khoá tủ đạt chuẩn.
+              <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/10 text-xs font-medium text-primary">
+                Broker MQTT: {mqttBrokerHost}:{mqttBrokerPort}
+              </div>
+            </>
+          )}
           {state === "PARTIAL" && `Hoàn tất kiểm tra nhưng phát hiện ${failCount} ngăn tủ bị lỗi cần bảo trì.`}
         </p>
       </div>

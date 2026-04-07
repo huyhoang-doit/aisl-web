@@ -2,14 +2,14 @@
  * Auth Types
  * TypeScript types cho authentication
  */
-import { roles } from '@/shared/configs/role';
+
 
 export interface User {
   id: string;
   username: string;
   email: string;
   // name: string;
-  roles: [typeof roles.TECHNICIAN, typeof roles.ADMIN];
+  roles: string[];
   avatar?: string;
   createdAt?: string;
   updatedAt?: string;

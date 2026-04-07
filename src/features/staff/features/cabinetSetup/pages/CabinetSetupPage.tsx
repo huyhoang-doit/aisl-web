@@ -6,7 +6,6 @@ import type {
 } from "../schemas/cabinetSetup.schema";
 import { BasicInfoStep } from "../components/steps/BasicInfoStep";
 import { LayoutStep } from "../components/steps/LayoutStep";
-import { MqttSettingsStep } from "../components/steps/MqttSettingsStep";
 import { ReviewStep } from "../components/steps/ReviewStep";
 import { SetupProgressStep } from "../components/steps/SetupProgressStep";
 import { Button } from "@/shared/components/ui/button";
@@ -22,14 +21,18 @@ import { setupCabinetSchema } from "../schemas/cabinetSetup.schema";
 const STEPS = [
   { id: "basic", title: "Thông tin cơ bản" },
   { id: "layout", title: "Bố trí tủ (Locker Layout)" },
-  { id: "mqtt", title: "Kết nối mạng MQTT" },
   { id: "review", title: "Kiểm tra & Xác nhận" },
 ];
 
 export default function CabinetSetupPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [setupResult, setSetupResult] = useState<{ cabinetId: string; totalLockers: number } | null>(null);
+  const [setupResult, setSetupResult] = useState<{ 
+    cabinetId: string; 
+    totalLockers: number;
+    mqttBrokerHost: string;
+    mqttBrokerPort: number;
+  } | null>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
@@ -48,10 +51,7 @@ export default function CabinetSetupPage() {
       totalColumns: 6,
       heartbeatInterval: 60,
       openDoorTimeout: 5,
-      mqttBrokerHost: "",
-      mqttBrokerPort: 1883,
-      mqttUsername: "",
-      mqttPassword: "",
+      deviceAttachmentIds: [],
     },
   });
 
@@ -59,7 +59,6 @@ export default function CabinetSetupPage() {
     let fieldsToValidate: (keyof SetupCabinetFormValues)[] = [];
     if (currentStep === 0) fieldsToValidate = ["locationId", "cabinetId", "macAddress"];
     if (currentStep === 1) fieldsToValidate = ["totalRows", "totalColumns", "heartbeatInterval", "openDoorTimeout"];
-    if (currentStep === 2) fieldsToValidate = ["mqttBrokerHost", "mqttBrokerPort"];
     
     const isValid = await form.trigger(fieldsToValidate);
     return isValid;
@@ -92,6 +91,8 @@ export default function CabinetSetupPage() {
       setSetupResult({ 
         cabinetId: response.cabinetId, 
         totalLockers: values.totalRows * values.totalColumns,
+        mqttBrokerHost: response.mqttBrokerHost,
+        mqttBrokerPort: response.mqttBrokerPort,
       });
       
     } catch (error: any) {
@@ -112,6 +113,8 @@ export default function CabinetSetupPage() {
           <SetupProgressStep 
             cabinetId={setupResult.cabinetId} 
             totalLockers={setupResult.totalLockers}
+            mqttBrokerHost={setupResult.mqttBrokerHost}
+            mqttBrokerPort={setupResult.mqttBrokerPort}
             onReset={() => {
               setSetupResult(null);
               setCurrentStep(0);
@@ -200,8 +203,7 @@ export default function CabinetSetupPage() {
                 <div className="min-h-[350px]">
                   {currentStep === 0 && <BasicInfoStep form={form} />}
                   {currentStep === 1 && <LayoutStep form={form} />}
-                  {currentStep === 2 && <MqttSettingsStep form={form} />}
-                  {currentStep === 3 && <ReviewStep form={form} />}
+                  {currentStep === 2 && <ReviewStep form={form} />}
                 </div>
 
                 <div className="pt-6 mt-8 border-t flex items-center justify-between">

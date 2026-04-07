@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import type { Location } from "../features/location/types/location.types";
-import { DataGrid, type Column, type QuickFilter } from "@/shared/components/DataGrid";
+import { DataGrid, type QuickFilter } from "@/shared/components/DataGrid";
 import { locationService } from "../features/location/services/location.service";
 import { useLocation } from "../features/location/hooks/useLocation";
 import { toast } from "sonner";

@@ -35,6 +35,19 @@ export function LayoutStep({ form }: LayoutStepProps) {
   const isExceedingRows = selectedCabinet?.totalRows || 0;
   const isExceedingCols = selectedCabinet?.totalColumns || 0;
 
+  const { data: attachmentsData, isLoading: isLoadingAttachments } = useQuery({
+    queryKey: ["device-attachments"],
+    queryFn: () => cabinetSetupService.getDeviceAttachments({ 
+      page: 1, 
+      limit: 100
+    }),
+  });
+
+  // Filter devices: show those unassigned OR assigned to this specific cabinet
+  const availableAttachments = attachmentsData?.data?.deviceAttachments?.filter((device: any) => 
+    !device.cabinetConfigId || device.cabinetConfigId === cabinetId
+  ) || [];
+
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-500">
       <div className="space-y-1 mb-6">
@@ -134,6 +147,65 @@ export function LayoutStep({ form }: LayoutStepProps) {
           </div>
         </div>
       )}
+
+      {/* Tùy chọn thiết bị đính kèm (Device Attachments) */}
+      <div className="mt-8">
+        <h3 className="text-sm font-medium mb-4">Các thiết bị phụ trợ đính kèm (Tuỳ chọn)</h3>
+        <FormField
+          control={form.control}
+          name="deviceAttachmentIds"
+          render={({ field }) => {
+            return (
+              <FormItem>
+                {isLoadingAttachments ? (
+                  <p className="text-sm text-muted-foreground">Đang tải danh sách thiết bị...</p>
+                ) : availableAttachments.length ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {availableAttachments.map((attachment: any) => (
+                      <div 
+                        key={attachment.id} 
+                        className={`flex items-start space-x-3 space-y-0 rounded-md border p-4 cursor-pointer transition-colors ${
+                          field.value?.includes(attachment.id) ? "border-primary bg-primary/5" : "hover:bg-muted/50"
+                        }`}
+                        onClick={() => {
+                          const currentValues = field.value || [];
+                          const isSelected = currentValues.includes(attachment.id);
+                          const newValues = isSelected 
+                            ? currentValues.filter((id) => id !== attachment.id)
+                            : [...currentValues, attachment.id];
+                          field.onChange(newValues);
+                        }}
+                      >
+                        <FormControl>
+                          <input
+                            type="checkbox"
+                            className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                            checked={field.value?.includes(attachment.id) || false}
+                            onChange={() => {}} // Handle change on parent div
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="font-medium cursor-pointer">
+                            {attachment.name}
+                          </FormLabel>
+                          <p className="text-xs text-muted-foreground">
+                            SN: {attachment.serialNumber}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 border border-dashed rounded-lg bg-muted/10 flex items-center justify-center text-sm text-muted-foreground">
+                    Không có thiết bị đính kèm nào khả dụng cho cụm tủ này.
+                  </div>
+                )}
+                <FormMessage />
+              </FormItem>
+            );
+          }}
+        />
+      </div>
     </div>
   );
 }
