@@ -101,6 +101,7 @@ const ManagePlanPage = () => {
       price: data.price,
       description: data.description,
       status: data.status,
+      pricingIds: data.pricingIds,
     };
 
     try {

@@ -14,9 +14,10 @@ export interface CreatePlanPayload {
   price: number;
   description?: string;
   status: PlanStatus;
+  pricingIds: string[];
 }
 
-export interface UpdatePlanPayload extends CreatePlanPayload {}
+export interface UpdatePlanPayload extends Partial<CreatePlanPayload> {}
 
 export interface PlanResponse {
   data: Plan;
