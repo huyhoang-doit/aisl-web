@@ -201,7 +201,7 @@ const LogsActivityPage = () => {
           pageSizeOptions: [5, 10, 20, 50, 100],
         }}
         searchable={false}
-        quickFilters={quickFilters}
+        // quickFilters={quickFilters}
         onQuickFilterChange={() => setPage(1)}
         onClearFilters={handleClearFilters}
         hasExternalFilters={hasExternalFilters}
