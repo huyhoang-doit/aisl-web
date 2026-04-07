@@ -27,6 +27,7 @@ import ManageVehiclesPage from "../pages/ManageVehiclesPage";
 import ManageDeviceAttachmentPage from "../pages/ManageDeviceAttachmentPage";
 import LogsDevicePage from "../pages/LogsDevicePage";
 import LogsActivityPage from "../pages/LogsActivityPage";
+import ManageStaffApplication from "../pages/ManageStaffApplication";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -37,6 +38,7 @@ const AdminRoutes = () => {
         <Route path="settings" element={<SettingPage />} />
         <Route path="users" element={<ManageUserPage />} />
         <Route path="staff" element={<ManageStaffPage />} />
+        <Route path="staff-applications" element={<ManageStaffApplication />} />
         <Route path="courier-requests" element={<ManageCourierRequest />} />
         <Route path="locked-accounts" element={<ManageLockedAccountsPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />

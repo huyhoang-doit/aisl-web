@@ -3,7 +3,6 @@ import {
   Users,
   Package,
   DollarSign,
-  Bell,
   MapPin,
   Box,
   User,
@@ -45,9 +44,14 @@ export const adminNavMain: NavItem[] = [
         url: "/admin/staff",
         icon: UserCog,
       },
+      // {
+      //   title: "Duyệt người chuyển phát",
+      //   url: "/admin/courier-requests",
+      //   icon: UserRoundPen,
+      // },
       {
-        title: "Duyệt người chuyển phát",
-        url: "/admin/courier-requests",
+        title: "Duyệt yêu cầu nhân viên",
+        url: "/admin/staff-applications",
         icon: UserRoundPen,
       },
       // {
