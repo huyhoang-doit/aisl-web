@@ -9,12 +9,13 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select"
 
+/* eslint-disable no-unused-vars */
 interface PaginationProps {
   current: number
   total: number
   pageSize: number
-  onPageChange: (page: number) => void
-  onPageSizeChange?: (size: number) => void
+  onPageChange: (_page: number) => void
+  onPageSizeChange?: (_size: number) => void
   pageSizeOptions?: number[]
   showPageSizeSelector?: boolean
   className?: string

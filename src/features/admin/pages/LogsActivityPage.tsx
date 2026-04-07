@@ -2,8 +2,8 @@ import { useMemo } from "react";
 import { DataTable, type Column, type QuickFilter } from "@/shared/components/DataTable";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { useActivityLogs } from "../features/logs/hooks/useActivityLogs";
-import type { ActivityLog } from "../features/logs/types/logs.types";
+import { useActivityLogs } from "@/features/admin/features/logs/hooks/useActivityLogs";
+import type { ActivityLog } from "@/features/admin/features/logs/types/logs.types";
 import UserSelector from "../features/user/components/UserSelector";
 
 const formatDateTime = (value?: string) => {

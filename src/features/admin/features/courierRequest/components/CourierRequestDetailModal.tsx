@@ -10,14 +10,8 @@ import { Button } from "@/shared/components/ui/button"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
 import { Calendar, CheckCircle2, XCircle, Car, ImageIcon } from "lucide-react"
-import type { CourierApplication, CourierStatusValue, VehicleTypeValue } from "../types/courierRequest.types"
+import type { CourierApplication, VehicleTypeValue } from "../types/courierRequest.types"
 import { CourierStatus, VehicleType } from "../types/courierRequest.types"
-
-const STATUS_LABELS: Record<CourierStatusValue, string> = {
-  [CourierStatus.PENDING]: "Chờ duyệt",
-  [CourierStatus.APPROVED]: "Đã duyệt",
-  [CourierStatus.REJECTED]: "Đã từ chối",
-}
 
 const VEHICLE_LABELS: Record<VehicleTypeValue, string> = {
   [VehicleType.BIKE]: "Xe đạp",

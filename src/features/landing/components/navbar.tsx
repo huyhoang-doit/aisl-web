@@ -25,12 +25,6 @@ interface RouteProps {
   label: string;
 }
 
-interface FeatureProps {
-  title: string;
-  description: string;
-  href: string;
-}
-
 const routeList: RouteProps[] = [
   {
     href: "#pricing",
@@ -47,29 +41,6 @@ const routeList: RouteProps[] = [
   {
     href: "#faq",
     label: "FAQ",
-  },
-];
-
-const featureList: FeatureProps[] = [
-  {
-    title: "Bảo Mật Đa Lớp & Sinh Trắc Học",
-    description: "Công nghệ nhận diện khuôn mặt tiên tiến đảm bảo nhận hàng an toàn, không tiếp xúc với xác thực nhiều lớp.",
-    href: "#features",
-  },
-  {
-    title: "Ví Điện Tử & Thanh Toán Tự Động",
-    description: "Tính phí dựa trên thời gian lưu trữ thực tế, tự động trừ vào ví đã nạp trước. Không cần thao tác thanh toán thủ công.",
-    href: "#features",
-  },
-  {
-    title: "Phân Bổ Tủ Thông Minh",
-    description: "Tự động phân bổ tủ tối ưu dựa trên kích cỡ gói hàng và tình trạng sẵn có. Hỗ trợ Load Balancing để giảm hao mòn cục bộ.",
-    href: "#features",
-  },
-  {
-    title: "Giám Sát IoT Theo Thời Gian Thực",
-    description: "Giám sát liên tục trạng thái tủ, điều kiện gói hàng và sức khỏe hệ thống qua cảm biến IoT. Cảnh báo tức thì khi có sự cố.",
-    href: "#features",
   },
 ];
 

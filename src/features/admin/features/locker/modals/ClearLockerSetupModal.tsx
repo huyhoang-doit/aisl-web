@@ -20,7 +20,6 @@ import {
 import { Loader2, RefreshCw } from "lucide-react";
 import CabinetSelector from "../../cabinet/components/CabinetSelector";
 import LockerSelector from "../components/LockerSelector";
-import { lockerService } from "../services/locker.service";
 import { toast } from "sonner";
 
 interface ClearLockerSetupModalProps {

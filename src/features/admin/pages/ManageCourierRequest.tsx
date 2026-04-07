@@ -260,14 +260,6 @@ const ManageCourierRequest = () => {
   // since React-Query and parameter passing handle that with the backend.
   // Using `requests` and `isLoading` below.
 
-  // Xử lý duyệt/từ chối
-   
-  const _handleApprove = async (request: CourierApplication, action: "approve" | "reject", reason?: string) => {
-    if (!request.id) return;
-    const newStatus = action === "approve" ? "APPROVED" : (request.status === "APPROVED" ? "SUSPENDED" : "REJECTED");
-    updateStatusMutation.mutate({ id: request.id, status: newStatus as any, reason });
-  }
-
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div>
@@ -280,7 +272,7 @@ const ManageCourierRequest = () => {
       <DataTable
         data={requests}
         columns={columns}
-        keyExtractor={(row) => row.id || row.email}
+        keyExtractor={(row) => row.id || row.userId}
         onCreate={undefined}
         emptyMessage={isLoading ? "Đang tải dữ liệu..." : "Chưa có yêu cầu nào"}
         onSort={handleSort}

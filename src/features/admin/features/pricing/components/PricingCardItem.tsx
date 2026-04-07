@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Calendar, DollarSign, Clock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Pricing } from "../types/pricing.types";

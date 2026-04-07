@@ -2,8 +2,8 @@ import { useCallback, useMemo } from "react";
 import { DataTable, type Column, type QuickFilter } from "@/shared/components/DataTable";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { useDeviceLogs } from "../features/logs/hooks/useDeviceLogs";
-import type { DeviceLog } from "../features/logs/types/logs.types";
+import { useDeviceLogs } from "@/features/admin/features/logs/hooks/useDeviceLogs";
+import type { DeviceLog } from "@/features/admin/features/logs/types/logs.types";
 import CabinetSelector from "../features/cabinet/components/CabinetSelector";
 import LockerSelector from "../features/locker/components/LockerSelector";
 

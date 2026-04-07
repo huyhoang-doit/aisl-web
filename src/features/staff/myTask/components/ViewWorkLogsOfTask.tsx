@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/shared/components/ui/button";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { workLogService } from "../services/workLog.service";
 import type { WorkLogDetail } from "../types/myTask.types";
 import { WorkLogCard } from "./WorkLogCard";
@@ -64,7 +63,7 @@ export function ViewWorkLogsOfTask({ taskId, onSuccess }: ViewWorkLogsOfTaskProp
         <p className="text-sm text-muted-foreground py-4">Chưa có work log nào.</p>
       ) : (
         <div className="space-y-3">
-          {workLogs.map((log) => (
+          {workLogs.map((log: WorkLogDetail) => (
             <WorkLogCard
               key={log.id}
               log={log}

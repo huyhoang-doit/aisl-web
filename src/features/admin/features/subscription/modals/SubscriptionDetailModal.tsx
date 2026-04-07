@@ -28,8 +28,6 @@ const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = ({
   open,
   onOpenChange,
   subscription,
-  onEdit,
-  onDelete,
 }) => {
   const [userDetail, setUserDetail] = useState<User | null>(null);
   const [userLoading, setUserLoading] = useState(false);
