@@ -5,6 +5,16 @@
 import { api } from '@/shared/lib/api/client';
 import type { LoginInput, LoginResponse, RegisterInput, RegisterResponse, User } from '../types/auth.types';
 
+interface RefreshTokenResponse {
+  token?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  data?: {
+    accessToken: string;
+    refreshToken?: string;
+  };
+}
+
 export const authService = {
   /**
    * Đăng nhập
@@ -46,7 +56,14 @@ export const authService = {
   /**
    * Refresh token
    */
-  refreshToken: async (refreshToken: string): Promise<{ token: string }> => {
-    return api.post<{ token: string }>('/api/auth/refresh', { refreshToken });
+  refreshToken: async (refreshToken: string): Promise<RefreshTokenResponse> => {
+    return api.post<RefreshTokenResponse>(
+      '/auth/refresh-token',
+      { refreshToken },
+      {
+        skipAuthRefresh: true,
+        skipAuthToken: true,
+      } as any
+    );
   },
 };

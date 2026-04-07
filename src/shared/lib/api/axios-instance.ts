@@ -3,8 +3,16 @@
  * Centralized axios instance với interceptors và error handling
  */
 import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import { authService } from '@/features/auth/services/auth.service';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+const MAX_REFRESH_ATTEMPTS = 3;
+
+interface AuthAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+  skipAuthRefresh?: boolean;
+  skipAuthToken?: boolean;
+}
 
 /**
  * Tạo axios instance với cấu hình mặc định
@@ -23,16 +31,76 @@ import { getDeviceId } from '@/shared/utils/device';
 
 // ... (existing code)
 
+let isRefreshing = false;
+let refreshAttempts = 0;
+let pendingRequests: Array<{
+  resolve: (token: string) => void;
+  reject: (error: { message: string; status: number }) => void;
+}> = [];
+
+const isRefreshEndpoint = (url?: string): boolean => {
+  return !!url && (url.includes('/auth/refresh') || url.includes('/auth/refresh-token'));
+};
+
+const clearAuthSession = (): void => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+  localStorage.removeItem('userInfo');
+  window.dispatchEvent(new Event('auth:logout'));
+};
+
+const resolvePendingRequests = (token: string): void => {
+  pendingRequests.forEach(({ resolve }) => resolve(token));
+  pendingRequests = [];
+};
+
+const rejectPendingRequests = (error: { message: string; status: number }): void => {
+  pendingRequests.forEach(({ reject }) => reject(error));
+  pendingRequests = [];
+};
+
+const refreshAccessToken = async (): Promise<string> => {
+  if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
+    clearAuthSession();
+    throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+  }
+
+  const refreshToken = localStorage.getItem('refreshToken');
+  if (!refreshToken) {
+    clearAuthSession();
+    throw new Error('Không tìm thấy refresh token. Vui lòng đăng nhập lại.');
+  }
+
+  refreshAttempts += 1;
+  const response = await authService.refreshToken(refreshToken);
+  const newAccessToken = response?.data?.accessToken ?? response?.accessToken ?? response?.token;
+  const newRefreshToken = response?.data?.refreshToken ?? response?.refreshToken;
+
+  if (!newAccessToken) {
+    clearAuthSession();
+    throw new Error('Không thể làm mới phiên đăng nhập.');
+  }
+
+  localStorage.setItem('token', newAccessToken);
+  if (newRefreshToken) {
+    localStorage.setItem('refreshToken', newRefreshToken);
+  }
+
+  refreshAttempts = 0;
+  return newAccessToken;
+};
+
 /**
  * Request Interceptor
  * Thêm token và device info vào header trước khi gửi request
  */
 axiosInstance.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    const requestConfig = config as AuthAxiosRequestConfig;
     // Lấy token từ localStorage
     const token = localStorage.getItem('token');
     
-    if (token && config.headers) {
+    if (!requestConfig.skipAuthToken && token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
@@ -65,28 +133,71 @@ axiosInstance.interceptors.response.use(
     // Trả về data trực tiếp từ response
     return response.data;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     // Xử lý lỗi
     if (error.response) {
       // Server trả về error response
       const status = error.response.status;
       const data = error.response.data as any;
+      const originalRequest = error.config as AuthAxiosRequestConfig | undefined;
 
       // Xử lý các trường hợp đặc biệt
       if (status === 401) {
-        // Unauthorized - xóa token và redirect đến login
-        // localStorage.removeItem('token');
-        // localStorage.removeItem('userInfo');
-        
-        // Chỉ redirect nếu không phải đang ở trang login
-        // if (window.location.pathname !== '/login') {
-        //   window.location.href = '/login';
-        // }
-        // toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-        return Promise.reject({
-          message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
-          status: 401,
-        });
+        if (!originalRequest) {
+          clearAuthSession();
+          return Promise.reject({
+            message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+            status: 401,
+          });
+        }
+
+        if (
+          originalRequest.skipAuthRefresh ||
+          originalRequest._retry ||
+          isRefreshEndpoint(originalRequest.url)
+        ) {
+          clearAuthSession();
+          return Promise.reject({
+            message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+            status: 401,
+          });
+        }
+
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            pendingRequests.push({
+              resolve: (token: string) => {
+                if (originalRequest.headers) {
+                  originalRequest.headers.Authorization = `Bearer ${token}`;
+                }
+                resolve(axiosInstance(originalRequest));
+              },
+              reject,
+            });
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          const newAccessToken = await refreshAccessToken();
+          resolvePendingRequests(newAccessToken);
+          if (originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          }
+          return axiosInstance(originalRequest);
+        } catch (refreshError: any) {
+          const normalizedError = {
+            message: refreshError?.message || 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+            status: 401,
+          };
+          rejectPendingRequests(normalizedError);
+          clearAuthSession();
+          return Promise.reject(normalizedError);
+        } finally {
+          isRefreshing = false;
+        }
       }
 
       // Tạo error object với thông tin chi tiết

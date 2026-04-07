@@ -9,6 +9,8 @@ import type { User } from '../types/auth.types';
 import { toast } from 'sonner';
 import { roles } from '@/shared/configs/role';
 
+/* eslint-disable no-unused-vars */
+
 interface AuthState {
   // State
   user: User | null;
@@ -26,6 +28,7 @@ interface AuthState {
   clearError: () => void;
   reset: () => void;
 }
+/* eslint-enable no-unused-vars */
 
 const initialState = {
   user: null,
@@ -34,14 +37,33 @@ const initialState = {
   isLoading: false,
   error: null,
 };
+let hasAuthLogoutListener = false;
 
 export const useAuthStore = create<AuthState>((set, get) => {
+  const performLocalLogout = (showToast = true) => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('userInfo');
+
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
+
+    if (showToast) {
+      toast.success('Đăng xuất thành công');
+    }
+  };
+
   // Khôi phục state từ localStorage khi khởi tạo
   const initializeAuth = () => {
     const token = localStorage.getItem('token');
+    const refreshToken = localStorage.getItem('refreshToken');
     const userInfo = localStorage.getItem('userInfo');
     
-    if (token && userInfo) {
+    if (token && refreshToken && userInfo) {
       try {
         const user = JSON.parse(userInfo);
         return {
@@ -52,6 +74,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       } catch {
         // Nếu parse lỗi, clear localStorage
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         localStorage.removeItem('userInfo');
       }
     }
@@ -60,6 +83,13 @@ export const useAuthStore = create<AuthState>((set, get) => {
   };
 
   const initialStateFromStorage = initializeAuth();
+
+  if (typeof window !== 'undefined' && !hasAuthLogoutListener) {
+    window.addEventListener('auth:logout', () => {
+      performLocalLogout(false);
+    });
+    hasAuthLogoutListener = true;
+  }
 
   return {
     ...initialStateFromStorage,
@@ -76,6 +106,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         
         // Lưu token và user info vào localStorage
         localStorage.setItem('token', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
 
         await get().getCurrentUser();
         
@@ -99,17 +130,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         // Gọi API logout (nếu có)
         // await authService.logout();
-        // Xóa token và user info
-        localStorage.removeItem('token');
-        localStorage.removeItem('userInfo');
-        
-        set({
-          user: null,
-          token: null,
-          isAuthenticated: false,
-        });
-
-        toast.success('Đăng xuất thành công');
+        performLocalLogout(true);
       } catch (error) {
         // Nếu API logout fail, vẫn tiếp tục logout local
         console.error('Logout API error:', error);
@@ -176,6 +197,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         localStorage.setItem('token', token);
       } else {
         localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
       }
       set({ token, isAuthenticated: !!token && !!get().user });
     },
@@ -192,6 +214,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
      */
     reset: () => {
       localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
       localStorage.removeItem('userInfo');
       set(initialState);
     },
@@ -206,7 +229,7 @@ export const useIsAdmin = () => {
 };
 
 export const useIsStaff = () => {
-  return useAuthStore((state) => state.user?.roles.includes(roles.TECHNICAL_STAFF));
+  return useAuthStore((state) => state.user?.roles.includes(roles.TECHNICIAN));
 };
 
 export const useUserRole = () => {
