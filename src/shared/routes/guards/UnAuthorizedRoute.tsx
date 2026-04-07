@@ -11,11 +11,11 @@ export const UnAuthorizedRoute = () => {
     }
     
     // Nếu đã đăng nhập, redirect về trang tương ứng với role
-    if (user.role === roles.ADMIN) {
+    if (user.roles.includes(roles.ADMIN)) {
       return <Navigate to="/admin" replace={true} />
     }
     
-    if (user.role === roles.TECHNICAL_STAFF) {
+    if (user.roles.includes(roles.TECHNICAL_STAFF)) {
       return <Navigate to="/staff" replace={true} />
     }
     

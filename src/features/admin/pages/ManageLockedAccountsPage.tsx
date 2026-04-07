@@ -4,18 +4,8 @@ import { LockedAccountDetailModal } from "../features/lockedAccount/components/L
 import { UnlockAccountModal } from "../features/lockedAccount/components/UnlockAccountModal"
 import { Badge } from "@/shared/components/ui/badge"
 import { Button } from "@/shared/components/ui/button"
-import { Lock, Unlock, Eye } from "lucide-react"
+import { Unlock, Eye } from "lucide-react"
 import type { LockedAccount } from "../features/lockedAccount/types/lockedAccount.types"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/components/ui/alert-dialog"
 
 // Mock data - Thay thế bằng API call thực tế
 const mockLockedAccounts: LockedAccount[] = [

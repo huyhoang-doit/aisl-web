@@ -53,6 +53,8 @@ export interface CourierRequest {
   reviewedBy?: string
   rejectionReason?: string
   documents?: string[]
+  legalName?: string
+  licensePlate?: string
   createdAt?: string
   updatedAt?: string
 }

@@ -42,7 +42,7 @@ export function CourierRequestDetailModal({
 }: CourierRequestDetailModalProps) {
   if (!application) return null
 
-  const statusConfig: Record<NonNullable<CourierRequest["status"]>, { label: string; variant: "secondary" | "default" | "destructive" }> = {
+  const statusConfig: Record<string, { label: string; variant: "secondary" | "default" | "destructive" }> = {
     NONE: { label: "Chưa kích hoạt", variant: "secondary" as const },
     PENDING: { label: "Chờ duyệt", variant: "secondary" as const },
     APPROVED: { label: "Đã duyệt", variant: "default" as const },
@@ -50,7 +50,9 @@ export function CourierRequestDetailModal({
     SUSPENDED: { label: "Đình chỉ", variant: "destructive" as const },
     BLACKLISTED: { label: "Danh sách đen", variant: "destructive" as const },
   }
-  const statusInfo = statusConfig[request.status] || { label: request.status, variant: "secondary" }
+  const statusInfo = statusConfig[application.status] || { label: application.status, variant: "secondary" }
+  const isPending = application.status === CourierStatus.PENDING
+  const vehicleLabel = application.vehicleType ? VEHICLE_LABELS[application.vehicleType as VehicleTypeValue] : "—"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,7 +67,7 @@ export function CourierRequestDetailModal({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <Badge variant={isPending ? "secondary" : application.status === CourierStatus.APPROVED ? "default" : "destructive"}>
-              {statusLabel}
+              {statusInfo.label}
             </Badge>
             {application.createdAt && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -144,7 +146,7 @@ export function CourierRequestDetailModal({
             </>
           )}
 
-          {request.status !== "PENDING" && request.status !== "NONE" && (
+          {application.status !== "PENDING" && (
             <>
               <Separator />
               <div className="space-y-4">
@@ -173,7 +175,7 @@ export function CourierRequestDetailModal({
         </div>
 
         <DialogFooter>
-          {request.status === "PENDING" && (
+          {application.status === "PENDING" && (
             <>
               <Button
                 type="button"

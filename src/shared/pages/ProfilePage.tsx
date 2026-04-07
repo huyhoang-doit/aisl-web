@@ -1,5 +1,5 @@
 import * as React from "react"
-import { User, Mail, Phone, MapPin, Calendar, Edit, Building2 } from "lucide-react"
+import { User, Mail, Phone, Edit } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar"

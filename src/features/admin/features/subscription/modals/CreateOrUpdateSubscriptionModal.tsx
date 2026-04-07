@@ -53,7 +53,7 @@ export function CreateOrUpdateSubscriptionModal({
   onSubmit,
   mode = "create",
 }: CreateOrUpdateSubscriptionModalProps) {
-  const isUpdateMode = mode === "update" && subscriptionData;
+  const isUpdateMode = !!(mode === "update" && subscriptionData);
 
   const form = useForm<SubscriptionFormData>({
     defaultValues: {

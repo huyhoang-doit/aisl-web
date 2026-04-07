@@ -3,7 +3,6 @@ import {
   Users,
   Package,
   DollarSign,
-  Bell,
   MapPin,
   Box,
   User,
