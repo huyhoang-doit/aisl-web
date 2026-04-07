@@ -32,7 +32,7 @@ export const STATUS_CONFIG: Record<string, StatusEntry> = {
   PENDING: { label: "Chờ xử lý", variant: "warning" },
   ASSIGNED: { label: "Đã phân công", variant: "info" },
   IN_PROGRESS: { label: "Đang xử lý", variant: "progress" },
-  RESOLVED: { label: "Đã xử lý", variant: "success" },
+  RESOLVED: { label: "Đã xác nhận", variant: "success" },
   CLOSED: { label: "Đã đóng", variant: "destructive" },
   // --- Technical Task (task bảo trì) ---
   OPEN: { label: "Chưa bắt đầu", variant: "warning" },

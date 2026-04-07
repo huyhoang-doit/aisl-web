@@ -56,3 +56,12 @@ export interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
 }
+
+export interface ChangePasswordInput {
+  email: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message?: string;
+}

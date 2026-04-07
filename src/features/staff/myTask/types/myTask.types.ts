@@ -1,13 +1,17 @@
 import type { Pagination } from "@/shared/types/pagination.types";
 
-/** Trạng thái task (backend): OPEN → IN_PROGRESS → COMPLETED → VERIFIED */
+/** Trạng thái task theo backend */
 export const TechnicalTaskStatus = {
   OPEN: "OPEN",
+  ASSIGNED: "ASSIGNED",
   IN_PROGRESS: "IN_PROGRESS",
   COMPLETED: "COMPLETED",
-  // VERIFIED: "VERIFIED",
   RESOLVED: "RESOLVED",
+  CANCELLED: "CANCELLED",
+  OVERDUE: "OVERDUE",
 } as const;
+
+export type TechnicalTaskStatusType = (typeof TechnicalTaskStatus)[keyof typeof TechnicalTaskStatus];
 
 export const TechnicalTaskPriority = {
   LOW: "LOW",
@@ -43,7 +47,7 @@ export interface TaskDetail {
   assignedByName?: string;
   taskType: "REPAIR" | "INSPECTION" | "CLEANING" | string;
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | string;
-  status: string;
+  status: TechnicalTaskStatusType;
   createdAt: string;
   updatedAt: string;
   incidentReport?: TaskDetailIncidentReport;

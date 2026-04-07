@@ -16,6 +16,7 @@ import { Switch } from "@/shared/components/ui/switch"
 import { Input } from "@/shared/components/ui/input"
 import { useTheme } from "next-themes"
 import { toast } from "sonner"
+import { authService } from "@/features/auth"
 import { useAuthStore } from "@/features/auth/store/auth.store"
 import { useFcmToken } from "@/shared/hooks/useFcmToken"
 import {
@@ -40,6 +41,7 @@ export default function SettingPage() {
   const [showNewPassword, setShowNewPassword] = React.useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
   const [notificationLoading, setNotificationLoading] = React.useState(false)
+  const [changingPassword, setChangingPassword] = React.useState(false)
 
   // Real notification permission state
   const [notificationEnabled, setNotificationEnabled] = React.useState(() => {
@@ -112,27 +114,48 @@ export default function SettingPage() {
     }))
   }
 
-  const handleSavePassword = () => {
+  const handleSavePassword = async () => {
+    if (!jwt) {
+      toast.error("Vui lòng đăng nhập lại để đổi mật khẩu.")
+      return
+    }
     if (!passwordData.currentPassword) {
-      alert("Vui lòng nhập mật khẩu hiện tại")
+      toast.error("Vui lòng nhập mật khẩu hiện tại")
       return
     }
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Mật khẩu mới và xác nhận mật khẩu không khớp")
+      toast.error("Mật khẩu mới và xác nhận mật khẩu không khớp")
       return
     }
-    if (passwordData.newPassword.length < 8) {
-      alert("Mật khẩu phải có ít nhất 8 ký tự")
+    // if (passwordData.newPassword.length < 8) {
+    //   toast.error("Mật khẩu phải có ít nhất 8 ký tự")
+    //   return
+    // }
+
+    const payloadEmail = useAuthStore.getState().user?.email
+    if (!payloadEmail) {
+      toast.error("Không tìm thấy email tài khoản. Vui lòng đăng nhập lại.")
       return
     }
-    // TODO: Implement password change API call
-    console.log("Changing password...", passwordData)
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
-    alert("Đổi mật khẩu thành công!")
+
+    setChangingPassword(true)
+    try {
+      await authService.changePassword({
+        email: payloadEmail,
+        newPassword: passwordData.newPassword,
+      })
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      })
+      toast.success("Đổi mật khẩu thành công!")
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Đổi mật khẩu thất bại"
+      toast.error(message)
+    } finally {
+      setChangingPassword(false)
+    }
   }
 
   const handleDeleteAccount = () => {
@@ -289,9 +312,9 @@ export default function SettingPage() {
               </div>
             </div>
 
-            <Button onClick={handleSavePassword} className="w-full">
+            <Button onClick={handleSavePassword} className="w-full" disabled={changingPassword}>
               <Lock className="mr-2 h-4 w-4" />
-              Đổi mật khẩu
+              {changingPassword ? "Đang đổi mật khẩu..." : "Đổi mật khẩu"}
             </Button>
           </CardContent>
         </Card>

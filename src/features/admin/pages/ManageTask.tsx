@@ -31,41 +31,59 @@ const PRIORITY_LABELS: Record<string, string> = {
 
 const TASK_STATUS_TABS: TaskStatus[] = [
   TechnicalTaskStatus.OPEN,
+  TechnicalTaskStatus.ASSIGNED,
   TechnicalTaskStatus.IN_PROGRESS,
   TechnicalTaskStatus.COMPLETED,
-  TechnicalTaskStatus.VERIFIED,
+  TechnicalTaskStatus.RESOLVED,
+  TechnicalTaskStatus.CANCELLED,
+  TechnicalTaskStatus.OVERDUE,
 ];
 
 const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
   [TechnicalTaskStatus.OPEN]: "Mở",
+  [TechnicalTaskStatus.ASSIGNED]: "Đã giao",
   [TechnicalTaskStatus.IN_PROGRESS]: "Đang xử lý",
   [TechnicalTaskStatus.COMPLETED]: "Hoàn thành",
-  [TechnicalTaskStatus.VERIFIED]: "Đã xác minh",
+  [TechnicalTaskStatus.RESOLVED]: "Đã xác nhận",
+  [TechnicalTaskStatus.CANCELLED]: "Đã hủy",
+  [TechnicalTaskStatus.OVERDUE]: "Quá hạn",
 };
 
 const TASK_TAB_COLOR_CLASS: Record<TaskStatus, string> = {
   [TechnicalTaskStatus.OPEN]:
     "data-[state=active]:bg-slate-100 data-[state=active]:text-slate-800 data-[state=active]:border-slate-300 border border-transparent border-border",
+  [TechnicalTaskStatus.ASSIGNED]:
+    "data-[state=active]:bg-indigo-100 data-[state=active]:text-indigo-800 data-[state=active]:border-indigo-300 border border-transparent border-border",
   [TechnicalTaskStatus.IN_PROGRESS]:
     "data-[state=active]:bg-amber-100 data-[state=active]:text-amber-800 data-[state=active]:border-amber-300 border border-transparent border-border",
   [TechnicalTaskStatus.COMPLETED]:
     "data-[state=active]:bg-emerald-100 data-[state=active]:text-emerald-800 data-[state=active]:border-emerald-300 border border-transparent border-border",
-  [TechnicalTaskStatus.VERIFIED]:
+  [TechnicalTaskStatus.RESOLVED]:
     "data-[state=active]:bg-teal-100 data-[state=active]:text-teal-800 data-[state=active]:border-teal-300 border border-transparent border-border",
+  [TechnicalTaskStatus.CANCELLED]:
+    "data-[state=active]:bg-rose-100 data-[state=active]:text-rose-800 data-[state=active]:border-rose-300 border border-transparent border-border",
+  [TechnicalTaskStatus.OVERDUE]:
+    "data-[state=active]:bg-orange-100 data-[state=active]:text-orange-800 data-[state=active]:border-orange-300 border border-transparent border-border",
 };
 
 const TASK_STATUS_BADGE_CLASS: Record<string, string> = {
   [TechnicalTaskStatus.OPEN]: "bg-slate-100 text-slate-800 border-slate-300",
+  [TechnicalTaskStatus.ASSIGNED]: "bg-indigo-100 text-indigo-800 border-indigo-300",
   [TechnicalTaskStatus.IN_PROGRESS]: "bg-amber-100 text-amber-800 border-amber-300",
   [TechnicalTaskStatus.COMPLETED]: "bg-emerald-100 text-emerald-800 border-emerald-300",
-  [TechnicalTaskStatus.VERIFIED]: "bg-teal-100 text-teal-800 border-teal-300",
+  [TechnicalTaskStatus.RESOLVED]: "bg-teal-100 text-teal-800 border-teal-300",
+  [TechnicalTaskStatus.CANCELLED]: "bg-rose-100 text-rose-800 border-rose-300",
+  [TechnicalTaskStatus.OVERDUE]: "bg-orange-100 text-orange-800 border-orange-300",
 };
 
 const TASK_EMPTY_MESSAGES: Record<TaskStatus, string> = {
   [TechnicalTaskStatus.OPEN]: "Chưa có task nào ở trạng thái mở",
+  [TechnicalTaskStatus.ASSIGNED]: "Chưa có task nào ở trạng thái đã giao",
   [TechnicalTaskStatus.IN_PROGRESS]: "Chưa có task nào đang xử lý",
   [TechnicalTaskStatus.COMPLETED]: "Chưa có task nào hoàn thành",
-  [TechnicalTaskStatus.VERIFIED]: "Chưa có task nào đã xác minh",
+  [TechnicalTaskStatus.RESOLVED]: "Chưa có task nào đã xác nhận",
+  [TechnicalTaskStatus.CANCELLED]: "Chưa có task nào đã hủy",
+  [TechnicalTaskStatus.OVERDUE]: "Chưa có task nào quá hạn",
 };
 
 const taskQuickFilters: QuickFilter[] = [
@@ -73,6 +91,7 @@ const taskQuickFilters: QuickFilter[] = [
     key: "taskType",
     label: "Loại task",
     placeholder: "Loại task",
+    allStringValue: "Tất cả phân loại task",
     options: [
       { value: TechnicalTaskType.REPAIR, label: TASK_TYPE_LABELS[TechnicalTaskType.REPAIR] },
       { value: TechnicalTaskType.SETUP, label: TASK_TYPE_LABELS[TechnicalTaskType.SETUP] },
@@ -84,6 +103,7 @@ const taskQuickFilters: QuickFilter[] = [
     key: "priority",
     label: "Độ ưu tiên",
     placeholder: "Độ ưu tiên",
+    allStringValue: "Tất cả độ ưu tiên",
     options: [
       { value: TechnicalTaskPriority.LOW, label: PRIORITY_LABELS[TechnicalTaskPriority.LOW] },
       { value: TechnicalTaskPriority.MEDIUM, label: PRIORITY_LABELS[TechnicalTaskPriority.MEDIUM] },
@@ -160,7 +180,7 @@ const ManageTask = () => {
       accessor: (row) => (
         <div>
           <div className="font-medium">{row.assignedToName ?? "-"}</div>
-          <div className="font-mono text-xs text-muted-foreground">{row.assignedToId ?? "-"}</div>
+          {/* <div className="font-mono text-xs text-muted-foreground">{row.assignedToId ?? "-"}</div> */}
         </div>
       ),
     },

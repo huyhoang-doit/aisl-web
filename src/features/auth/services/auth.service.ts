@@ -3,7 +3,15 @@
  * Service layer cho authentication API calls
  */
 import { api } from '@/shared/lib/api/client';
-import type { LoginInput, LoginResponse, RegisterInput, RegisterResponse, User } from '../types/auth.types';
+import type {
+  ChangePasswordInput,
+  ChangePasswordResponse,
+  LoginInput,
+  LoginResponse,
+  RegisterInput,
+  RegisterResponse,
+  User
+} from '../types/auth.types';
 
 interface RefreshTokenResponse {
   token?: string;
@@ -65,5 +73,12 @@ export const authService = {
         skipAuthToken: true,
       } as any
     );
+  },
+
+  /**
+   * Đổi mật khẩu
+   */
+  changePassword: async (data: ChangePasswordInput): Promise<ChangePasswordResponse> => {
+    return api.post<ChangePasswordResponse>('/auth/change-password', data);
   },
 };

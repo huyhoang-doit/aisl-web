@@ -2,16 +2,25 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import { Loader2, Plus } from "lucide-react";
 import { workLogService } from "../services/workLog.service";
-import type { WorkLogDetail } from "../types/myTask.types";
+import type { TechnicalTaskStatusType, WorkLogDetail } from "../types/myTask.types";
 import { WorkLogCard } from "./WorkLogCard";
 import { CreateWorkLogModal } from "../modals/CreateWorkLogModal";
+import { TechnicalTaskStatus } from "@/features/admin/features/task/types/task.types";
 
 export interface ViewWorkLogsOfTaskProps {
   taskId: string;
   onSuccess?: () => void;
+  taskStatus: TechnicalTaskStatusType;
+  // eslint-disable-next-line no-unused-vars -- type-only callback param
+  onWorkLogsStateChange?: (_payload: { hasWorkLogs: boolean; allCompleted: boolean }) => void;
 }
 
-export function ViewWorkLogsOfTask({ taskId, onSuccess }: ViewWorkLogsOfTaskProps) {
+export function ViewWorkLogsOfTask({
+  taskId,
+  onSuccess,
+  taskStatus,
+  onWorkLogsStateChange,
+}: ViewWorkLogsOfTaskProps) {
   const [workLogs, setWorkLogs] = useState<WorkLogDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -23,13 +32,19 @@ export function ViewWorkLogsOfTask({ taskId, onSuccess }: ViewWorkLogsOfTaskProp
     try {
       setLoading(true);
       const list = await workLogService.getByTaskId(taskId);
-      setWorkLogs(Array.isArray(list) ? list : []);
+      const normalized = Array.isArray(list) ? list : [];
+      setWorkLogs(normalized);
+      onWorkLogsStateChange?.({
+        hasWorkLogs: normalized.length > 0,
+        allCompleted: normalized.length > 0 && normalized.every((log) => !!log.completedAt),
+      });
     } catch {
       setWorkLogs([]);
+      onWorkLogsStateChange?.({ hasWorkLogs: false, allCompleted: false });
     } finally {
       setLoading(false);
     }
-  }, [taskId]);
+  }, [taskId, onWorkLogsStateChange]);
 
   useEffect(() => {
     loadWorkLogs();
@@ -54,16 +69,18 @@ export function ViewWorkLogsOfTask({ taskId, onSuccess }: ViewWorkLogsOfTaskProp
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Work logs
         </h3>
-        {/* <Button variant="outline" size="sm" onClick={() => setCreateModalOpen(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          Tạo work log
-        </Button> */}
+        {taskStatus === TechnicalTaskStatus.IN_PROGRESS && (
+          <Button variant="outline" size="sm" onClick={() => setCreateModalOpen(true)}>
+            <Plus className="h-4 w-4 mr-1" />
+            Tạo work log
+          </Button>
+        )}
       </div>
 
       {workLogs.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4">Chưa có work log nào.</p>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
           {workLogs.map((log) => (
             <WorkLogCard
               key={log.id}

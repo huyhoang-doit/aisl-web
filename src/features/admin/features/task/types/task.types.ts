@@ -1,11 +1,14 @@
 import type { Pagination } from "@/shared/types/pagination.types";
 
-/** Trạng thái task (backend): OPEN → IN_PROGRESS → COMPLETED → VERIFIED. Dùng typeof TechnicalTaskStatus[keyof typeof TechnicalTaskStatus] khi cần type. */
+/** Trạng thái task theo backend. Dùng typeof TechnicalTaskStatus[keyof typeof TechnicalTaskStatus] khi cần type. */
 export const TechnicalTaskStatus = {
   OPEN: "OPEN",
+  ASSIGNED: "ASSIGNED",
   IN_PROGRESS: "IN_PROGRESS",
   COMPLETED: "COMPLETED",
-  VERIFIED: "VERIFIED",
+  RESOLVED: "RESOLVED",
+  CANCELLED: "CANCELLED",
+  OVERDUE: "OVERDUE",
 } as const;
 
 /** Độ ưu tiên task (backend). */

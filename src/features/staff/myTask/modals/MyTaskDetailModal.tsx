@@ -27,6 +27,7 @@ import { TechnicalTaskStatus } from "../types/myTask.types";
 import { ViewWorkLogsOfTask } from "../components/ViewWorkLogsOfTask";
 import { TaskInfoContent } from "../components/TaskInfoContent";
 import { CreateWorkLogModal } from "./CreateWorkLogModal";
+import { toast } from "sonner";
 
 const PRIORITY_LABELS: Record<string, string> = {
   LOW: "Thấp",
@@ -62,6 +63,8 @@ export function MyTaskDetailModal({
   const [confirmCloseOpen, setConfirmCloseOpen] = useState(false);
   const [confirmProcessOpen, setConfirmProcessOpen] = useState(false);
   const [createWorkLogModalOpen, setCreateWorkLogModalOpen] = useState(false);
+  const [canCompleteTask, setCanCompleteTask] = useState(false);
+  const [isCompletingTask, setIsCompletingTask] = useState(false);
 
   const loadTask = useCallback(async () => {
     if (!taskId) return;
@@ -79,15 +82,32 @@ export function MyTaskDetailModal({
 
   useEffect(() => {
     if (!open || !taskId) return;
+    setCanCompleteTask(false);
     loadTask();
     return () => {
       setTask(null);
+      setCanCompleteTask(false);
     };
   }, [open, taskId, loadTask]);
 
   const handleSuccess = () => {
     loadTask();
     onSuccess?.();
+  };
+
+  const handleCompleteTask = async () => {
+    if (!taskId) return;
+    try {
+      setIsCompletingTask(true);
+      await myTaskService.updateStatus(taskId, { status: TechnicalTaskStatus.COMPLETED });
+      toast.success("Đã hoàn thành task");
+      await loadTask();
+      onSuccess?.();
+    } catch (err) {
+      toast.error((err as Error)?.message ?? "Hoàn thành task thất bại");
+    } finally {
+      setIsCompletingTask(false);
+    }
   };
 
   if (!open) return null;
@@ -130,7 +150,7 @@ export function MyTaskDetailModal({
             </DialogHeader>
 
             {task.status !== TechnicalTaskStatus.OPEN ? (
-              <Tabs defaultValue="info" className="w-full mt-4">
+              <Tabs defaultValue="worklog" className="w-full mt-4">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="info" className="active-tab">
                     Thông tin
@@ -144,7 +164,14 @@ export function MyTaskDetailModal({
                 </TabsContent>
                 <TabsContent value="worklog" className="space-y-6 mt-4">
                   {taskId && (
-                    <ViewWorkLogsOfTask taskId={taskId} onSuccess={handleSuccess} />
+                    <ViewWorkLogsOfTask
+                      taskId={taskId}
+                      taskStatus={task.status}
+                      onSuccess={handleSuccess}
+                      onWorkLogsStateChange={({ allCompleted }) => {
+                        setCanCompleteTask(allCompleted);
+                      }}
+                    />
                   )}
                 </TabsContent>
               </Tabs>
@@ -166,6 +193,20 @@ export function MyTaskDetailModal({
                   <Button onClick={() => setConfirmProcessOpen(true)}>
                     Xử lý
                   </Button>
+                </>
+              ) : task.status === TechnicalTaskStatus.IN_PROGRESS ? (
+                <>
+                  <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    Đóng
+                  </Button>
+                  {canCompleteTask && (
+                    <Button onClick={handleCompleteTask} disabled={isCompletingTask}>
+                      {isCompletingTask && (
+                        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                      )}
+                      Hoàn thành task
+                    </Button>
+                  )}
                 </>
               ) : (
                 <Button variant="outline" onClick={() => onOpenChange(false)}>

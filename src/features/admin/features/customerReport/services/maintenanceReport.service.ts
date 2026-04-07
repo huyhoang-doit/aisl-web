@@ -98,7 +98,7 @@ export const maintenanceReportService = {
       });
     }
 
-    return api.post<ReportResponse>('/maintenance/reports', formData);
+    return api.post<ReportResponse>('/maintenance/reports/admin', formData);
   },
 
   /**

@@ -121,12 +121,12 @@ export const adminNavMain: NavItem[] = [
     icon: AlertTriangle,
     items: [
       {
-        title: "Phía khách hàng",
+        title: "Báo cáo sự cố",
         url: "/admin/manage-reports",
-        icon: User,
+        icon: AlertTriangle,
       },
       {
-        title: "Phía nhân viên kỹ thuật",
+        title: "Công việc kỹ thuật",
         url: "/admin/manage-tasks",
         icon: UserCog,
       },

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { User, Mail, Phone, MapPin, Calendar, Edit, Building2 } from "lucide-react"
+import { User, Mail, Phone, Edit, Lock } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/components/ui/avatar"
@@ -10,6 +10,7 @@ import { useAuthStore } from "@/features/auth"
 import { userService } from "@/features/admin/features/user/services/user.service"
 import type { User as UserDetail } from "@/features/admin/features/user/types/user.types"
 import { roles } from "@/shared/configs/role"
+import { useNavigate } from "react-router-dom"
 
 const ROLE_LABELS: Record<string, string> = {
   [roles.ADMIN]: "Quản trị viên",
@@ -20,6 +21,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 export default function ProfilePage() {
   const { user: authUser, getCurrentUser } = useAuthStore()
+  const navigate = useNavigate()
   const [isEditModalOpen, setIsEditModalOpen] = React.useState(false)
   const [userDetail, setUserDetail] = React.useState<UserDetail | null>(null)
   const [isLoading, setIsLoading] = React.useState(true)
@@ -112,10 +114,16 @@ export default function ProfilePage() {
             Quản lý thông tin cá nhân và cài đặt tài khoản
           </p>
         </div>
-        <Button onClick={() => setIsEditModalOpen(true)}>
-          <Edit className="mr-2 h-4 w-4" />
-          Chỉnh sửa
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate("../settings")}>
+            <Lock className="mr-2 h-4 w-4" />
+            Đổi mật khẩu
+          </Button>
+          <Button onClick={() => setIsEditModalOpen(true)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Chỉnh sửa
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
