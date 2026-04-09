@@ -159,4 +159,11 @@ export const lockerService = {
   clearSetup: async (id: string): Promise<void> => {
     return api.post<void>(`/lockers/${id}/clear-setup`);
   },
+
+  /**
+   * Gửi lệnh mở tủ (Administrative Open)
+   */
+  open: async (id: string): Promise<void> => {
+    return api.post<void>(`/lockers/${id}/open`);
+  },
 };

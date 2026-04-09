@@ -7,6 +7,7 @@ export interface Pricing {
   id: string;
   name: string;
   blockDuration: number;
+  blockUnit: string;
   feePerBlock: number;
   lateFeePerBlock: number;
   orderType: OrderType;

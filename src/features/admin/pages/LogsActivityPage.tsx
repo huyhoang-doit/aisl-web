@@ -96,43 +96,45 @@ const LogsActivityPage = () => {
         { value: "Cũ nhất", label: "Cũ nhất" },
       ],
     },
-    // {
-    //   key: "action",
-    //   label: "Hành động",
-    //   allStringValue: "Tất cả hành động",
-    //   placeholder: "Chọn hành động",
-    //   options: [
-    //     { value: "LOGIN", label: "LOGIN" },
-    //     { value: "LOGOUT", label: "LOGOUT" },
-    //     { value: "CREATE", label: "CREATE" },
-    //     { value: "UPDATE", label: "UPDATE" },
-    //     { value: "DELETE", label: "DELETE" },
-    //   ],
-    // },
-    // {
-    //   key: "resource",
-    //   label: "Resource",
-    //   allStringValue: "Tất cả resource",
-    //   placeholder: "Chọn resource",
-    //   options: [
-    //     { value: "Auth", label: "Auth" },
-    //     { value: "User", label: "User" },
-    //     { value: "Order", label: "Order" },
-    //     { value: "Locker", label: "Locker" },
-    //   ],
-    // },
-    // {
-    //   key: "service",
-    //   label: "Service",
-    //   allStringValue: "Tất cả service",
-    //   placeholder: "Chọn service",
-    //   options: [
-    //     { value: "gateway", label: "gateway" },
-    //     { value: "user-service", label: "user-service" },
-    //     { value: "locker-service", label: "locker-service" },
-    //     { value: "order-service", label: "order-service" },
-    //   ],
-    // },
+    {
+      key: "action",
+      label: "Hành động",
+      allStringValue: "Tất cả hành động",
+      placeholder: "Chọn hành động",
+      options: [
+        { value: "LOGIN", label: "LOGIN" },
+        { value: "LOGOUT", label: "LOGOUT" },
+        { value: "CREATE", label: "CREATE" },
+        { value: "UPDATE", label: "UPDATE" },
+        { value: "DELETE", label: "DELETE" },
+        { value: "SETUP", label: "SETUP" },
+      ],
+    },
+    {
+      key: "resource",
+      label: "Resource",
+      allStringValue: "Tất cả resource",
+      placeholder: "Chọn resource",
+      options: [
+        { value: "Auth", label: "Auth" },
+        { value: "User", label: "User" },
+        { value: "Order", label: "Order" },
+        { value: "Locker", label: "Locker" },
+        { value: "Cabinet", label: "Cabinet" },
+      ],
+    },
+    {
+      key: "service",
+      label: "Service",
+      allStringValue: "Tất cả service",
+      placeholder: "Chọn service",
+      options: [
+        { value: "gateway", label: "gateway" },
+        { value: "user-service", label: "user-service" },
+        { value: "locker-service", label: "locker-service" },
+        { value: "order-service", label: "order-service" },
+      ],
+    },
   ];
 
   return (
@@ -201,7 +203,7 @@ const LogsActivityPage = () => {
           pageSizeOptions: [5, 10, 20, 50, 100],
         }}
         searchable={false}
-        // quickFilters={quickFilters}
+        quickFilters={quickFilters}
         onQuickFilterChange={() => setPage(1)}
         onClearFilters={handleClearFilters}
         hasExternalFilters={hasExternalFilters}

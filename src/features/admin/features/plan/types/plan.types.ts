@@ -1,3 +1,5 @@
+import type { Pricing } from "../../pricing/types/pricing.types";
+
 export type PlanStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface Plan {
@@ -9,4 +11,7 @@ export interface Plan {
   status: PlanStatus;
   createdAt?: string;
   updatedAt?: string;
+  isFreeDefault?: boolean;
+  pricings?: Pricing[];
+  pricingIds?: string[];
 }

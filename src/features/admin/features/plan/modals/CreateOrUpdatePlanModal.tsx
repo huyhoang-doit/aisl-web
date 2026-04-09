@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -26,7 +26,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Checkbox } from "@/shared/components/ui/checkbox";
+import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import type { Plan, PlanStatus } from "../types/plan.types";
+import { pricingService } from "../../pricing/services/pricing.service";
+import type { Pricing } from "../../pricing/types/pricing.types";
 
 export interface PlanFormData {
   name: string;
@@ -34,6 +38,7 @@ export interface PlanFormData {
   price: number;
   description?: string;
   status: PlanStatus;
+  pricingIds: string[];
 }
 
 interface CreateOrUpdatePlanModalProps {
@@ -52,6 +57,8 @@ export function CreateOrUpdatePlanModal({
   mode = "create",
 }: CreateOrUpdatePlanModalProps) {
   const isUpdateMode = mode === "update" && planData;
+  const [allPricings, setAllPricings] = useState<Pricing[]>([]);
+  const [isPricingsLoading, setIsPricingsLoading] = useState(false);
 
   const form = useForm<PlanFormData>({
     defaultValues: {
@@ -60,9 +67,28 @@ export function CreateOrUpdatePlanModal({
       price: 0,
       description: "",
       status: "ACTIVE",
+      pricingIds: [],
       ...planData,
     },
   });
+
+  useEffect(() => {
+    const loadPricings = async () => {
+      try {
+        setIsPricingsLoading(true);
+        const response = await pricingService.getAll({ limit: 100 });
+        setAllPricings(response.data.pricings || []);
+      } catch (error) {
+        console.error("Error loading pricings:", error);
+      } finally {
+        setIsPricingsLoading(false);
+      }
+    };
+
+    if (open) {
+      loadPricings();
+    }
+  }, [open]);
 
   useEffect(() => {
     if (open) {
@@ -73,6 +99,7 @@ export function CreateOrUpdatePlanModal({
           price: planData.price,
           description: planData.description || "",
           status: planData.status,
+          pricingIds: planData.pricings?.map(p => p.id) || planData.pricingIds || [],
         });
       } else {
         form.reset({
@@ -81,6 +108,7 @@ export function CreateOrUpdatePlanModal({
           price: 0,
           description: "",
           status: "ACTIVE",
+          pricingIds: [],
         });
       }
     }
@@ -258,6 +286,79 @@ export function CreateOrUpdatePlanModal({
                   </FormItem>
                 )}
               />
+
+              <div className="space-y-2">
+                <FormLabel className="flex items-center justify-between">
+                  Bảng giá áp dụng *
+                  <span className="text-xs font-normal text-muted-foreground">
+                    Đã chọn: {form.watch("pricingIds")?.length || 0}
+                  </span>
+                </FormLabel>
+                <FormField
+                  control={form.control}
+                  name="pricingIds"
+                  rules={{
+                    validate: (value) => 
+                      (value && value.length > 0) || "Phải chọn ít nhất một bảng giá"
+                  }}
+                  render={() => (
+                    <FormItem>
+                      <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                        {isPricingsLoading ? (
+                          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                            Đang tải bảng giá...
+                          </div>
+                        ) : allPricings.length === 0 ? (
+                          <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                            Không có bảng giá nào khả dụng
+                          </div>
+                        ) : (
+                          <div className="space-y-3">
+                            {allPricings.map((pricing) => (
+                              <FormField
+                                key={pricing.id}
+                                control={form.control}
+                                name="pricingIds"
+                                render={({ field }) => {
+                                  return (
+                                    <FormItem
+                                      key={pricing.id}
+                                      className="flex flex-row items-start space-x-3 space-y-0"
+                                    >
+                                      <FormControl>
+                                        <Checkbox
+                                          checked={field.value?.includes(pricing.id)}
+                                          onCheckedChange={(checked) => {
+                                            const current = field.value || [];
+                                            return checked
+                                              ? field.onChange([...current, pricing.id])
+                                              : field.onChange(
+                                                  current.filter((value) => value !== pricing.id)
+                                                );
+                                          }}
+                                        />
+                                      </FormControl>
+                                      <FormLabel className="font-normal cursor-pointer w-full">
+                                        <div className="flex flex-col">
+                                          <span className="font-medium">{pricing.name}</span>
+                                          <span className="text-xs text-muted-foreground">
+                                            {typeof pricing.orderType === 'string' ? pricing.orderType : (pricing.orderType as any)?.code || 'N/A'} - {pricing.feePerBlock.toLocaleString()}đ/{pricing.blockDuration} {pricing.blockUnit || 'giờ'}
+                                          </span>
+                                        </div>
+                                      </FormLabel>
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </ScrollArea>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <DialogFooter>

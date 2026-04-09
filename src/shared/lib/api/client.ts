@@ -19,7 +19,7 @@ export const api = {
   /**
    * GET request
    */
-  get: <T = unknown>(url: string, config?: AxiosRequestConfig) => {
+  get: <T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     return axiosInstance.get<T>(url, config);
   },
 
@@ -30,7 +30,7 @@ export const api = {
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
-  ) => {
+  ): Promise<T> => {
     return axiosInstance.post<T>(url, data, config);
   },
 
@@ -41,7 +41,7 @@ export const api = {
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
-  ) => {
+  ): Promise<T> => {
     return axiosInstance.put<T>(url, data, config);
   },
 
@@ -52,14 +52,14 @@ export const api = {
     url: string,
     data?: unknown,
     config?: AxiosRequestConfig
-  ) => {
+  ): Promise<T> => {
     return axiosInstance.patch<T>(url, data, config);
   },
 
   /**
    * DELETE request
    */
-  delete: <T = unknown>(url: string, config?: AxiosRequestConfig) => {
+  delete: <T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> => {
     return axiosInstance.delete<T>(url, config);
   },
 };
