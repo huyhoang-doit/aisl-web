@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, Loader2, XCircle, AlertTriangle } from "lucide-react";
 import { Progress } from "@/shared/components/ui/progress";
 import { Button } from "@/shared/components/ui/button";
+import { cabinetSetupService } from "../../services/cabinetSetup.service";
+import { CABINET_STATUS } from "../../types/cabinetSetup.types";
+import { useDiscoverySocket } from "../../hooks/useDiscoverySocket";
 
 interface SetupProgressStepProps {
   cabinetId: string;
+  macAddress: string;
   totalLockers: number;
   mqttBrokerHost: string;
   mqttBrokerPort: number;
@@ -12,8 +16,6 @@ interface SetupProgressStepProps {
   onComplete: () => void;
 }
 
-// Giả lập trạng thái nhận Socket / MQTT từ BE
-// Trong thực tế, bạn sẽ dùng Socket.io hoặc Server-Sent Events (SSE) để lắng nghe sự kiện
 type SetupState = "INITIALIZING" | "IN_PROGRESS" | "COMPLETED" | "PARTIAL" | "ABORTED" | "ERROR";
 
 interface LockerStatus {
@@ -24,7 +26,7 @@ interface LockerStatus {
   errorCode?: string;
 }
 
-export function SetupProgressStep({ totalLockers, mqttBrokerHost, mqttBrokerPort, onReset, onComplete }: SetupProgressStepProps) {
+export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBrokerHost, mqttBrokerPort, onReset, onComplete }: SetupProgressStepProps) {
   const [state, setState] = useState<SetupState>("INITIALIZING");
   const [testedCount, setTestedCount] = useState(0);
   const [okCount, setOkCount] = useState(0);
@@ -32,64 +34,142 @@ export function SetupProgressStep({ totalLockers, mqttBrokerHost, mqttBrokerPort
   const [lockers, setLockers] = useState<LockerStatus[]>(
     Array.from({ length: totalLockers }).map((_, i) => ({
       slotIndex: i,
-      row: Math.floor(i / (totalLockers / 4)) + 1, // Giả lập row/col (tùy thuộc thực tế layout truyền vào)
-      column: (i % (totalLockers / 4)) + 1,
+      row: 0, 
+      column: 0,
       testResult: "PENDING",
     }))
   );
 
-  // Giả lập quá trình Setup đang diễn ra (Mocking WebSocket messages)
+  // WebSocket Integration
+  const { setupProgress, setupResult, isConnected } = useDiscoverySocket(macAddress);
+
+  // 1. Handle Setup Progress Events (Real-time)
   useEffect(() => {
-    let currentTest = 0;
-    let currentOk = 0;
-    let currentFail = 0;
-    setState("IN_PROGRESS");
+    if (!setupProgress || setupProgress.cabinetId !== cabinetId) return;
 
-    const timer = setInterval(() => {
-      if (currentTest >= totalLockers) {
-        clearInterval(timer);
-        // Xác định kết quả cuối cùng
-        if (currentFail === 0 && currentOk === totalLockers) setState("COMPLETED");
-        else if (currentOk === 0) setState("ABORTED");
-        else setState("PARTIAL");
-        return;
+    // Defer state updates to avoid cascading render warning
+    setTimeout(() => {
+      if (state !== "IN_PROGRESS") {
+        setState("IN_PROGRESS");
       }
+  
+      setLockers(prev => {
+        const idx = prev.findIndex(l => l.slotIndex === setupProgress.slotIndex);
+        if (idx !== -1 && prev[idx].testResult !== "PENDING") return prev;
+  
+        const updated = [...prev];
+        const newLocker: LockerStatus = {
+          slotIndex: setupProgress.slotIndex,
+          row: setupProgress.row,
+          column: setupProgress.column,
+          testResult: setupProgress.testResult === "OK" ? "OK" : "FAIL",
+          errorCode: setupProgress.testResult === "FAIL" ? "HARDWARE_FAILURE" : undefined
+        };
+  
+        if (idx !== -1) {
+          updated[idx] = newLocker;
+        } else {
+          updated.push(newLocker);
+        }
+        return updated;
+      });
+  
+      if (setupProgress.progress) {
+        setTestedCount(setupProgress.progress.tested);
+        setOkCount(setupProgress.progress.okCount);
+        setFailCount(setupProgress.progress.failCount);
+      }
+    }, 0);
+  }, [setupProgress, cabinetId, state]);
 
-      // Giả lập tỉ lệ rủi ro lỗi 10%
-      const isOk = Math.random() > 0.1;
+  // 2. Handle Setup Result Event (Final)
+  useEffect(() => {
+    if (!setupResult || setupResult.cabinetId !== cabinetId) return;
+    
+    const finalStatus = setupResult.status === "COMPLETED" ? "COMPLETED" : 
+                       setupResult.status === "PARTIAL" ? "PARTIAL" : "ERROR";
+    
+    setTimeout(() => {
+      if (state !== finalStatus) {
+        setState(finalStatus);
+      }
+    }, 0);
+  }, [setupResult, cabinetId, state]);
 
-      setLockers((prev) =>
-        prev.map((locker, index) => {
-          if (index === currentTest) {
-            return {
-              ...locker,
-              testResult: isOk ? "OK" : "FAIL",
-              errorCode: isOk ? undefined : "MOTOR_FAILURE",
-            };
+  // 3. Polling logic (Fallback & Initial Snapshot)
+  useEffect(() => {
+    let pollInterval: any;
+    
+    const fetchStatus = async () => {
+      try {
+        const cabResponse = await cabinetSetupService.getCabinet(cabinetId);
+        const cabData = cabResponse.data;
+        
+        const lockersResponse = await cabinetSetupService.getCabinetLockers(cabinetId, { page: 1, limit: 100 });
+        const remoteLockers = lockersResponse.data.lockers;
+
+        const updatedLockers: LockerStatus[] = remoteLockers.map(rl => ({
+          slotIndex: rl.slotIndex,
+          row: rl.row,
+          column: rl.column,
+          testResult: rl.status === "AVAILABLE" ? "OK" : rl.isActive === false ? "FAIL" : "PENDING",
+          errorCode: rl.hwState === "ERROR" ? "HARDWARE_FAILURE" : undefined
+        }));
+
+        setLockers(updatedLockers);
+        
+        const ok = updatedLockers.filter(l => l.testResult === "OK").length;
+        const fail = updatedLockers.filter(l => l.testResult === "FAIL").length;
+        const tested = updatedLockers.filter(l => l.testResult !== "PENDING").length;
+
+        setOkCount(ok);
+        setFailCount(fail);
+        setTestedCount(tested);
+
+        if (cabData.status === CABINET_STATUS.SETTING_UP) {
+          if (state !== "IN_PROGRESS" && state !== "COMPLETED") setState("IN_PROGRESS");
+        } else if (cabData.status === CABINET_STATUS.ACTIVE) {
+          if (state !== "COMPLETED") {
+            setState("COMPLETED");
+            if (pollInterval) clearInterval(pollInterval);
           }
-          return locker;
-        })
-      );
-
-      setTestedCount(currentTest + 1);
-      if (isOk) {
-        setOkCount((prev) => prev + 1);
-        currentOk++;
-      } else {
-        setFailCount((prev) => prev + 1);
-        currentFail++;
+        } else if (cabData.status === CABINET_STATUS.PARTIAL_ERROR) {
+          if (state !== "PARTIAL") {
+            setState("PARTIAL");
+            if (pollInterval) clearInterval(pollInterval);
+          }
+        } else if (cabData.status === CABINET_STATUS.OFFLINE && tested > 0) {
+          if (state !== "ERROR") {
+            setState("ERROR");
+            if (pollInterval) clearInterval(pollInterval);
+          }
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
       }
+    };
 
-      currentTest++;
-    }, 1500); // Mỗi locker test mất 1.5s
+    fetchStatus();
+    pollInterval = setInterval(fetchStatus, 5000); 
 
-    return () => clearInterval(timer);
-  }, [totalLockers]);
+    return () => {
+      if (pollInterval) clearInterval(pollInterval);
+    };
+  }, [cabinetId, state]);
 
   const progressPercent = (testedCount / totalLockers) * 100;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex justify-between items-center px-4 -mb-4">
+        <div className="flex items-center space-x-2">
+          <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+          <span className="text-[10px] text-muted-foreground uppercase font-medium">
+            {isConnected ? 'Real-time Link Active' : 'Polling Fallback Active'}
+          </span>
+        </div>
+      </div>
+
       <div className="text-center space-y-2 mt-4">
         {state === "INITIALIZING" || state === "IN_PROGRESS" ? (
           <div className="flex justify-center items-center mb-4">

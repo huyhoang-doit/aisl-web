@@ -4,7 +4,10 @@ import type {
   SetupCabinetResponse, 
   LocationWithCabinetsResponse,
   GetCabinetsParams,
-  GetDeviceAttachmentsResponse
+  GetDeviceAttachmentsResponse,
+  DiscoveryResponse,
+  CabinetBasicInfo,
+  GetCabinetLockersResponse
 } from "../types/cabinetSetup.types";
 
 export const cabinetSetupService = {
@@ -18,5 +21,17 @@ export const cabinetSetupService = {
 
   getDeviceAttachments: async (params?: any): Promise<GetDeviceAttachmentsResponse> => {
     return api.get<GetDeviceAttachmentsResponse>(`/device-attachments`, { params });
+  },
+
+  discoverCabinets: async (macAddress: string): Promise<DiscoveryResponse> => {
+    return api.get<DiscoveryResponse>(`/cabinets/discovery/${macAddress}`);
+  },
+
+  getCabinet: async (id: string): Promise<{ data: CabinetBasicInfo }> => {
+    return api.get<{ data: CabinetBasicInfo }>(`/cabinets/${id}`);
+  },
+
+  getCabinetLockers: async (id: string, params?: any): Promise<GetCabinetLockersResponse> => {
+    return api.get<GetCabinetLockersResponse>(`/cabinets/${id}/lockers`, { params });
   },
 };

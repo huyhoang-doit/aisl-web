@@ -1,67 +1,189 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { 
-  SetupCabinetFormValues 
-} from "../schemas/cabinetSetup.schema";
+import type { SetupCabinetFormValues } from "../schemas/cabinetSetup.schema";
+import { setupCabinetSchema } from "../schemas/cabinetSetup.schema";
 import { BasicInfoStep } from "../components/steps/BasicInfoStep";
-import { LayoutStep } from "../components/steps/LayoutStep";
+import { CabinetSelectionStep } from "../components/steps/CabinetSelectionStep";
+import { CabinetDetailCarousel } from "../components/steps/CabinetDetailCarousel";
 import { ReviewStep } from "../components/steps/ReviewStep";
 import { SetupProgressStep } from "../components/steps/SetupProgressStep";
 import { Button } from "@/shared/components/ui/button";
 import { Form } from "@/shared/components/ui/form";
 import { toast } from "sonner";
-import { Check, ChevronRight, ServerCog } from "lucide-react";
+import { Check, ChevronRight, Wifi, AlertTriangle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { cabinetSetupService } from "../services/cabinetSetup.service";
 import { useAuthStore } from "@/features/auth/store/auth.store";
+import type { SlaveDetail } from "../types/cabinetSetup.types";
+import { useDiscoverySocket } from "../hooks/useDiscoverySocket";
+import React from "react";
 
-import { setupCabinetSchema } from "../schemas/cabinetSetup.schema";
+class ErrorBoundary extends React.Component<{ children: React.ReactNode, fallback: React.ReactNode }, { hasError: boolean, error: Error | null }> {
+  constructor(props: any) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error("[Boundary] Error caught:", error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+function ErrorFallback({error}: {error: Error | null}) {
+  return (
+    <div className="p-10 border-2 border-dashed border-destructive/30 rounded-3xl bg-destructive/5 flex flex-col items-center text-center gap-4">
+      <div className="p-4 bg-destructive/10 rounded-full text-destructive">
+        <AlertTriangle className="w-10 h-10" />
+      </div>
+      <div className="space-y-1">
+        <h3 className="text-xl font-bold text-destructive">Đã xảy ra lỗi hiển thị</h3>
+        <p className="text-sm text-muted-foreground max-w-xs">{error?.message || "Không xác định"}</p>
+      </div>
+      <Button variant="outline" onClick={() => window.location.reload()} className="mt-2">
+        Thử tải lại trang
+      </Button>
+    </div>
+  );
+}
 
 const STEPS = [
-  { id: "basic", title: "Thông tin cơ bản" },
-  { id: "layout", title: "Bố trí tủ (Locker Layout)" },
-  { id: "review", title: "Kiểm tra & Xác nhận" },
+  { id: "connection", title: "Kết nối & Quét" },
+  { id: "selection", title: "Chọn Cụm tủ" },
+  { id: "details", title: "Cấu hình Layout" },
+  { id: "review", title: "Xác nhận" },
 ];
 
 export default function CabinetSetupPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [hasScanned, setHasScanned] = useState(false);
+  const [discoveredSlaves, setDiscoveredSlaves] = useState<SlaveDetail[]>([]);
+  
   const [setupResult, setSetupResult] = useState<{ 
-    cabinetId: string; 
+    macAddress: string;
+    cabinetIds: string[];
     totalLockers: number;
     mqttBrokerHost: string;
     mqttBrokerPort: number;
   } | null>(null);
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
 
   const paramLocationId = searchParams.get("locationId") || "";
-  const paramCabinetId = searchParams.get("cabinetId") || "";
 
   const form = useForm<SetupCabinetFormValues>({
     resolver: zodResolver(setupCabinetSchema),
     mode: "onChange",
     defaultValues: {
       locationId: paramLocationId,
-      cabinetId: paramCabinetId,
       macAddress: "",
-      totalRows: 4,
-      totalColumns: 6,
       heartbeatInterval: 60,
       openDoorTimeout: 5,
+      configurations: [],
       deviceAttachmentIds: [],
     },
   });
 
+  const macAddress = useWatch({ control: form.control, name: "macAddress" });
+  const { discoveryResult, isConnected, resetDiscovery } = useDiscoverySocket(macAddress);
+
+  useEffect(() => {
+    console.log(`[Page] WebSocket Status: ${isConnected ? 'CONNECTED' : 'DISCONNECTED'}`);
+  }, [isConnected]);
+
+  useEffect(() => {
+    if (isScanning && discoveryResult) {
+      console.log("[Page] << Discovery result captured from WebSocket:", discoveryResult);
+      setDiscoveredSlaves(discoveryResult.slaves);
+      setHasScanned(true);
+      setIsScanning(false);
+      
+      if (discoveryResult.slaves.length > 0) {
+        toast.success(`Tìm thấy ${discoveryResult.slaves.length} Arduino controller!`);
+      } else {
+        toast.error("Không tìm thấy controller nào trên thiết bị này. Kiểm tra RS485.");
+      }
+    }
+  }, [discoveryResult, isScanning]);
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "configurations",
+  });
+
+  const selectedCabinetIds = fields.map(f => f.cabinetId);
+
+  const handleScan = async () => {
+    const mac = form.getValues("macAddress");
+    if (!mac || !/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/.test(mac)) {
+      toast.error("Vui lòng nhập MAC Address hợp lệ");
+      return;
+    }
+
+    resetDiscovery();
+    setIsScanning(true);
+    setHasScanned(false);
+    setDiscoveredSlaves([]);
+
+    try {
+      // Trigger scan on backend (will return fast)
+      console.log(`Triggering hardware discovery for MAC: ${mac}`);
+      await cabinetSetupService.discoverCabinets(mac);
+      toast.info("Đang quét phần cứng... Vui lòng chờ kết quả qua WebSocket.");
+      
+    } catch {
+      toast.error("Lỗi khi gửi yêu cầu quét phần cứng");
+      setIsScanning(false);
+    }
+  };
+
+  const handleToggleCabinet = (cabinetId: string) => {
+    const idx = selectedCabinetIds.indexOf(cabinetId);
+    if (idx > -1) {
+      remove(idx);
+    } else {
+      if (selectedCabinetIds.length >= discoveredSlaves.length && discoveredSlaves.length > 0) {
+        toast.warning(`Chỉ có thể chọn tối đa ${discoveredSlaves.length} tủ (tương ứng số controller)`);
+        return;
+      }
+      append({ cabinetId, totalRows: 4, totalColumns: 6 });
+    }
+  };
+
   const isStepValid = async () => {
-    let fieldsToValidate: (keyof SetupCabinetFormValues)[] = [];
-    if (currentStep === 0) fieldsToValidate = ["locationId", "cabinetId", "macAddress"];
-    if (currentStep === 1) fieldsToValidate = ["totalRows", "totalColumns", "heartbeatInterval", "openDoorTimeout"];
+    if (currentStep === 0) {
+      const valid = await form.trigger(["locationId", "macAddress"]);
+      if (!valid) return false;
+      if (!hasScanned) {
+        toast.warning("Vui lòng thực hiện Quét phần cứng trước");
+        return false;
+      }
+      return true;
+    }
     
-    const isValid = await form.trigger(fieldsToValidate);
-    return isValid;
+    if (currentStep === 1) {
+      if (selectedCabinetIds.length === 0) {
+        toast.warning("Vui lòng chọn ít nhất 1 cụm tủ");
+        return false;
+      }
+      return true;
+    }
+
+    if (currentStep === 2) {
+      return await form.trigger("configurations");
+    }
+
+    return true;
   };
 
   const nextStep = async () => {
@@ -85,18 +207,22 @@ export default function CabinetSetupPage() {
         operatorId: user?.id || "unknown-operator",
       };
       
-      const response = await cabinetSetupService.setupCabinet(payload);
+      const response = await cabinetSetupService.setupCabinet(payload as any);
 
-      toast.success("Đã gửi lệnh thiết lập xuống Raspberry Pi");
+      toast.success("Đã gửi lệnh thiết lập thành công");
+      
+      const totalLockers = values.configurations.reduce((sum, c) => sum + (c.totalRows * c.totalColumns), 0);
+      
       setSetupResult({ 
-        cabinetId: response.cabinetId, 
-        totalLockers: values.totalRows * values.totalColumns,
-        mqttBrokerHost: response.mqttBrokerHost,
-        mqttBrokerPort: response.mqttBrokerPort,
+        macAddress: values.macAddress,
+        cabinetIds: selectedCabinetIds, 
+        totalLockers,
+        mqttBrokerHost: response.mqttBrokerHost || "",
+        mqttBrokerPort: response.mqttBrokerPort || 1883,
       });
       
-    } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Lỗi khi gửi lệnh thiết lập cabinet");
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Lỗi khi gửi lệnh thiết lập");
     } finally {
       setIsSubmitting(false);
     }
@@ -106,12 +232,13 @@ export default function CabinetSetupPage() {
     return (
       <div className="container max-w-4xl py-10 space-y-8">
         <div>
-           <h2 className="text-3xl font-bold tracking-tight">Tiến độ thiết lập tủ</h2>
-           <p className="text-muted-foreground mt-2">Theo dõi kết quả trả về từ RPi Cabinet {setupResult.cabinetId}</p>
+           <h2 className="text-3xl font-bold tracking-tight">Tiến độ thiết lập</h2>
+           <p className="text-muted-foreground mt-2">Đang cấu hình {setupResult.cabinetIds.length} tủ tại RPi {setupResult.macAddress}</p>
         </div>
         <div className="bg-card border rounded-2xl p-6 shadow-sm">
           <SetupProgressStep 
-            cabinetId={setupResult.cabinetId} 
+            cabinetId={setupResult.cabinetIds[0]} // Show first one for status
+            macAddress={setupResult.macAddress}
             totalLockers={setupResult.totalLockers}
             mqttBrokerHost={setupResult.mqttBrokerHost}
             mqttBrokerPort={setupResult.mqttBrokerPort}
@@ -121,11 +248,7 @@ export default function CabinetSetupPage() {
               form.reset();
             }}
             onComplete={() => {
-              // Lưu vào localStorage để Kiosk Web App nhận diện
-              localStorage.setItem("kiosk_cabinet_id", setupResult.cabinetId);
-              toast.success("Đã lưu định danh thiết bị Kiosk!");
-              
-              navigate('/staff/list-lockers');
+              navigate('/admin/setup-cabinet');
             }}
           />
         </div>
@@ -134,76 +257,80 @@ export default function CabinetSetupPage() {
   }
 
   return (
-    <div className="container max-w-4xl py-10 space-y-8">
+    <div className="container max-w-5xl py-10 space-y-8">
       <div>
          <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0">
-               <ServerCog className="w-6 h-6" />
+               <Wifi className="w-6 h-6" />
             </div>
             <div>
               <h2 className="text-3xl font-bold tracking-tight">Thiết lập kết nối Tủ (Cabinet)</h2>
-              <p className="text-muted-foreground mt-1">Cấu hình tham số và ghép nối Raspberry Pi vào hệ thống</p>
+              <p className="text-muted-foreground mt-1">Quy trình 4 bước: Kết nối &rarr; Chọn Tủ &rarr; Cấu hình &rarr; Hoàn tất</p>
             </div>
          </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Sidebar Steps */}
-        <div className="md:col-span-4">
-          <div className="sticky top-6 rounded-xl border bg-card p-6 shadow-sm">
+        <div className="md:col-span-3">
+          <div className="sticky top-6 rounded-xl border bg-card p-4 shadow-sm">
             <nav aria-label="Progress" className="hidden md:block">
-              <ol role="list" className="overflow-hidden">
+              <ol role="list" className="space-y-4">
                 {STEPS.map((step, index) => (
-                  <li key={step.id} className={`relative ${index !== STEPS.length - 1 ? 'pb-10' : ''}`}>
-                    {index !== STEPS.length - 1 && (
-                      <div 
-                        className={`absolute left-4 top-4 -ml-px mt-0.5 h-full w-0.5 ${index < currentStep ? 'bg-primary' : 'bg-muted'}`} 
-                        aria-hidden="true" 
-                      />
-                    )}
-                    <div className="relative flex items-start group">
-                      <span className="h-9 flex items-center">
-                        <span 
-                          className={`
-                            relative z-10 w-8 h-8 flex items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors duration-300
-                            ${index < currentStep ? 'bg-primary border-primary text-primary-foreground' : 
-                              index === currentStep ? 'border-primary text-primary ring-4 ring-primary/20 bg-background' : 
-                              'border-muted bg-background text-muted-foreground'}
-                          `}
-                        >
-                          {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
-                        </span>
+                  <li key={step.id}>
+                    <div className="relative flex items-center gap-3">
+                      <span 
+                        className={`
+                          w-8 h-8 flex items-center justify-center rounded-full border-2 text-xs font-bold transition-all
+                          ${index < currentStep ? 'bg-primary border-primary text-primary-foreground' : 
+                            index === currentStep ? 'border-primary text-primary shadow-[0_0_0_4px_rgba(59,130,246,0.1)]' : 
+                            'border-muted text-muted-foreground'}
+                        `}
+                      >
+                        {index < currentStep ? <Check className="w-4 h-4" /> : index + 1}
                       </span>
-                      <span className="ml-4 min-w-0 flex flex-col justify-center translate-y-2">
-                        <span className={`text-sm font-medium ${index <= currentStep ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          {step.title}
-                        </span>
+                      <span className={`text-sm font-medium ${index <= currentStep ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        {step.title}
                       </span>
                     </div>
                   </li>
                 ))}
               </ol>
             </nav>
-            {/* Mobile Progress Bar */}
-            <div className="md:hidden space-y-2">
-               <p className="text-sm font-medium">Bước {currentStep + 1} của {STEPS.length}</p>
-               <div className="w-full bg-muted rounded-full h-2.5">
-                  <div className="bg-primary h-2.5 rounded-full transition-all duration-300" style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}></div>
-               </div>
-               <p className="text-xs font-medium text-primary mt-1">{STEPS[currentStep].title}</p>
-            </div>
           </div>
         </div>
 
-        {/* Form Content */}
-        <div className="md:col-span-8">
-          <div className="rounded-2xl border bg-card shadow-sm">
+        <div className="md:col-span-9">
+          <div className="rounded-2xl border bg-card shadow-sm min-h-[500px] flex flex-col">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit as any)} className="p-8">
-                <div className="min-h-[350px]">
-                  {currentStep === 0 && <BasicInfoStep form={form} />}
-                  {currentStep === 1 && <LayoutStep form={form} />}
-                  {currentStep === 2 && <ReviewStep form={form} />}
+              <form onSubmit={form.handleSubmit(onSubmit as any)} className="p-8 flex-1 flex flex-col">
+                <div className="flex-1">
+                  <ErrorBoundary fallback={<ErrorFallback error={null} />}>
+                    {currentStep === 0 && (
+                      <BasicInfoStep 
+                        form={form} 
+                        isScanning={isScanning} 
+                        onScan={handleScan} 
+                        hasScanned={hasScanned} 
+                      />
+                    )}
+                    {currentStep === 1 && (
+                      <CabinetSelectionStep 
+                        locationId={form.getValues("locationId")}
+                        discoveredSlaves={discoveredSlaves}
+                        selectedCabinets={selectedCabinetIds}
+                        onToggleCabinet={handleToggleCabinet}
+                      />
+                    )}
+                    {currentStep === 2 && (
+                      <CabinetDetailCarousel 
+                        form={form}
+                        selectedCabinets={selectedCabinetIds}
+                      />
+                    )}
+                    {currentStep === 3 && (
+                      <ReviewStep form={form} />
+                    )}
+                  </ErrorBoundary>
                 </div>
 
                 <div className="pt-6 mt-8 border-t flex items-center justify-between">
@@ -222,13 +349,13 @@ export default function CabinetSetupPage() {
                       <ChevronRight className="w-4 h-4 ml-2" />
                     </Button>
                   ) : (
-                    <Button type="submit" disabled={isSubmitting} onClick={form.handleSubmit(onSubmit as any)}>
+                    <Button type="submit" disabled={isSubmitting} size="lg" className="px-8 font-bold">
                       {isSubmitting ? (
                         <>
-                           <Check className="mr-2 h-4 w-4 animate-spin" /> Chờ xử lý...
+                           <Check className="mr-2 h-4 w-4 animate-spin" /> Đang thiết lập...
                         </>
                       ) : (
-                        "Khởi chạy Setup Cabinet"
+                        "KHỞI CHẠY SETUP"
                       )}
                     </Button>
                   )}
