@@ -28,6 +28,7 @@ const PRIORITY_LABELS: Record<string, string> = {
 };
 
 const TASK_STATUS_TABS: TaskStatus[] = [
+  TechnicalTaskStatus.OPEN,
   TechnicalTaskStatus.ASSIGNED,
   TechnicalTaskStatus.IN_PROGRESS,
   TechnicalTaskStatus.COMPLETED,

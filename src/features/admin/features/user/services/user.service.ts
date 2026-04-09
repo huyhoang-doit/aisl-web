@@ -44,7 +44,7 @@ export interface UserResponse {
 
 export interface UserListResponse {
   data: {
-    users: User[];
+    items: User[];
     pagination: Pagination;
   };
 }
@@ -86,28 +86,32 @@ export const userService = {
 
     const query = searchParams.toString();
     const url = query ? `/users?${query}` : "/users";
-    return api.get<UserListResponse>(url);
+    const response = await api.get<UserListResponse>(url);
+    return response as unknown as UserListResponse;
   },
 
   /**
    * Lấy thông tin user theo keycloakUserId
    */
   getById: async (keycloakUserId: string): Promise<UserResponse> => {
-    return api.get<UserResponse>(`/users/${keycloakUserId}`);
+    const response = await api.get<UserResponse>(`/users/${keycloakUserId}`);
+    return response as unknown as UserResponse;
   },
 
   /**
    * Lấy chi tiết user (gọi API detail) – alias của getById
    */
   getDetail: async (keycloakUserId: string): Promise<UserResponse> => {
-    return api.get<UserResponse>(`/users/${keycloakUserId}`);
+    const response = await api.get<UserResponse>(`/users/${keycloakUserId}`);
+    return response as unknown as UserResponse;
   },
 
   /**
    * Tạo user mới
    */
   create: async (data: CreateUserPayload): Promise<UserResponse> => {
-    return api.post<UserResponse>("/users", data);
+    const response = await api.post<UserResponse>("/users", data);
+    return response as unknown as UserResponse;
   },
 
   /**
@@ -125,16 +129,19 @@ export const userService = {
         }
       });
       formData.append("files", file);
-      return api.put<UserResponse>(`/users/${keycloakUserId}`, formData);
+      const response = await api.put<UserResponse>(`/users/${keycloakUserId}`, formData);
+      return response as unknown as UserResponse;
     }
-    return api.put<UserResponse>(`/users/${keycloakUserId}`, rest);
+    const response = await api.put<UserResponse>(`/users/${keycloakUserId}`, rest);
+    return response as unknown as UserResponse;
   },
 
   /**
    * Xóa user
    */
   delete: async (keycloakUserId: string): Promise<void> => {
-    return api.delete<void>(`/users/${keycloakUserId}`);
+    const response = await api.delete<void>(`/users/${keycloakUserId}`);
+    return response as unknown as void;
   },
 
   /**
@@ -144,13 +151,15 @@ export const userService = {
     keycloakUserId: string,
     data: { status: "NONE" | "PENDING" | "APPROVED" | "REJECTED" | "SUSPENDED" | "BLACKLISTED"; reason?: string }
   ): Promise<UserResponse> => {
-    return api.put<UserResponse>(`/users/${keycloakUserId}/courier-status`, data);
+    const response = await api.put<UserResponse>(`/users/${keycloakUserId}/courier-status`, data);
+    return response as unknown as UserResponse;
   },
 
   /**
    * Lấy danh sách vai trò (roles)
    */
   getRoles: async (): Promise<RolesResponse> => {
-    return api.get<RolesResponse>("/roles");
+    const response = await api.get<RolesResponse>("/roles");
+    return response as unknown as RolesResponse;
   },
 };

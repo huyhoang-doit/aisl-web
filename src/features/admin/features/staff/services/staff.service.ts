@@ -9,6 +9,7 @@ export interface StaffListResponse {
   data: {
     users?: Staff[];
     staffs?: Staff[];
+    items?: Staff[];
     pagination?: { page: number; limit: number; total: number };
   };
 }
@@ -48,7 +49,7 @@ export const staffService = {
       status: 'ACTIVE',
     });
     const data = response.data;
-    const list = data?.users ?? data?.staffs ?? [];
+    const list = data?.items ?? data?.staffs ?? [];
     return Array.isArray(list) ? list : [];
   },
 };
