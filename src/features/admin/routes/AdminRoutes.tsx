@@ -18,6 +18,8 @@ import ManageCustomerReport from "../pages/ManageCustomerReport";
 import ManageTransactionPage from "../pages/ManageTransactionPage";
 import ManageOrderPage from "../pages/ManageOrderPage";
 import ManageHardwarePage from "../pages/ManageHardwarePage";
+import LogsActivityPage from "../pages/LogsActivityPage";
+import ManageStaffApplication from "../pages/ManageStaffApplication";
 import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/CabinetSetupPage";
 import AdminNotificationListPage from "@/features/notification/pages/AdminNotificationListPage";
 import AdminNotificationDetailPage from "@/features/notification/pages/AdminNotificationDetailPage";
@@ -26,8 +28,6 @@ import ManageTask from "../pages/ManageTask";
 import ManageVehiclesPage from "../pages/ManageVehiclesPage";
 import ManageDeviceAttachmentPage from "../pages/ManageDeviceAttachmentPage";
 import LogsDevicePage from "../pages/LogsDevicePage";
-import LogsActivityPage from "../pages/LogsActivityPage";
-import ManageStaffApplication from "../pages/ManageStaffApplication";
 const AdminRoutes = () => {
   return (
     <Routes>
