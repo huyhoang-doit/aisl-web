@@ -7,6 +7,7 @@ export interface DeviceAttachment {
   cabinetId?: string;
   cabinetConfigId?: string;
   name: string;
+  type?: string;
   serialNumber: string;
   description?: string;
   isActive: boolean;

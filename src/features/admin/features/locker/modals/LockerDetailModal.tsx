@@ -9,14 +9,25 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, DoorOpen, Loader2 } from "lucide-react";
 import type { Locker, LockerStatus } from "../types/locker.types";
+import { useState } from "react";
+import { toast } from "sonner";
+import { lockerService } from "../services/locker.service";
 
 const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
   AVAILABLE: { label: "Trống", variant: "default" },
   OCCUPIED: { label: "Đã thuê", variant: "secondary" },
   MAINTENANCE: { label: "Bảo trì", variant: "destructive" },
   RESERVED: { label: "Đã đặt", variant: "outline" },
+};
+
+const HW_STATE_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "warning" }> = {
+  OPENING: { label: "Đang mở", variant: "default" },
+  CLOSING: { label: "Đang đóng", variant: "outline" },
+  JAMMED: { label: "Bị kẹt", variant: "destructive" },
+  OFFLINE: { label: "Ngoại tuyến", variant: "secondary" },
+  ERROR: { label: "Lỗi", variant: "destructive" },
 };
 
 interface LockerDetailModalProps {
@@ -34,6 +45,21 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const [isOpening, setIsOpening] = useState(false);
+
+  const handleOpenLocker = async () => {
+    try {
+      setIsOpening(true);
+      await lockerService.open(locker.id);
+      toast.success(`Đã gửi lệnh mở tủ ${locker.lockerLabel || locker.id} thành công`);
+    } catch (error: any) {
+      console.error("Failed to open locker:", error);
+      toast.error(error?.response?.data?.message || "Không thể gửi lệnh mở tủ");
+    } finally {
+      setIsOpening(false);
+    }
+  };
+
   const displayTitle = locker.lockerLabel ?? `${locker.row}-${locker.column}`;
   const sizeName = locker.sizeType?.name ?? "—";
   const statusInfo = STATUS_CONFIG[locker.status];
@@ -72,6 +98,20 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
                   Xóa locker
                 </Button>
               )}
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleOpenLocker}
+                disabled={isOpening}
+                className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                {isOpening ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <DoorOpen className="h-4 w-4" />
+                )}
+                Mở tủ
+              </Button>
             </div>
           </div>
         </DialogHeader>
@@ -92,9 +132,16 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Cửa (HW):</span>
-              <Badge variant="outline" className="ml-2">
-                {locker.hwState ?? "—"}
-              </Badge>
+              {locker.hwState ? (
+                <Badge 
+                  variant={HW_STATE_CONFIG[locker.hwState]?.variant as any || "outline"} 
+                  className="ml-2"
+                >
+                  {HW_STATE_CONFIG[locker.hwState]?.label || locker.hwState}
+                </Badge>
+              ) : (
+                <span className="ml-2">—</span>
+              )}
             </div>
             <div>
               <span className="text-sm text-muted-foreground">Hoạt động:</span>
