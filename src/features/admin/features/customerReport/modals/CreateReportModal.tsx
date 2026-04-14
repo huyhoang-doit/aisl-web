@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -30,7 +31,7 @@ import { CabinetSelector } from "@/features/admin/features/cabinet/components/Ca
 import { lockerService } from "@/features/admin/features/locker/services/locker.service";
 import type { Locker } from "@/features/admin/features/locker/types/locker.types";
 import { useState, useCallback } from "react";
-import { ImagePlus, X } from "lucide-react";
+import { Loader2,  ImagePlus, X  } from "lucide-react";
 import type { CreateReportPayload } from "../services/maintenanceReport.service";
 
 export interface CreateReportFormData {
@@ -159,7 +160,7 @@ export function CreateReportModal({
               rules={{ required: "Vui lòng chọn cabinet" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Cabinet *</FormLabel>
+                  <FormLabel>Cabinet <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <CabinetSelector
                       value={field.value}
@@ -179,7 +180,7 @@ export function CreateReportModal({
               rules={{ required: "Vui lòng chọn locker" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Locker *</FormLabel>
+                  <FormLabel>Locker <span className="text-red-500">*</span></FormLabel>
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
@@ -209,7 +210,7 @@ export function CreateReportModal({
               rules={{ required: "Vui lòng nhập tiêu đề" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tiêu đề *</FormLabel>
+                  <FormLabel>Tiêu đề <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Input placeholder="Tiêu đề báo cáo" {...field} />
                   </FormControl>
@@ -224,7 +225,7 @@ export function CreateReportModal({
               rules={{ required: "Vui lòng nhập mô tả" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mô tả *</FormLabel>
+                  <FormLabel>Mô tả <span className="text-red-500">*</span></FormLabel>
                   <FormControl>
                     <Textarea placeholder="Mô tả chi tiết sự cố" rows={4} {...field} />
                   </FormControl>
@@ -280,7 +281,7 @@ export function CreateReportModal({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
               <Button type="submit" disabled={isSubmitting}>

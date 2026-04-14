@@ -233,12 +233,12 @@ const ManageUserPage = () => {
           toast.error("Vui lòng nhập mật khẩu");
           return;
         }
-        await authService.createAccout({
+        await authService.createAccount({
           email: data.email,
           password: data.password,
           fullName: data.fullName,
           phoneNumber: data.phoneNumber,
-          role: data.role,
+          roles: data.roles,
         });
         toast.success("Thêm người dùng thành công");
         refetch();
@@ -249,7 +249,6 @@ const ManageUserPage = () => {
         refetch();
       }
 
-      setIsModalOpen(false);
       setSelectedUser(null);
     } catch (error) {
       console.error("Error saving user:", error);

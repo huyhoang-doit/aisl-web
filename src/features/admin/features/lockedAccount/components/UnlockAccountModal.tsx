@@ -92,12 +92,13 @@ export function UnlockAccountModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
               <Button
                 type="submit"
-              >
+               disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Xác nhận mở khóa
               </Button>
             </DialogFooter>

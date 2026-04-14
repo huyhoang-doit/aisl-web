@@ -34,7 +34,7 @@ export interface RegisterInput {
   password: string;
   fullName: string;
   phoneNumber: string;
-  role?: string;
+  roles: string[];
 }
 
 export interface RegisterResponse {

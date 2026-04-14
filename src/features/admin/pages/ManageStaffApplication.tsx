@@ -5,16 +5,7 @@ import {
   type QuickFilter,
 } from "@/shared/components/DataTable";
 import { Badge } from "@/shared/components/ui/badge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/components/ui/alert-dialog";
+import { Button } from "@/shared/components/ui/button";
 import { CheckCircle2, Eye, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -25,6 +16,10 @@ import {
 import { useStaffApplication } from "../features/staffApplication/hooks/useStaffApplication";
 import { staffApplicationService } from "../features/staffApplication/services/staffApplication.service";
 import StaffApplicationDetailModal from "../features/staffApplication/components/StaffApplicationDetailModal";
+import RoleSelector from "../features/user/components/RoleSelector";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
 
 const statusBadge = (status: StaffApplication["status"]) => {
   const value = getStaffApplicationStatus(status);
@@ -60,6 +55,18 @@ const ManageStaffApplication = () => {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] =
     useState<StaffApplication | null>(null);
+  const [approveForm, setApproveForm] = useState<{
+    roleId: string;
+    reviewNote: string;
+  }>({
+    roleId: "",
+    reviewNote: "",
+  });
+  const [rejectForm, setRejectForm] = useState<{
+    reviewNote: string;
+  }>({
+    reviewNote: "",
+  });
 
   const columns: Column<StaffApplication>[] = [
     {
@@ -138,29 +145,51 @@ const ManageStaffApplication = () => {
 
   const handleOpenApproveDialog = (application: StaffApplication) => {
     setSelectedApplication(application);
+    setApproveForm({
+      roleId: "",
+      reviewNote: "",
+    });
     setIsApproveDialogOpen(true);
   };
-
+  
   const handleOpenRejectDialog = (application: StaffApplication) => {
     setSelectedApplication(application);
+    setRejectForm({
+      reviewNote: "",
+    });
     setIsRejectDialogOpen(true);
   };
 
   const confirmApprove = async () => {
     if (!selectedApplication?.id) return;
+    if (!approveForm.roleId) {
+      toast.error("Vui lòng chọn vai trò cho nhân viên");
+      return;
+    }
+  
     try {
-      await approve(selectedApplication.id);
+      await approve(selectedApplication.id, {
+        roleId: approveForm.roleId,
+        reviewNote: approveForm.reviewNote,
+      });
       setIsApproveDialogOpen(false);
       setSelectedApplication(null);
     } catch (error) {
       console.error("Approve staff application failed:", error);
     }
   };
-
+  
   const confirmReject = async () => {
     if (!selectedApplication?.id) return;
+    if (!rejectForm.reviewNote.trim()) {
+      toast.error("Vui lòng nhập lý do từ chối");
+      return;
+    }
+  
     try {
-      await reject(selectedApplication.id);
+      await reject(selectedApplication.id, {
+        reviewNote: rejectForm.reviewNote,
+      });
       setIsRejectDialogOpen(false);
       setSelectedApplication(null);
     } catch (error) {
@@ -242,45 +271,73 @@ const ManageStaffApplication = () => {
         }}
       />
 
-      <AlertDialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận duyệt đơn</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn duyệt đơn của{" "}
-              <strong>{selectedApplication?.legalName || "ứng viên này"}</strong>?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmApprove} disabled={isApproving}>
+      <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Duyệt đơn đăng ký nhân viên</DialogTitle>
+            <DialogDescription>
+              Vui lòng chọn vai trò và nhập ghi chú để duyệt đơn của{" "}
+              <strong>{selectedApplication?.legalName}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="role">Vai trò gán cho nhân viên</Label>
+              <RoleSelector
+                value={approveForm.roleId}
+                onValueChange={(val) => setApproveForm({ ...approveForm, roleId: val })}
+                placeholder="Chọn vai trò (ví dụ: COURIER)"
+              />
+              <p className="text-[12px] text-muted-foreground">
+                Nhân viên ứng tuyển cho vị trí: <span className="font-semibold">{selectedApplication?.role}</span>
+              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="note">Ghi chú (tùy chọn)</Label>
+              <Textarea
+                id="note"
+                placeholder="Nhập ghi chú cho nhân viên..."
+                value={approveForm.reviewNote}
+                onChange={(e) => setApproveForm({ ...approveForm, reviewNote: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsApproveDialogOpen(false)}>Hủy</Button>
+            <Button onClick={confirmApprove} disabled={isApproving}>
               {isApproving ? "Đang xử lý..." : "Xác nhận duyệt"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận từ chối đơn</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn từ chối đơn của{" "}
-              <strong>{selectedApplication?.legalName || "ứng viên này"}</strong>?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmReject}
-              disabled={isRejecting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+  
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Từ chối đơn đăng ký</DialogTitle>
+            <DialogDescription>
+              Nhập lý do từ chối đơn của <strong>{selectedApplication?.legalName}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="reject-note">Lý do từ chối</Label>
+              <Textarea
+                id="reject-note"
+                placeholder="Ví dụ: Hình ảnh xe không rõ ràng..."
+                value={rejectForm.reviewNote}
+                onChange={(e) => setRejectForm({ reviewNote: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsRejectDialogOpen(false)}>Hủy</Button>
+            <Button variant="destructive" onClick={confirmReject} disabled={isRejecting}>
               {isRejecting ? "Đang xử lý..." : "Xác nhận từ chối"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

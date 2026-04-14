@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -140,7 +142,7 @@ export function CreateOrUpdatePricingModal({
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên bảng giá *</FormLabel>
+                    <FormLabel>Tên bảng giá <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="VD: Standard Pricing" {...field} />
                     </FormControl>
@@ -155,7 +157,7 @@ export function CreateOrUpdatePricingModal({
                 rules={{ required: "Loại đơn hàng là bắt buộc" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loại đơn hàng (Order type) *</FormLabel>
+                    <FormLabel>Loại đơn hàng (Order type) <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -186,7 +188,7 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thời gian block (phút) *</FormLabel>
+                      <FormLabel>Thời gian block (phút) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -210,7 +212,7 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Grace period (phút) *</FormLabel>
+                      <FormLabel>Grace period (phút) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -236,7 +238,7 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phí mỗi block (VND) *</FormLabel>
+                      <FormLabel>Phí mỗi block (VND) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -260,7 +262,7 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phí trễ mỗi block (VND) *</FormLabel>
+                      <FormLabel>Phí trễ mỗi block (VND) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -295,10 +297,11 @@ export function CreateOrUpdatePricingModal({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">{isUpdateMode ? "Cập nhật" : "Tạo mới"}</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isUpdateMode ? "Cập nhật" : "Tạo mới"}</Button>
             </DialogFooter>
           </form>
         </Form>

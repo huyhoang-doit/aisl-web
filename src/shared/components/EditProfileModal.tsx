@@ -166,7 +166,7 @@ export function EditProfileModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Họ và tên *</FormLabel>
+                      <FormLabel>Họ và tên <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Nhập họ và tên" {...field} />
                       </FormControl>
@@ -186,7 +186,7 @@ export function EditProfileModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email *</FormLabel>
+                      <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="email@example.com" {...field} />
                       </FormControl>
@@ -206,7 +206,7 @@ export function EditProfileModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số điện thoại *</FormLabel>
+                      <FormLabel>Số điện thoại <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input type="tel" placeholder="+84 123 456 789" {...field} />
                       </FormControl>

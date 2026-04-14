@@ -111,13 +111,14 @@ export function ApproveCourierRequestModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
               <Button
                 type="submit"
                 variant={isReject ? "destructive" : "default"}
-              >
+               disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isReject ? "Từ chối" : "Xác nhận duyệt"}
               </Button>
             </DialogFooter>

@@ -14,6 +14,7 @@ import {
   ServerCog,
   Activity,
   Monitor,
+  ShoppingBag,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -114,6 +115,11 @@ export const adminNavMain: NavItem[] = [
         icon: MapPin,
       },
     ],
+  },
+  {
+    title: "Quản lý Đơn hàng",
+    url: "/admin/orders",
+    icon: ShoppingBag,
   },
   {
     title: "Quản lý báo cáo",

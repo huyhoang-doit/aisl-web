@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -120,7 +121,7 @@ export function CreateOrUpdateLocationModal({
   const handleSubmit = async (formData: LocationFormData) => {
     try {
       await onSubmit(formData);
-      onOpenChange(false);
+      // Removed redundant onOpenChange(false) as parent handles it in onSubmit
       if (!isUpdateMode) {
         form.reset();
       }
@@ -158,7 +159,7 @@ export function CreateOrUpdateLocationModal({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên địa điểm *</FormLabel>
+                    <FormLabel>Tên địa điểm <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Nhập tên địa điểm" {...field} />
                     </FormControl>
@@ -172,7 +173,7 @@ export function CreateOrUpdateLocationModal({
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Địa chỉ *</FormLabel>
+                    <FormLabel>Địa chỉ <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input placeholder="Nhập địa chỉ chi tiết" {...field} />
                     </FormControl>
@@ -186,7 +187,7 @@ export function CreateOrUpdateLocationModal({
                   name="latitude"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Bản đồ chọn vị trí</FormLabel>
+                      <FormLabel>Bản đồ chọn vị trí <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <SelectLocationMap
                           latitude={form.watch("latitude")}
@@ -256,7 +257,7 @@ export function CreateOrUpdateLocationModal({
                   name="plannedCabinetQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số lượng Cabinet dự kiến *</FormLabel>
+                      <FormLabel>Số lượng Cabinet dự kiến <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -279,7 +280,7 @@ export function CreateOrUpdateLocationModal({
                   name="plannedLockerQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số lượng Locker dự kiến *</FormLabel>
+                      <FormLabel>Số lượng Locker dự kiến <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -325,10 +326,11 @@ export function CreateOrUpdateLocationModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

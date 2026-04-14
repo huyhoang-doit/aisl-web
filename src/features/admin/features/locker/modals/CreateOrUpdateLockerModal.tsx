@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -148,7 +149,7 @@ export function CreateOrUpdateLockerModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cabinet *</FormLabel>
+                      <FormLabel>Cabinet <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <CabinetSelector
                           value={field.value}
@@ -184,7 +185,7 @@ export function CreateOrUpdateLockerModal({
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Kích thước *</FormLabel>
+                    <FormLabel>Kích thước <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <SizeSelector
                         value={field.value}
@@ -212,7 +213,7 @@ export function CreateOrUpdateLockerModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Hàng *</FormLabel>
+                      <FormLabel>Hàng <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -241,7 +242,7 @@ export function CreateOrUpdateLockerModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cột *</FormLabel>
+                      <FormLabel>Cột <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -268,7 +269,7 @@ export function CreateOrUpdateLockerModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trạng thái *</FormLabel>
+                      <FormLabel>Trạng thái <span className="text-red-500">*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
@@ -319,10 +320,11 @@ export function CreateOrUpdateLockerModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -26,8 +28,7 @@ import type { Size } from "../types/size.types";
 const sizeSchema = z.object({
   name: z
     .string()
-    .min(1, "Tên kích thước không được để trống")
-    .min(2, "Tên kích thước phải có ít nhất 2 ký tự"),
+    .min(1, "Tên kích thước không được để trống"),
   width: z.number().min(0, "Chiều rộng không thể nhỏ hơn 0"),
   height: z.number().min(0, "Chiều cao không thể nhỏ hơn 0"),
   depth: z.number().min(0, "Chiều sâu không thể nhỏ hơn 0"),
@@ -127,7 +128,7 @@ export default function CreateOrUpdateSizeModal({
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên kích thước *</FormLabel>
+                    <FormLabel>Tên kích thước <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         placeholder="VD: Nhỏ, Vừa, Lớn"
@@ -145,7 +146,7 @@ export default function CreateOrUpdateSizeModal({
                   name="width"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chiều rộng (cm) *</FormLabel>
+                      <FormLabel>Chiều rộng (cm) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -171,7 +172,7 @@ export default function CreateOrUpdateSizeModal({
                   name="height"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chiều cao (cm) *</FormLabel>
+                      <FormLabel>Chiều cao (cm) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -197,7 +198,7 @@ export default function CreateOrUpdateSizeModal({
                   name="depth"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Chiều sâu (cm) *</FormLabel>
+                      <FormLabel>Chiều sâu (cm) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -225,10 +226,11 @@ export default function CreateOrUpdateSizeModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>
