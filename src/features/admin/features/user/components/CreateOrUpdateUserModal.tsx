@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -29,7 +30,6 @@ import {
 } from "@/shared/components/ui/select";
 import type { User, UserStatusValue, UserStatus, NotificationType } from "../types/user.types";
 import { RoleSelector } from "./RoleSelector";
-import { getPrimaryRole } from "../types/user.types";
 
 export interface UserFormData {
   keycloakUserId: string;
@@ -39,7 +39,7 @@ export interface UserFormData {
   password?: string;
   status: UserStatus;
   notificationType: NotificationType;
-  role: string;
+  roles: string[];
   isVerified: boolean;
 }
 
@@ -66,7 +66,7 @@ export function CreateOrUpdateUserModal({
     email: string;
     phoneNumber: string;
     password?: string;
-    role: string;
+    roles: string[];
     status?: UserStatusValue;
     isVerified?: boolean;
   };
@@ -77,7 +77,7 @@ export function CreateOrUpdateUserModal({
       email: "",
       phoneNumber: "",
       password: "",
-      role: "",
+      roles: [],
       status: "ACTIVE",
       isVerified: true,
     },
@@ -95,7 +95,7 @@ export function CreateOrUpdateUserModal({
           fullName: userData.fullName,
           email: userData.email,
           phoneNumber: userData.phoneNumber,
-          role: getPrimaryRole(userData) || userData.role,
+          roles: userData.roles?.map(r => r.name) || [],
           status: statusValue as UserStatusValue,
           isVerified: userData.isVerified ?? true,
         });
@@ -105,7 +105,7 @@ export function CreateOrUpdateUserModal({
           email: "",
           phoneNumber: "",
           password: "",
-          role: "",
+          roles: [],
           status: "ACTIVE",
           isVerified: true,
         });
@@ -127,7 +127,7 @@ export function CreateOrUpdateUserModal({
         password: values.password?.trim() ? values.password : undefined,
         status: statusValue,
         isVerified: values.isVerified ?? true,
-        role: values.role,
+        roles: values.roles,
         notificationType: userData?.notificationType ?? {},
       };
 
@@ -178,7 +178,7 @@ export function CreateOrUpdateUserModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Họ và tên *</FormLabel>
+                      <FormLabel>Họ và tên <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Nhập họ và tên"
@@ -203,7 +203,7 @@ export function CreateOrUpdateUserModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email *</FormLabel>
+                      <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -232,7 +232,7 @@ export function CreateOrUpdateUserModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số điện thoại *</FormLabel>
+                      <FormLabel>Số điện thoại <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="tel"
@@ -258,7 +258,7 @@ export function CreateOrUpdateUserModal({
                     }}
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mật khẩu *</FormLabel>
+                        <FormLabel>Mật khẩu <span className="text-red-500">*</span></FormLabel>
                         <FormControl>
                           <Input
                             type="password"
@@ -292,20 +292,21 @@ export function CreateOrUpdateUserModal({
 
                 <FormField
                   control={form.control}
-                  name="role"
+                  name="roles"
                   rules={{
                     required: "Vai trò là bắt buộc",
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vai trò *</FormLabel>
+                      <FormLabel>Vai trò <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <RoleSelector
-                          value={field.value}
+                          value={(field.value as string[]) || []}
                           onValueChange={field.onChange}
                           placeholder="Chọn vai trò"
                           allowClear={false}
                           valueBy="name"
+                          multiple={true}
                         />
                       </FormControl>
                       <FormDescription>
@@ -324,7 +325,7 @@ export function CreateOrUpdateUserModal({
                     name="status"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Trạng thái</FormLabel>
+                        <FormLabel>Trạng thái <span className="text-red-500">*</span></FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value || "ACTIVE"}
@@ -356,7 +357,7 @@ export function CreateOrUpdateUserModal({
                     name="isVerified"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Đã xác minh</FormLabel>
+                        <FormLabel>Đã xác minh <span className="text-red-500">*</span></FormLabel>
                         <Select
                           onValueChange={(v) => field.onChange(v === "true")}
                           value={String(field.value ?? true)}
@@ -383,10 +384,11 @@ export function CreateOrUpdateUserModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

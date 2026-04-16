@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -137,7 +138,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Địa điểm *</FormLabel>
+                      <FormLabel>Địa điểm <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <LocationSelector
                           value={field.value}
@@ -179,7 +180,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tên cabinet *</FormLabel>
+                      <FormLabel>Tên cabinet <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Nhập tên cabinet"
@@ -199,7 +200,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>MAC Address *</FormLabel>
+                      <FormLabel>MAC Address</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="VD: AA:BB:CC:DD:EE:FF"
@@ -219,7 +220,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>IP Address *</FormLabel>
+                      <FormLabel>IP Address</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="VD: 192.168.1.100"
@@ -260,7 +261,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tổng số hàng *</FormLabel>
+                      <FormLabel>Tổng số hàng <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -287,7 +288,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tổng số cột *</FormLabel>
+                      <FormLabel>Tổng số cột <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -309,10 +310,11 @@ export function CreateOrUpdateCabinetModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

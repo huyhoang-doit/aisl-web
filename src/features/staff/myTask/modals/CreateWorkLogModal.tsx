@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import {
   Dialog,
   DialogContent,
@@ -80,7 +81,7 @@ export function CreateWorkLogModal({
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-2">
-            <Label>Mô tả công việc *</Label>
+            <Label>Mô tả công việc <span className="text-red-500">*</span></Label>
             <Textarea
               placeholder="Mô tả công việc..."
               value={workDescription}

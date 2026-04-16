@@ -28,6 +28,7 @@ export interface StaffApplication {
 
 export interface StaffReviewPayload {
   reviewNote?: string;
+  roleId?: string;
 }
 
 export const getStaffApplicationStatus = (

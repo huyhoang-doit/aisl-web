@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useMemo, useState } from "react";
 import {
   Dialog,
@@ -95,7 +96,7 @@ export function AssignTechnicalStaffModal({
         priority: "HIGH",
       });
     }
-  }, [open, report?.id, form]);
+  }, [open, report, form]);
 
   const selectedIds = form.watch("staffIds") ?? [];
 
@@ -150,7 +151,7 @@ export function AssignTechnicalStaffModal({
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nhân viên kỹ thuật *</FormLabel>
+                  <FormLabel>Nhân viên kỹ thuật <span className="text-red-500">*</span></FormLabel>
                   <FormDescription>
                     Chọn một hoặc nhiều nhân viên. Mỗi nhân viên sẽ được tạo một task riêng.
                   </FormDescription>
@@ -214,7 +215,7 @@ export function AssignTechnicalStaffModal({
               rules={{ required: "Vui lòng chọn loại công việc" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Loại công việc *</FormLabel>
+                  <FormLabel>Loại công việc <span className="text-red-500">*</span></FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -243,7 +244,7 @@ export function AssignTechnicalStaffModal({
               rules={{ required: "Vui lòng chọn độ ưu tiên" }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Độ ưu tiên *</FormLabel>
+                  <FormLabel>Độ ưu tiên <span className="text-red-500">*</span></FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     value={field.value}
@@ -271,7 +272,7 @@ export function AssignTechnicalStaffModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
               <Button type="submit" disabled={!selectedIds.length}>

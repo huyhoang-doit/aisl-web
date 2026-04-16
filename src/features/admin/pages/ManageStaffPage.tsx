@@ -30,7 +30,7 @@ import { useUser } from "../features/user/hooks/useUser";
 import type { User } from "../features/user/types/user.types";
 import { toast } from "sonner";
 
-const staffListDefaultParams = { role: roles.TECHNICIAN };
+const staffListDefaultParams = { roles: [roles.TECHNICIAN] };
 
 const ManageStaffPage = () => {
   const {
@@ -225,7 +225,7 @@ const ManageStaffPage = () => {
           password: data.password,
           fullName: data.fullName,
           phoneNumber: data.phoneNumber,
-          role: data.role || roles.TECHNICAL_STAFF,
+          roles: data.roles,
         });
         toast.success("Thêm nhân viên thành công");
         refetch();
@@ -236,7 +236,6 @@ const ManageStaffPage = () => {
         refetch();
       }
 
-      setIsModalOpen(false);
       setSelectedUser(null);
     } catch (error) {
       console.error("Error saving staff:", error);

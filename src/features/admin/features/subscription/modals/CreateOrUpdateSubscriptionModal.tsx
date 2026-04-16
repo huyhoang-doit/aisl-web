@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -127,7 +129,7 @@ export function CreateOrUpdateSubscriptionModal({
                 rules={{ required: "ID người dùng là bắt buộc" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ID người dùng (userId) *</FormLabel>
+                    <FormLabel>ID người dùng (userId) <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Nhập ID hoặc keycloakUserId"
@@ -146,7 +148,7 @@ export function CreateOrUpdateSubscriptionModal({
                 rules={{ required: "Gói đăng ký là bắt buộc" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Gói đăng ký *</FormLabel>
+                    <FormLabel>Gói đăng ký <span className="text-red-500">*</span></FormLabel>
                     {plans.length > 0 ? (
                       <Select
                         onValueChange={field.onChange}
@@ -215,7 +217,7 @@ export function CreateOrUpdateSubscriptionModal({
                 rules={{ required: "Trạng thái là bắt buộc" }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trạng thái *</FormLabel>
+                    <FormLabel>Trạng thái <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
@@ -240,10 +242,11 @@ export function CreateOrUpdateSubscriptionModal({
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">{isUpdateMode ? "Cập nhật" : "Tạo mới"}</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{isUpdateMode ? "Cập nhật" : "Tạo mới"}</Button>
             </DialogFooter>
           </form>
         </Form>

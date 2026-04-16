@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect } from "react"
+import { Loader2 } from "lucide-react"
 import { useForm } from "react-hook-form"
 import {
   Dialog,
@@ -138,7 +139,7 @@ export function CreateOrUpdateStaffModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Họ và tên *</FormLabel>
+                      <FormLabel>Họ và tên <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           placeholder="Nhập họ và tên"
@@ -163,7 +164,7 @@ export function CreateOrUpdateStaffModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email *</FormLabel>
+                      <FormLabel>Email <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="email"
@@ -191,7 +192,7 @@ export function CreateOrUpdateStaffModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số điện thoại *</FormLabel>
+                      <FormLabel>Số điện thoại <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="tel"
@@ -212,7 +213,7 @@ export function CreateOrUpdateStaffModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Vai trò *</FormLabel>
+                      <FormLabel>Vai trò <span className="text-red-500">*</span></FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
@@ -311,10 +312,11 @@ export function CreateOrUpdateStaffModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

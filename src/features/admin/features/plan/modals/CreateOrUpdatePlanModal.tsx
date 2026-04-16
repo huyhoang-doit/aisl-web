@@ -1,4 +1,6 @@
+/* eslint-disable no-unused-vars */
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import {
   Dialog,
@@ -174,7 +176,7 @@ export function CreateOrUpdatePlanModal({
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tên gói đăng ký *</FormLabel>
+                    <FormLabel>Tên gói đăng ký <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         placeholder="VD: Basic Plan"
@@ -198,7 +200,7 @@ export function CreateOrUpdatePlanModal({
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Số locker tối đa *</FormLabel>
+                    <FormLabel>Số locker tối đa <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -225,7 +227,7 @@ export function CreateOrUpdatePlanModal({
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Giá (VND) *</FormLabel>
+                    <FormLabel>Giá (VND) <span className="text-red-500">*</span></FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -266,7 +268,7 @@ export function CreateOrUpdatePlanModal({
                 }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Trạng thái *</FormLabel>
+                    <FormLabel>Trạng thái <span className="text-red-500">*</span></FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value || "ACTIVE"}
@@ -289,7 +291,7 @@ export function CreateOrUpdatePlanModal({
 
               <div className="space-y-2">
                 <FormLabel className="flex items-center justify-between">
-                  Bảng giá áp dụng *
+                  Bảng giá áp dụng <span className="text-red-500">*</span>
                   <span className="text-xs font-normal text-muted-foreground">
                     Đã chọn: {form.watch("pricingIds")?.length || 0}
                   </span>
@@ -366,10 +368,11 @@ export function CreateOrUpdatePlanModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

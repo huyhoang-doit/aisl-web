@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /**
  * Hook quản lý danh sách user: fetch, pagination, filter, search.
  */
@@ -44,7 +45,8 @@ function buildListParams(
         "Người vận chuyển": roles.COURIER,
         "Khách hàng": roles.CUSTOMER,
       };
-      params.role = roleMap[filter.value] ?? filter.value;
+      const roleValue = roleMap[filter.value] ?? filter.value;
+      params.roles = [roleValue];
     }
     if (filter.key === "status" && filter.value) {
       const statusMap: Record<string, UserStatusValue> = {

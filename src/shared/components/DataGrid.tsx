@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { Skeleton } from "@/shared/components/ui/skeleton";
 import type { Column, FilterConfig, QuickFilter } from "./DataTable";
 
 export type { Column, FilterConfig, QuickFilter };
@@ -383,8 +384,24 @@ export function DataGrid<T extends Record<string, any>>({
 
       {/* Grid */}
       {isLoading ? (
-        <div className="rounded-md border border-border bg-card p-24 text-center text-muted-foreground">
-          {loadingMessage}
+        <div
+            className={cn(
+              "grid gap-4",
+              getGridClass(gridCols.default),
+              gridCols.md && `md:${getGridClass(gridCols.md)}`,
+              gridCols.lg && `lg:${getGridClass(gridCols.lg)}`,
+              gridCols.xl && `xl:${getGridClass(gridCols.xl || gridCols.lg)}`
+            )}
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+             <div key={i} className="flex flex-col space-y-3">
+               <Skeleton className="h-[125px] w-full rounded-xl bg-muted" />
+               <div className="space-y-2">
+                 <Skeleton className="h-4 w-[85%] bg-muted/60" />
+                 <Skeleton className="h-4 w-[60%] bg-muted/60" />
+               </div>
+             </div>
+          ))}
         </div>
       ) : data.length === 0 ? (
         <div className="rounded-md border border-border bg-card p-24 text-center text-muted-foreground">

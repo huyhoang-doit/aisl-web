@@ -32,7 +32,7 @@ const UserRoleComponent: React.FC<UserRoleComponentProps> = ({
   roles: rolesProp,
   role: roleProp,
   className,
-  primaryOnly = true,
+  primaryOnly = false,
 }) => {
   const list: UserRoleItem[] =
     (user?.roles?.length ? user.roles : undefined) ??

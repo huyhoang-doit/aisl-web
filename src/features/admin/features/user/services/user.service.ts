@@ -14,7 +14,7 @@ export interface CreateUserPayload {
   phoneNumber: string;
   fullName: string;
   password: string;
-  role: string;
+  roles: string[];
   status?: UserStatus;
   isVerified?: boolean;
   notificationType?: NotificationType;
@@ -26,7 +26,7 @@ export interface UpdateUserPayload {
   email?: string;
   phoneNumber?: string;
   fullName?: string;
-  role?: string;
+  roles?: string[];
   status?: UserStatus;
   isVerified?: boolean;
   notificationType?: NotificationType;
@@ -52,7 +52,7 @@ export interface UserListResponse {
 export interface UserListParams {
   page?: number;
   limit?: number;
-  role?: string;
+  roles?: string[];
   status?: UserStatusValue | string;
   search?: string;
   orderBy?: string;
@@ -78,7 +78,9 @@ export const userService = {
     const searchParams = new URLSearchParams();
     if (params?.page != null) searchParams.set("page", String(params.page));
     if (params?.limit != null) searchParams.set("limit", String(params.limit));
-    if (params?.role) searchParams.set("role", params.role);
+    if (params?.roles && params.roles.length > 0) {
+      params.roles.forEach(role => searchParams.append("roles", role));
+    }
     if (params?.status) searchParams.set("status", params.status);
     if (params?.search) searchParams.set("search", params.search);
     if (params?.orderBy) searchParams.set("orderBy", params.orderBy);

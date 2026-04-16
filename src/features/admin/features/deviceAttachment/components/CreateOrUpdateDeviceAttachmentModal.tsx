@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -195,7 +196,7 @@ export function CreateOrUpdateDeviceAttachmentModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tên thiết bị *</FormLabel>
+                      <FormLabel>Tên thiết bị <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Nhập tên thiết bị" {...field} />
                       </FormControl>
@@ -212,7 +213,7 @@ export function CreateOrUpdateDeviceAttachmentModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số serial *</FormLabel>
+                      <FormLabel>Số serial <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input placeholder="Nhập số serial" {...field} />
                       </FormControl>
@@ -267,10 +268,11 @@ export function CreateOrUpdateDeviceAttachmentModal({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-              >
+               disabled={form.formState.isSubmitting}>
                 Hủy
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isUpdateMode ? "Cập nhật" : "Tạo mới"}
               </Button>
             </DialogFooter>

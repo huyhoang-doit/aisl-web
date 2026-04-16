@@ -8,6 +8,7 @@ import {
   MapPin,
   Boxes,
   ServerCog,
+  ShoppingBag,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -39,6 +40,11 @@ export const staffNavMain: NavItem[] = [
         icon: ServerCog,
       },
     ],
+  },
+  {
+    title: "Quản lý Đơn hàng",
+    url: "/staff/orders",
+    icon: ShoppingBag,
   },
   {
     title: "Task của tôi",
