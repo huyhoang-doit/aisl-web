@@ -237,14 +237,14 @@ const ManageCustomerReport = () => {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Quản lý báo cáo sự cố</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý báo cáo từ khách hàng và công việc bảo trì</h1>
           <p className="text-muted-foreground mt-2">
-            Quản lý và phân công xử lý các báo cáo sự cố
+            Quản lý và phân công xử lý các báo cáo từ khách hàng và công việc bảo trì
           </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Tạo báo cáo
+          Tạo báo cáo công việc
         </Button>
       </div>
 
