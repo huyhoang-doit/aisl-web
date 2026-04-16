@@ -93,9 +93,17 @@ export const notificationService = {
 
   /**
    * Get notification detail
-   * GET /notifications/:id
+   * GET /users/notifications/admin/:id
    */
   getNotificationDetail: async (id: string): Promise<NotificationDetailResponse> => {
     return api.get<any>(`users/notifications/admin/${id}`).then((res) => res.data);
+  },
+
+  /**
+   * Get user notification detail
+   * GET /users/notifications/:id
+   */
+  getUserNotificationDetail: async (id: string) => {
+    return api.get<any>(`/users/notifications/${id}`).then((res) => res.data);
   },
 };

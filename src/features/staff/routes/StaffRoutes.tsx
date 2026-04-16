@@ -11,6 +11,8 @@ import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/Cabin
 import SettingPage from "@/shared/pages/SettingPage"
 import { Route, Routes } from "react-router-dom"
 import NotFoundPage from "@/shared/pages/NotFoundPage"
+import NotificationsPage from "@/shared/pages/NotificationsPage";
+import NotificationDetailPage from "@/shared/pages/NotificationDetailPage";
 
 const StaffRoutes = () => {
   return (
@@ -22,6 +24,8 @@ const StaffRoutes = () => {
         <Route path="cabinets" element={<ManageCabinetPage />} />
         <Route path="setup-cabinet" element={<CabinetSetupPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="notifications/:id" element={<NotificationDetailPage />} />
         <Route path="manage-tasks" element={<ManageTask />} />
         <Route path="my-tasks" element={<MyTaskPages />} />
         <Route path="profile" element={<ProfilePage />} />

@@ -14,6 +14,7 @@ import {
   ServerCog,
   Activity,
   Monitor,
+  Bell,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -175,10 +176,10 @@ export const adminNavMain: NavItem[] = [
 ]
 
 export const adminNavSecondary: NavItem[] = [
-  // {
-  //   title: "Thông báo",
-  //   url: "/admin/notifications",
-  //   icon: Bell,
-  // },
+  {
+    title: "Thông báo",
+    url: "/admin/notifications",
+    icon: Bell,
+  },
 ]
 

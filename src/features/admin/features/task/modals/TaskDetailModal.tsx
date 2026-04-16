@@ -23,6 +23,7 @@ import StatusComponent from "@/shared/components/StatusComponent";
 import { taskService } from "../services/task.service";
 import { TechnicalTaskStatus, type TaskDetail } from "../types/task.types";
 import { ViewWorkLogsOfTask } from "@/features/staff/myTask/components/ViewWorkLogsOfTask";
+import type { TechnicalTaskStatusType } from "@/features/staff/myTask/types/myTask.types";
 import { toast } from "sonner";
 
 const TASK_TYPE_LABELS: Record<string, string> = {
@@ -136,7 +137,8 @@ export function TaskDetailModal({ open, onOpenChange, taskId }: TaskDetailModalP
               </div>
             </DialogHeader>
 
-            {task.status === (TechnicalTaskStatus.RESOLVED || TechnicalTaskStatus.COMPLETED) ? (
+            {task.status === TechnicalTaskStatus.RESOLVED ||
+            task.status === TechnicalTaskStatus.COMPLETED ? (
               <Tabs defaultValue="info" className="w-full mt-4">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="info" className="active-tab">
@@ -270,7 +272,10 @@ export function TaskDetailModal({ open, onOpenChange, taskId }: TaskDetailModalP
                 </TabsContent>
                 <TabsContent value="worklog" className="space-y-6 mt-4">
                   {taskId && (
-                    <ViewWorkLogsOfTask taskId={taskId} taskStatus={task.status} />
+                    <ViewWorkLogsOfTask
+                      taskId={taskId}
+                      taskStatus={task.status as TechnicalTaskStatusType}
+                    />
                   )}
                 </TabsContent>
               </Tabs>

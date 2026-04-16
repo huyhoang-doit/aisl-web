@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { workLogService } from "../services/workLog.service";
 import type { TechnicalTaskStatusType, WorkLogDetail } from "../types/myTask.types";
 import { WorkLogCard } from "./WorkLogCard";
