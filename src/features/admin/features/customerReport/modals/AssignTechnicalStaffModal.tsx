@@ -24,13 +24,14 @@ import { Input } from "@/shared/components/ui/input";
 import type { CustomerReport } from "../types/customerReport.types";
 import type { CreateTaskPayload } from "@/features/admin/features/task/services/task.service";
 import { useTechnicalStaff } from "@/features/admin/features/staff/hooks/useTechnicalStaff";
+import { useAuthStore } from "@/features/auth/store/auth.store";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
 import { cn } from "@/shared/lib/utils";
 
 const TASK_TYPE_OPTIONS: { value: CreateTaskPayload["taskType"]; label: string }[] = [
   { value: "REPAIR", label: "Sửa chữa" },
   { value: "INSPECTION", label: "Kiểm tra" },
-  { value: "CLEANING", label: "Vệ sinh" },
+  // { value: "CLEANING", label: "Vệ sinh" },
 ];
 
 const PRIORITY_OPTIONS: { value: CreateTaskPayload["priority"]; label: string }[] = [
@@ -61,6 +62,7 @@ export function AssignTechnicalStaffModal({
   onSubmit,
 }: AssignTechnicalStaffModalProps) {
   const { staffList, isLoading: staffLoading } = useTechnicalStaff();
+  const assignedByName = useAuthStore((state) => state.user?.username ?? state.user?.email ?? undefined);
   const [searchQuery, setSearchQuery] = useState("");
 
   const form = useForm<AssignFormData>({
@@ -115,6 +117,7 @@ export function AssignTechnicalStaffModal({
       assignedToId,
       taskType: data.taskType,
       priority: data.priority,
+      assignedByName,
     }));
 
     try {

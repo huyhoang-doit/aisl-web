@@ -84,7 +84,7 @@ const TASK_EMPTY_MESSAGES: Record<TaskStatus, string> = {
 };
 
 const MyTaskPages = () => {
-  const [taskStatusTab, setTaskStatusTab] = useState<TaskStatus>(TechnicalTaskStatus.ASSIGNED);
+  const [taskStatusTab, setTaskStatusTab] = useState<TaskStatus>(TechnicalTaskStatus.OPEN);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
