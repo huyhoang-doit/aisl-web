@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Package, ScanFace, Users } from "lucide-react";
+import { Package, ScanFace, Users, ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
 import type React from "react";
 
 interface WorkflowPanelProps {
@@ -57,81 +58,96 @@ const workflowPanels: WorkflowPanelProps[] = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
 export const HowItWorksSection = () => {
   return (
-    <section id="how-it-works" className="container py-8 sm:py-12">
-      <div className="text-center mb-12">
-        <h2 className="text-lg text-primary mb-2 tracking-wider">
-          Cách Thức Hoạt Động
+    <section id="how-it-works" className="container py-16 sm:py-24 relative">
+      {/* Decorative background lines */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] -z-10 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)]" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16"
+      >
+        <h2 className="text-lg text-primary mb-3 tracking-widest uppercase font-semibold">
+          Quy Trình Tự Động
         </h2>
 
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Lockerly Hoạt Động Như Thế Nào?
+        <h2 className="text-3xl md:text-5xl font-bold mb-6">
+          Hoạt Động Trơn Tru, Nhanh Chóng
         </h2>
 
-        <p className="md:w-2/3 mx-auto text-xl text-muted-foreground">
-          Trải nghiệm quy trình giao nhận hàng thông minh, đơn giản và an toàn. 
-          Từ gửi hàng đến nhận hàng, mọi thứ đều được tự động hóa hoàn toàn.
+        <p className="md:w-2/3 mx-auto text-lg md:text-xl text-muted-foreground/90">
+          Mọi thao tác đều được số hóa và tối ưu. Không cần chìa khóa, không cần chờ đợi. Chỉ với vài chạm và xác thực khuôn mặt.
         </p>
-      </div>
+      </motion.div>
 
       {/* Three Panel Layout */}
-      <div className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto"
+      >
         {workflowPanels.map(({ title, icon, steps }, index) => (
-          <Card
-            key={index}
-            className="bg-muted/50 dark:bg-card border-2 border-border hover:border-primary/50 transition-all duration-300 overflow-hidden group h-full flex flex-col"
-          >
-            {/* Header with Icon and Title */}
-            <CardHeader className="border-b border-border/50 bg-background/50">
-              <div className="flex items-center justify-between mb-4">
-                <div className="bg-primary/20 p-3 rounded-full ring-4 ring-primary/10">
-                  {icon}
-                </div>
-                <div className="h-0.5 w-16 bg-primary"></div>
-              </div>
-              <CardTitle className="text-xl md:text-2xl font-bold text-center">{title}</CardTitle>
-            </CardHeader>
-
-            {/* Steps List */}
-            <CardContent className="pt-6">
-              <ol className="space-y-2.5 mb-6 max-h-[500px] overflow-y-auto pr-2">
-                {steps.map((step, stepIndex) => (
-                  <li key={stepIndex} className="flex items-start gap-3">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-primary/20 text-primary font-bold text-xs flex items-center justify-center mt-0.5">
-                      {stepIndex + 1}
-                    </span>
-                    <span className="text-muted-foreground text-sm flex-1 pt-0.5 leading-relaxed">{step}</span>
-                  </li>
-                ))}
-              </ol>
-            </CardContent>
-
-            {/* Video Thumbnail Section */}
-            {/* <div className="px-6 pb-6">
-              <div className="relative rounded-lg overflow-hidden bg-muted aspect-video group-hover:shadow-lg transition-shadow duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent flex items-center justify-center">
-                  <div className="text-center space-y-2">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-primary/90 backdrop-blur-sm flex items-center justify-center shadow-xl group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                      <Play className="w-8 h-8 text-white ml-1" fill="white" />
-                    </div>
+          <motion.div key={index} variants={cardVariants} className="h-full">
+            <Card
+              className="bg-card/60 backdrop-blur-md border-border/60 hover:border-primary/60 transition-all duration-500 overflow-hidden group h-full flex flex-col shadow-lg hover:shadow-xl hover:shadow-primary/5 relative"
+            >
+              {/* Glowing top line */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              <CardHeader className="border-b border-border/40 bg-muted/20 relative z-10 pb-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="bg-background p-4 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.05)] border border-border/50 group-hover:border-primary/30 group-hover:scale-110 transition-all duration-300 text-primary">
+                    {icon}
                   </div>
+                  {index < workflowPanels.length - 1 && (
+                    <div className="hidden md:flex absolute -right-6 top-10 z-20 bg-background rounded-full p-1 border border-border shadow-sm">
+                      <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                  )}
                 </div>
-                
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-                  <p className="text-white text-xs font-semibold mb-1 line-clamp-2">
-                    {videoTitle}
-                  </p>
-                  <p className="text-white/70 text-[10px] line-clamp-1">
-                    {videoSubtitle}
-                  </p>
-                </div>
-              </div>
-            </div> */}
-          </Card>
-        ))}
-      </div>
+                <CardTitle className="text-xl md:text-2xl font-bold tracking-tight">{title}</CardTitle>
+              </CardHeader>
 
+              <CardContent className="pt-8 relative z-10 flex-1">
+                <ol className="space-y-4 mb-6 max-h-[450px] overflow-y-auto pr-2">
+                  {steps.map((step, stepIndex) => (
+                    <li key={stepIndex} className="flex items-start gap-4 group/step">
+                      <span className="shrink-0 w-7 h-7 rounded-full bg-muted border border-border text-muted-foreground group-hover/step:bg-primary group-hover/step:text-primary-foreground group-hover/step:border-primary font-semibold text-xs flex items-center justify-center transition-colors duration-300 shadow-sm mt-0.5">
+                        {stepIndex + 1}
+                      </span>
+                      <span className="text-muted-foreground text-sm flex-1 pt-1 leading-relaxed group-hover/step:text-foreground transition-colors duration-300">
+                        {step}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </CardContent>
+              
+              {/* Animated bottom gradient */}
+              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-20" />
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
     </section>
   );
 };
