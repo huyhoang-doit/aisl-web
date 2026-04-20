@@ -11,10 +11,12 @@ export type TaskType = "REPAIR" | "INSPECTION" | "SETUP" | "MAINTENANCE" | strin
 export type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
 export interface CreateTaskPayload {
-  incidentReportId: string;
+  incidentReportId?: string;
   assignedToId: string;
   taskType: TaskType;
   priority: TaskPriority;
+  assignedByName?: string;
+  techNote?: string;
 }
 
 export interface UpdateTaskStatusPayload {

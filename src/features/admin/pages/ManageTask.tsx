@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { DataTable, type Column, type QuickFilter } from "@/shared/components/DataTable";
 import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
-import { Eye } from "lucide-react";
+import { Eye, Plus } from "lucide-react";
+import { toast } from "sonner";
 import { useTask } from "../features/task/hooks/useTask";
 import {
   type TaskDetail,
@@ -11,6 +13,8 @@ import {
   TechnicalTaskPriority,
 } from "../features/task/types/task.types";
 import { TaskDetailModal } from "../features/task/modals/TaskDetailModal";
+import CreateTaskModal from "../features/task/modals/CreateTaskModal.tsx";
+import { taskService, type CreateTaskPayload } from "../features/task/services/task.service";
 
 /** Type trạng thái task suy trực tiếp từ const TechnicalTaskStatus */
 type TaskStatus = (typeof TechnicalTaskStatus)[keyof typeof TechnicalTaskStatus];
@@ -117,6 +121,8 @@ const ManageTask = () => {
   const [taskStatusTab, setTaskStatusTab] = useState<TaskStatus>(TechnicalTaskStatus.OPEN);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isTaskDetailModalOpen, setIsTaskDetailModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreatingTask, setIsCreatingTask] = useState(false);
 
   const {
     tasks: taskList,
@@ -126,6 +132,7 @@ const ManageTask = () => {
     pageSize: taskPageSize,
     setPage: setTaskPage,
     setPageSize: setTaskPageSize,
+    refetch: refetchTasks,
     handleFilter: handleTaskFilter,
     handleClearFilters: handleTaskClearFilters,
   } = useTask({
@@ -232,6 +239,21 @@ const ManageTask = () => {
     if (!open) setSelectedTaskId(null);
   };
 
+  const handleCreateTask = async (payload: CreateTaskPayload) => {
+    try {
+      setIsCreatingTask(true);
+      await taskService.create(payload);
+      toast.success("Tạo task thành công");
+      refetchTasks();
+    } catch (error) {
+      console.error("Error creating task:", error);
+      toast.error("Không thể tạo task");
+      throw error;
+    } finally {
+      setIsCreatingTask(false);
+    }
+  };
+
   const taskCustomActions = [
     {
       label: "Xem chi tiết",
@@ -243,11 +265,17 @@ const ManageTask = () => {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Quản lý task</h1>
-        <p className="text-muted-foreground mt-2">
-          Danh sách task bảo trì theo trạng thái, lọc theo loại task và độ ưu tiên
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý task</h1>
+          <p className="text-muted-foreground mt-2">
+            Danh sách task bảo trì theo trạng thái, lọc theo loại task và độ ưu tiên
+          </p>
+        </div>
+        <Button onClick={() => setIsCreateModalOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Tạo task
+        </Button>
       </div>
 
       <Tabs
@@ -301,6 +329,13 @@ const ManageTask = () => {
         open={isTaskDetailModalOpen}
         onOpenChange={handleTaskDetailModalClose}
         taskId={selectedTaskId}
+      />
+
+      <CreateTaskModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSubmit={handleCreateTask}
+        isSubmitting={isCreatingTask}
       />
     </div>
   );
