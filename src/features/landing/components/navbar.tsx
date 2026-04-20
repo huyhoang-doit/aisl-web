@@ -290,8 +290,13 @@ export const Navbar = () => {
         </NavigationMenuList>
       </NavigationMenu>
 
-      <div className="hidden lg:flex">
+      <div className="hidden lg:flex gap-2">
         <ToggleTheme />
+        <Button asChild >
+          <a href="/login">
+            Quản trị viên
+          </a>
+        </Button>
       </div>
     </header>
   );
