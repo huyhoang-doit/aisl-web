@@ -8,6 +8,7 @@ export const hardwareApi = {
   getMonitorStatus: async (
     params?: HardwareMonitorQueryParams
   ): Promise<PaginatedHardwareMonitor> => {
-    return axiosInstance.get("/cabinets/monitor/status", { params });
+    const res = await axiosInstance.get("/cabinets/monitor/status", { params });
+    return res.data;
   },
 };

@@ -44,7 +44,7 @@ export interface UserResponse {
 
 export interface UserListResponse {
   data: {
-    users: User[];
+    items: User[];
     pagination: Pagination;
   };
 }

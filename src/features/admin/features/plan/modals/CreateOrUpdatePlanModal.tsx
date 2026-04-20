@@ -290,12 +290,12 @@ export function CreateOrUpdatePlanModal({
               />
 
               <div className="space-y-2">
-                <FormLabel className="flex items-center justify-between">
+                <label className="text-sm font-medium flex items-center justify-between">
                   Bảng giá áp dụng <span className="text-red-500">*</span>
                   <span className="text-xs font-normal text-muted-foreground">
                     Đã chọn: {form.watch("pricingIds")?.length || 0}
                   </span>
-                </FormLabel>
+                </label>
                 <FormField
                   control={form.control}
                   name="pricingIds"

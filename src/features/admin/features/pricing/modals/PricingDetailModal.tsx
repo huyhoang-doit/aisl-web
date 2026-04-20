@@ -12,6 +12,7 @@ import { Separator } from "@/shared/components/ui/separator";
 import type { Pricing } from "../types/pricing.types";
 import StatusComponent from "@/shared/components/StatusComponent";
 
+/* eslint-disable no-unused-vars -- callback param names in types are for signature only */
 interface PricingDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -19,6 +20,7 @@ interface PricingDetailModalProps {
   onEdit?: (pricing: Pricing) => void;
   onDelete?: (pricing: Pricing) => void;
 }
+/* eslint-enable no-unused-vars */
 
 const PricingDetailModal: React.FC<PricingDetailModalProps> = ({
   open,
@@ -41,11 +43,13 @@ const PricingDetailModal: React.FC<PricingDetailModalProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-xl font-bold">{pricing.name}</DialogTitle>
-              <DialogDescription className="mt-1">
-                <StatusComponent status={pricing.orderType} />
+              <DialogDescription className="mt-1" asChild>
+                <div className="flex items-center gap-2">
+                  <StatusComponent status={pricing.orderType} />
+                </div>
               </DialogDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-5">
               {onEdit && (
                 <Button
                   variant="outline"

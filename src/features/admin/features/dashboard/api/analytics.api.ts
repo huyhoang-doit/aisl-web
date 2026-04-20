@@ -9,7 +9,8 @@ import type {
 
 export const analyticsApi = {
   getOrderStats: async (params?: DateRangeParams): Promise<OrderStats> => {
-    return axiosInstance.get("/analytics/orders", { params });
+    const res = await axiosInstance.get("/analytics/orders", { params });
+    return res.data;
   },
 
   getRevenueStats: async (params: DateRangeParams): Promise<{ statistics: RevenueStats }> => {

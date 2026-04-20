@@ -3,6 +3,7 @@ import type { PaginatedTransactions, TransactionQueryParams } from "../types/tra
 
 export const transactionApi = {
   getTransactions: async (params?: TransactionQueryParams): Promise<PaginatedTransactions> => {
-    return axiosInstance.get("payments/admin/transactions", { params });
+    const res = await axiosInstance.get("payments/admin/transactions", { params });
+    return res.data;
   },
 };

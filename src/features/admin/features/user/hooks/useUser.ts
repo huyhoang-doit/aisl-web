@@ -111,7 +111,7 @@ export function useUser(options: UseUserOptions = {}): UseUserReturn {
     try {
       setIsLoading(true);
       const response = await userService.getAll(params);
-      setUsers(response.data.users || []);
+      setUsers(response.data.items || []);
       setTotal(response.data.pagination?.total ?? 0);
     } catch (error) {
       console.error("Error loading users:", error);

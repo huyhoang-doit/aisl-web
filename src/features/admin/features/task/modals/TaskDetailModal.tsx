@@ -127,7 +127,7 @@ export function TaskDetailModal({ open, onOpenChange, taskId }: TaskDetailModalP
                   </DialogTitle>
                   <DialogDescription>Chi tiết task bảo trì</DialogDescription>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 mr-5">
                   <StatusComponent status={task.status} />
                   <Badge variant={priorityVariant[task.priority] ?? "default"}>
                     {PRIORITY_LABELS[task.priority] ?? task.priority}

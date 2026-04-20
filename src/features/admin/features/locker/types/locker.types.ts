@@ -1,4 +1,4 @@
-export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED';
+export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED' | 'LOCKED_BY_BALANCE' | 'FAULT' | 'INITIALIZING';
 
 export type HwState = 'OPENING' | 'CLOSING' | 'JAMMED' | 'OFFLINE' | 'ERROR' | string;
 

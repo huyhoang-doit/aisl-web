@@ -12,6 +12,7 @@ import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
 import type { Plan } from "../types/plan.types";
 
+/* eslint-disable no-unused-vars -- callback param names in types are for signature only */
 interface PlanDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -19,6 +20,7 @@ interface PlanDetailModalProps {
   onEdit?: (plan: Plan) => void;
   onDelete?: (plan: Plan) => void;
 }
+/* eslint-enable no-unused-vars */
 
 const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
   open,
@@ -47,11 +49,13 @@ const PlanDetailModal: React.FC<PlanDetailModalProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <DialogTitle className="text-xl font-bold">{plan.name}</DialogTitle>
-              <DialogDescription className="mt-1">
-                <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+              <DialogDescription asChild className="mt-1">
+                <div>
+                  <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                </div>
               </DialogDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 mr-5">
               {onEdit && (
                 <Button
                   variant="outline"
