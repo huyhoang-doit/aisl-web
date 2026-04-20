@@ -92,7 +92,7 @@ export function WorkLogCard({
           <div className="flex gap-1 shrink-0">
             {!isUpdating && !isCompleting && (
               <>
-                <Button
+                {/* <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => {
@@ -101,7 +101,7 @@ export function WorkLogCard({
                   }}
                 >
                   Cập nhật
-                </Button>
+                </Button> */}
                 <Button
                   size="sm"
                   variant="default"

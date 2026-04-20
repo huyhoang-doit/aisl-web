@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CheckCircle2, Loader2, XCircle, AlertTriangle } from "lucide-react";
 import { Progress } from "@/shared/components/ui/progress";
 import { Button } from "@/shared/components/ui/button";
@@ -39,6 +39,11 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
       testResult: "PENDING",
     }))
   );
+  const stateRef = useRef<SetupState>("INITIALIZING");
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // WebSocket Integration
   const { setupProgress, setupResult, isConnected } = useDiscoverySocket(macAddress);
@@ -49,7 +54,7 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
 
     // Defer state updates to avoid cascading render warning
     setTimeout(() => {
-      if (state !== "IN_PROGRESS") {
+      if (stateRef.current !== "IN_PROGRESS") {
         setState("IN_PROGRESS");
       }
   
@@ -80,7 +85,7 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
         setFailCount(setupProgress.progress.failCount);
       }
     }, 0);
-  }, [setupProgress, cabinetId, state]);
+  }, [setupProgress, cabinetId]);
 
   // 2. Handle Setup Result Event (Final)
   useEffect(() => {
@@ -90,11 +95,11 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
                        setupResult.status === "PARTIAL" ? "PARTIAL" : "ERROR";
     
     setTimeout(() => {
-      if (state !== finalStatus) {
+      if (stateRef.current !== finalStatus) {
         setState(finalStatus);
       }
     }, 0);
-  }, [setupResult, cabinetId, state]);
+  }, [setupResult, cabinetId]);
 
   // 3. Polling logic (Fallback & Initial Snapshot)
   useEffect(() => {
@@ -116,7 +121,23 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
           errorCode: rl.hwState === "ERROR" ? "HARDWARE_FAILURE" : undefined
         }));
 
-        setLockers(updatedLockers);
+        setLockers(prev => {
+          const isSame =
+            prev.length === updatedLockers.length &&
+            prev.every((locker, index) => {
+              const updated = updatedLockers[index];
+              return (
+                updated &&
+                locker.slotIndex === updated.slotIndex &&
+                locker.row === updated.row &&
+                locker.column === updated.column &&
+                locker.testResult === updated.testResult &&
+                locker.errorCode === updated.errorCode
+              );
+            });
+
+          return isSame ? prev : updatedLockers;
+        });
         
         const ok = updatedLockers.filter(l => l.testResult === "OK").length;
         const fail = updatedLockers.filter(l => l.testResult === "FAIL").length;
@@ -127,19 +148,19 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
         setTestedCount(tested);
 
         if (cabData.status === CABINET_STATUS.SETTING_UP) {
-          if (state !== "IN_PROGRESS" && state !== "COMPLETED") setState("IN_PROGRESS");
+          if (stateRef.current !== "IN_PROGRESS" && stateRef.current !== "COMPLETED") setState("IN_PROGRESS");
         } else if (cabData.status === CABINET_STATUS.ACTIVE) {
-          if (state !== "COMPLETED") {
+          if (stateRef.current !== "COMPLETED") {
             setState("COMPLETED");
             if (pollInterval) clearInterval(pollInterval);
           }
         } else if (cabData.status === CABINET_STATUS.PARTIAL_ERROR) {
-          if (state !== "PARTIAL") {
+          if (stateRef.current !== "PARTIAL") {
             setState("PARTIAL");
             if (pollInterval) clearInterval(pollInterval);
           }
         } else if (cabData.status === CABINET_STATUS.OFFLINE && tested > 0) {
-          if (state !== "ERROR") {
+          if (stateRef.current !== "ERROR") {
             setState("ERROR");
             if (pollInterval) clearInterval(pollInterval);
           }
@@ -155,7 +176,7 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
     return () => {
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [cabinetId, state]);
+  }, [cabinetId]);
 
   const progressPercent = (testedCount / totalLockers) * 100;
 
