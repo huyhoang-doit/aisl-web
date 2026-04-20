@@ -242,10 +242,10 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Danh sách Cabinet</h3>
-              <Button onClick={handleCreateCabinet} className="gap-2">
+              {/* <Button onClick={handleCreateCabinet} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Thêm cabinet
-              </Button>
+              </Button> */}
             </div>
 
             <CabinetTable

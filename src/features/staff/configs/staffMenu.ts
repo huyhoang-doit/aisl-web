@@ -25,11 +25,7 @@ export const staffNavMain: NavItem[] = [
     url: "/staff/locations",
     icon: Package,
     items: [
-           {
-        title: "Tủ",
-        url: "/staff/lockers",
-        icon: Box,
-      },
+           
       {
         title: "Địa điểm",
         url: "/staff/locations",
@@ -39,6 +35,11 @@ export const staffNavMain: NavItem[] = [
         title: "Cụm tủ",
         url: "/staff/cabinets",
         icon: Boxes,
+      },
+      {
+        title: "Tủ",
+        url: "/staff/lockers",
+        icon: Box,
       },
       {
         title: "Setup Tủ Mới (RPi)",

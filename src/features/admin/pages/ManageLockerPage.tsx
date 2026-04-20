@@ -171,13 +171,13 @@ const ManageLockerPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             variant="destructive"
             onClick={() => setIsClearSetupModalOpen(true)}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Clear setup locker
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
             onClick={() => setIsManageSizeModalOpen(true)}

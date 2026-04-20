@@ -228,10 +228,10 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Danh sách Locker</h3>
-              <Button onClick={handleCreateLocker} className="gap-2">
+              {/* <Button onClick={handleCreateLocker} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Thêm locker
-              </Button>
+              </Button> */}
             </div>
 
             <LockerTable
