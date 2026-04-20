@@ -146,9 +146,9 @@ export function CreateReportModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Tạo báo cáo sự cố</DialogTitle>
+          <DialogTitle>Tạo báo cáo công việc</DialogTitle>
           <DialogDescription>
-            Tạo báo cáo sự cố mới trên web admin (tính năng test)
+            Tạo báo cáo công việc mới dành cho admin
           </DialogDescription>
         </DialogHeader>
 
@@ -285,7 +285,7 @@ export function CreateReportModal({
                 Hủy
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Đang tạo..." : "Tạo báo cáo"}
+                {isSubmitting ? "Đang tạo..." : "Tạo báo cáo công việc"}
               </Button>
             </DialogFooter>
           </form>

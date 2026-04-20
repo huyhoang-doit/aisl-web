@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Icon } from "@/shared/components/ui/icon";
+import { motion } from "framer-motion";
 
 interface FeaturesProps {
   icon: string;
@@ -46,46 +47,77 @@ const featureList: FeaturesProps[] = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+};
+
 export const FeaturesSection = () => {
   return (
-    <section id="features" className="container py-8 sm:py-12">
-      <h2 className="text-lg text-primary text-center mb-2 tracking-wider">
-        Tính Năng
-      </h2>
+    <section id="features" className="container py-16 sm:py-24 relative">
+      <div className="absolute top-0 right-0 -z-10 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px]" />
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6 }}
+        className="text-center mb-16"
+      >
+        <h2 className="text-lg text-primary mb-3 tracking-widest uppercase font-semibold">
+          Công Nghệ Lõi
+        </h2>
 
-      <h2 className="text-3xl md:text-4xl text-center font-bold mb-4">
-        Tính Năng Mạnh Mẽ Cho Cuộc Sống Hiện Đại
-      </h2>
+        <h2 className="text-3xl md:text-5xl font-bold mb-6">
+          Sức Mạnh Đằng Sau <span className="text-transparent bg-gradient-to-r from-primary to-purple-500 bg-clip-text">Lockerly</span>
+        </h2>
 
-      <h3 className="md:w-1/2 mx-auto text-xl text-center text-muted-foreground mb-8">
-        Trải nghiệm thế hệ tiếp theo của công nghệ tủ thông minh. Từ nhận diện khuôn mặt AI 
-        đến thanh toán tự động, Lockerly mang lại sự tiện lợi và an toàn trong một giải pháp hoàn chỉnh.
-      </h3>
+        <p className="md:w-2/3 mx-auto text-lg md:text-xl text-muted-foreground/90">
+          Trải nghiệm thế hệ tiếp theo của giao nhận hàng hóa. Tích hợp sâu AI, IoT và tự động hóa để mang lại trải nghiệm liền mạch và an toàn tuyệt đối.
+        </p>
+      </motion.div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+      >
         {featureList.map(({ icon, title, description }) => (
-          <div key={title}>
-            <Card className="h-full bg-background border-0 shadow-none">
-              <CardHeader className="flex justify-center items-center">
-                <div className="bg-primary/20 p-2 rounded-full ring-8 ring-primary/10 mb-4">
+          <motion.div key={title} variants={itemVariants} className="h-full">
+            <Card className="h-full bg-card/40 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-300 group hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-primary/10 overflow-hidden relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-[30px] group-hover:bg-primary/20 transition-colors duration-500" />
+              
+              <CardHeader className="flex flex-col items-start pb-4 relative z-10">
+                <div className="bg-background p-3 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300 ring-1 ring-border shadow-sm group-hover:ring-primary/30">
                   <Icon
                     name={icon}
-                    size={24}
-                    className="text-primary w-6 h-6"
+                    size={28}
+                    className="text-primary"
                   />
                 </div>
-
-                <CardTitle>{title}</CardTitle>
+                <CardTitle className="text-xl font-bold leading-snug">{title}</CardTitle>
               </CardHeader>
 
-              <CardContent className="text-muted-foreground text-center">
+              <CardContent className="text-muted-foreground relative z-10 text-sm md:text-base leading-relaxed">
                 {description}
               </CardContent>
             </Card>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </section>
   );
 };
-
