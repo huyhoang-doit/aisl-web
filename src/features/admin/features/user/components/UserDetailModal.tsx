@@ -17,10 +17,10 @@ import type { User } from "../types/user.types";
 
 interface UserDetailModalProps {
   open: boolean;
-  onOpenChange: (open: boolean | User) => void;
+  onOpenChange: (val: boolean | User) => void;
   user: User;
-  onEdit?: (user: User) => void;
-  onLock?: (user: User) => void;
+  onEdit?: (u: User) => void;
+  onLock?: (u: User) => void;
 }
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({
@@ -138,6 +138,59 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
             </div>
           </div>
 
+          {user.roles?.some(r => r.name === "TECHNICIAN" || r.name === "COURIER") && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Thông tin phương tiện & Công việc
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Tên pháp lý:</span>
+                    <p className="font-medium">{user.legalName || "N/A"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Biển số xe:</span>
+                    <p className="font-medium">{user.licensePlate || "N/A"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Loại xe:</span>
+                    <p className="font-medium">{user.vehicleType || "N/A"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Trạng thái duyệt:</span>
+                    <Badge variant="outline" className="ml-2">
+                      {user.staffStatus || "NONE"}
+                    </Badge>
+                  </div>
+                </div>
+                {(user.frontVehicleImageUrl || user.backVehicleImageUrl) && (
+                  <div className="grid gap-4 grid-cols-2 mt-4">
+                    {user.frontVehicleImageUrl && (
+                      <div>
+                        <span className="text-xs text-muted-foreground">Ảnh trước xe:</span>
+                        <img src={user.frontVehicleImageUrl} alt="Front Vehicle" className="mt-1 rounded-md border w-full h-32 object-cover" />
+                      </div>
+                    )}
+                    {user.backVehicleImageUrl && (
+                      <div>
+                        <span className="text-xs text-muted-foreground">Ảnh sau xe:</span>
+                        <img src={user.backVehicleImageUrl} alt="Back Vehicle" className="mt-1 rounded-md border w-full h-32 object-cover" />
+                      </div>
+                    )}
+                  </div>
+                )}
+                {user.reviewNote && (
+                  <div className="mt-2 text-sm">
+                    <span className="text-muted-foreground">Ghi chú duyệt:</span>
+                    <p className="p-2 bg-muted rounded mt-1">{user.reviewNote}</p>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+
           {(user.createdAt || user.updatedAt) && (
             <>
               <Separator />
@@ -164,6 +217,12 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                       </span>
                     </div>
                   )}
+                  <div>
+                    <span className="text-muted-foreground">Tọa độ:</span>{" "}
+                    <span className="font-medium font-mono text-xs">
+                      {user.latitude && user.longitude ? `${user.latitude}, ${user.longitude}` : "N/A"}
+                    </span>
+                  </div>
                 </div>
               </div>
             </>

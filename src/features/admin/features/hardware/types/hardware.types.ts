@@ -18,14 +18,10 @@ export interface HardwareMonitorQueryParams {
 }
 
 export interface PaginatedHardwareMonitor {
-  statusCode: number;
-  message: string;
-  data: {
-    statuses: HardwareMonitorStats[];
-    pagination: {
-      total: number;
-      page: number;
-      limit: number;
-    };
+  statuses: HardwareMonitorStats[];
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
   };
 }

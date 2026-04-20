@@ -115,10 +115,12 @@ export function BasicInfoStep({ form, isScanning, onScan, hasScanned }: BasicInf
           render={({ field }) => (
             <FormItem>
               <FormControl>
-                <DeviceAttachmentSelector
-                  selectedIds={field.value ?? []}
-                  onChange={field.onChange}
-                />
+                <div>
+                  <DeviceAttachmentSelector
+                    selectedIds={field.value ?? []}
+                    onChange={field.onChange}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -50,8 +50,8 @@ export default function ManageHardwarePage() {
     refetchInterval: 30000, // Tự động làm mới mỗi 30 giây
   });
 
-  const stats: HardwareMonitorStats[] = data?.data?.statuses || [];
-  const pagination = data?.data?.pagination;
+  const stats: HardwareMonitorStats[] = data?.statuses || [];
+  const pagination = data?.pagination;
 
   // Tính toán thống kê tổng quát
   const totalCabinets = pagination?.total || 0;

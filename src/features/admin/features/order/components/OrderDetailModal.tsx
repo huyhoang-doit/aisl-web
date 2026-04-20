@@ -35,7 +35,27 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
 }) => {
   if (!orderData) return null;
 
-  const { order, orderDetails } = orderData;
+  // Robustly extract order and orderDetails
+  // Case 1: orderData is OrderWithDetails { order, orderDetails }
+  // Case 2: orderData is a plain Order object
+  const order = (orderData as any).order || (orderData as any);
+  const orderDetails = (orderData as any).orderDetails || [];
+
+  // Final check to ensure we have an order object with necessary properties
+  if (!order || !order.orderCode) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Lỗi dữ liệu</DialogTitle>
+          </DialogHeader>
+          <div className="p-6 text-center text-muted-foreground">
+            Không thể hiển thị chi tiết đơn hàng do thiếu thông tin.
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const getStatusBadge = (status: OrderStatus | OrderDetailStatus) => {
     switch (status) {
@@ -86,13 +106,13 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 <span>•</span>
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
+                  {order.createdAt ? format(new Date(order.createdAt), "dd/MM/yyyy HH:mm") : "—"}
                 </span>
               </div>
             </div>
             <div className="text-right">
                 <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Tổng tích lũy</p>
-                <p className="text-2xl font-bold text-green-600">{order.accumulatedFee.toLocaleString()} đ</p>
+                <p className="text-2xl font-bold text-green-600">{(order.accumulatedFee || 0).toLocaleString()} đ</p>
             </div>
           </div>
         </DialogHeader>
@@ -125,14 +145,14 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   )}
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Đã thu:</span>
-                    <span className="font-semibold">{order.totalCollected.toLocaleString()} đ</span>
+                    <span className="font-semibold">{(order.totalCollected || 0).toLocaleString()} đ</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-sm italic py-1">
                     <span className="text-muted-foreground flex items-center gap-1">
                         <Clock className="h-3 w-3" /> Cập nhật cuối:
                     </span>
-                    <span>{format(new Date(order.updatedAt), "dd/MM/yyyy HH:mm:ss")}</span>
+                    <span>{order.updatedAt ? format(new Date(order.updatedAt), "dd/MM/yyyy HH:mm:ss") : "—"}</span>
                   </div>
                 </div>
               </section>
@@ -176,7 +196,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                 <QrCode className="h-4 w-4" /> Các ô tủ chi tiết ({orderDetails.length})
               </h3>
               <div className="space-y-4">
-                {orderDetails.map((detail) => (
+                {orderDetails.map((detail: any) => (
                   <div key={detail.id} className="bg-card border rounded-lg overflow-hidden shadow-sm transition-all hover:border-primary/50">
                     <div className="p-3 bg-muted/20 border-b flex justify-between items-center">
                       <div className="flex items-center gap-2">
@@ -197,7 +217,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                           <p className="text-muted-foreground font-medium flex items-center gap-1 mb-1">
                             <CreditCard className="h-3 w-3" /> Phí trễ hạn
                           </p>
-                          <p className="font-semibold text-orange-600">{detail.overdueFee.toLocaleString()} đ</p>
+                          <p className="font-semibold text-orange-600">{(detail.overdueFee || 0).toLocaleString()} đ</p>
                         </div>
                       </div>
 

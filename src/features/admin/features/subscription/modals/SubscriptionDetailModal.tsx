@@ -79,8 +79,10 @@ const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = ({
               <DialogTitle className="text-xl font-bold">
                 Đăng ký #{subscription.id.slice(0, 8)}...
               </DialogTitle>
-              <DialogDescription className="mt-1">
-                <StatusComponent status={subscription.status} />
+              <DialogDescription asChild className="mt-1">
+                <div>
+                  <StatusComponent status={subscription.status} />
+                </div>
               </DialogDescription>
             </div>
             {/* <div className="flex items-center gap-2">
