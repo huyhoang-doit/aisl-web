@@ -9,6 +9,7 @@ import {
   Boxes,
   ServerCog,
   ShoppingBag,
+  Box,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -24,6 +25,11 @@ export const staffNavMain: NavItem[] = [
     url: "/staff/locations",
     icon: Package,
     items: [
+           {
+        title: "Tủ",
+        url: "/staff/lockers",
+        icon: Box,
+      },
       {
         title: "Địa điểm",
         url: "/staff/locations",

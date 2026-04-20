@@ -14,6 +14,7 @@ import { Route, Routes } from "react-router-dom"
 import NotFoundPage from "@/shared/pages/NotFoundPage"
 import NotificationsPage from "@/shared/pages/NotificationsPage";
 import NotificationDetailPage from "@/shared/pages/NotificationDetailPage";
+import ManageLockerPage from "@/features/admin/pages/ManageLockerPage";
 
 const StaffRoutes = () => {
   return (
@@ -23,6 +24,7 @@ const StaffRoutes = () => {
         <Route path="list-lockers" element={<ManageLockerAreaPage />} />
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
+        <Route path="lockers" element={<ManageLockerPage />} />
         <Route path="orders" element={<ManageOrderPage />} />
         <Route path="setup-cabinet" element={<CabinetSetupPage />} />
         <Route path="manage-reports" element={<ManageCustomerReport />} />
