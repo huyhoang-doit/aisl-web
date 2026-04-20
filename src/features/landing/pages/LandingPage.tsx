@@ -18,8 +18,8 @@ const LandingPage = () => {
     <>
       <Navbar />
       <HeroSection />
-      <DownloadAppSection />
-      <SponsorsSection />
+      {/* <DownloadAppSection /> */}
+      {/* <SponsorsSection /> */}
       <BenefitsSection />
       <FeaturesSection />
       <HowItWorksSection />
