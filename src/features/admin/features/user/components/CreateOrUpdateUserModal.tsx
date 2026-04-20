@@ -118,8 +118,9 @@ export function CreateOrUpdateUserModal({
       const statusValue = values.status ?? "ACTIVE";
       const payload: UserFormData = {
         keycloakUserId:
-          values.keycloakUserId ??
-          userData?.keycloakUserId ??
+          userData?.id ||
+          values.keycloakUserId ||
+          userData?.keycloakUserId ||
           "",
         email: values.email,
         phoneNumber: values.phoneNumber,

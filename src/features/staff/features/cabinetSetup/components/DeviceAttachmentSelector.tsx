@@ -2,9 +2,8 @@ import { useState, useMemo } from "react";
 import { useDeviceAttachment } from "../../../../admin/features/deviceAttachment/hooks/useDeviceAttachment";
 import type { DeviceAttachment } from "../../../../admin/features/deviceAttachment/types/deviceAttachment.types";
 import { Input } from "@/shared/components/ui/input";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import { Badge } from "@/shared/components/ui/badge";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X, Check } from "lucide-react";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import {
   Select,
@@ -132,11 +131,15 @@ export function DeviceAttachmentSelector({ selectedIds, onChange }: DeviceAttach
                   }`}
                   onClick={() => handleToggle(da.id)}
                 >
-                  <Checkbox
-                    checked={selectedIds.includes(da.id)}
-                    onCheckedChange={() => handleToggle(da.id)}
-                    className="mt-1"
-                  />
+                  <div
+                    className={`mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border shadow-sm pointer-events-none transition-colors ${
+                      selectedIds.includes(da.id)
+                        ? "bg-primary border-primary text-primary-foreground"
+                        : "border-primary bg-transparent"
+                    }`}
+                  >
+                    {selectedIds.includes(da.id) && <Check className="h-3 w-3" strokeWidth={3} />}
+                  </div>
                   <div 
                     className="flex-1 min-w-0 pointer-events-none" 
                   >

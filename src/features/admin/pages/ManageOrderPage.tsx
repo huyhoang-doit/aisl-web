@@ -173,9 +173,11 @@ export default function ManageOrderPage() {
             </CardContent>
           </Card>
           
-          <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-6 shadow-inner italic">
-            <h4 className="text-blue-800 font-bold text-sm mb-2 flex items-center gap-2">Lưu ý nghiệp vụ</h4>
-            <p className="text-xs text-blue-700 leading-relaxed">
+          <div className="bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-6 shadow-sm">
+            <h4 className="text-blue-800 dark:text-blue-300 font-bold text-base mb-2 flex items-center gap-2">
+              Lưu ý nghiệp vụ
+            </h4>
+            <p className="text-sm text-blue-700 dark:text-blue-200 leading-relaxed italic">
               Các đơn hàng "Gửi/Nhận hàng" (Logistics) sẽ tự động hoàn thành khi người nhận lấy hàng. 
               Sử dụng tính năng Force action chỉ khi hệ thống gặp sự cố kĩ thuật.
             </p>

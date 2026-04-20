@@ -9,15 +9,19 @@ export const orderAdminApi = {
     orderCode?: string;
     orderType?: string;
   }): Promise<any> => {
-    return axiosInstance.get("/orders", { params });
+    const res = await axiosInstance.get("/orders", { params });
+    return res.data;
   },
   getOrderDetails: async (id: string): Promise<any> => {
-    return axiosInstance.get(`/orders/${id}`);
+    const res = await axiosInstance.get(`/orders/${id}`);
+    return res.data;
   },
   forceCancelOrder: async (orderId: string): Promise<any> => {
-    return axiosInstance.post(`/orders/${orderId}/force-cancel`);
+    const res = await axiosInstance.post(`/orders/${orderId}/force-cancel`);
+    return res.data;
   },
   forceCompleteOrder: async (orderId: string): Promise<any> => {
-    return axiosInstance.post(`/orders/${orderId}/force-complete`);
+    const res = await axiosInstance.post(`/orders/${orderId}/force-complete`);
+    return res.data;
   },
 };

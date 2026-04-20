@@ -15,12 +15,15 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
   OCCUPIED: { label: "Đã thuê", variant: "secondary" },
   MAINTENANCE: { label: "Bảo trì", variant: "destructive" },
   RESERVED: { label: "Đã đặt", variant: "outline" },
+  LOCKED_BY_BALANCE: { label: "Khóa do số dư", variant: "destructive" },
+  FAULT: { label: "Lỗi", variant: "destructive" },
+  INITIALIZING: { label: "Đang khởi tạo", variant: "outline" },
 };
 
 const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
   const displayTitle = locker.lockerLabel ?? `${locker.row}-${locker.column}`;
   const sizeName = locker.sizeType?.name ?? "—";
-  const statusInfo = STATUS_CONFIG[locker.status];
+  const statusInfo = STATUS_CONFIG[locker.status] ?? { label: locker.status, variant: "outline" };
 
   return (
     <Card

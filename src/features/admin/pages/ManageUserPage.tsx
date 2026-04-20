@@ -177,11 +177,11 @@ const ManageUserPage = () => {
   };
 
   const confirmLock = async () => {
-    if (!selectedUser?.keycloakUserId && !selectedUser?.id) return;
-    const userId = selectedUser.keycloakUserId || selectedUser.id;
+    if (!selectedUser?.id && !selectedUser?.keycloakUserId) return;
+    const userId = selectedUser.id || selectedUser.keycloakUserId;
 
     try {
-      await userService.update(userId, { status: "BLOCKED" });
+      await userService.update(userId!, { status: "BLOCKED" });
       setIsLockDialogOpen(false);
       setSelectedUser(null);
       refetch();
@@ -193,11 +193,11 @@ const ManageUserPage = () => {
   };
 
   const confirmUnlock = async () => {
-    if (!selectedUser?.keycloakUserId && !selectedUser?.id) return;
-    const userId = selectedUser.keycloakUserId || selectedUser.id;
+    if (!selectedUser?.id && !selectedUser?.keycloakUserId) return;
+    const userId = selectedUser.id || selectedUser.keycloakUserId;
 
     try {
-      await userService.update(userId, { status: "ACTIVE" });
+      await userService.update(userId!, { status: "ACTIVE" });
       setIsUnlockDialogOpen(false);
       setSelectedUser(null);
       refetch();
@@ -214,7 +214,7 @@ const ManageUserPage = () => {
     try {
       await Promise.all(
         selectedRows.map((u) =>
-          userService.update(u.keycloakUserId || u.id, { status: "BLOCKED" })
+          userService.update(u.id || u.keycloakUserId || "", { status: "BLOCKED" })
         )
       );
       setSelectedRows([]);
@@ -243,8 +243,9 @@ const ManageUserPage = () => {
         toast.success("Thêm người dùng thành công");
         refetch();
       } else {
-        if (!selectedUser?.keycloakUserId) return;
-        await userService.update(selectedUser.keycloakUserId, data);
+        if (!selectedUser?.id && !selectedUser?.keycloakUserId) return;
+        const userId = selectedUser.id || selectedUser.keycloakUserId || "";
+        await userService.update(userId, data);
         toast.success("Cập nhật người dùng thành công");
         refetch();
       }
@@ -264,7 +265,7 @@ const ManageUserPage = () => {
     } else {
       setUsers(
         users.map((u) =>
-          u.keycloakUserId === open.keycloakUserId ? open : u
+        u.id === (open as User).id ? (open as User) : u
         )
       );
       setIsDetailModalOpen(false);
@@ -300,7 +301,7 @@ const ManageUserPage = () => {
       <DataTable
         data={users}
         columns={columns}
-        keyExtractor={(row) => row.keycloakUserId || row.email}
+        keyExtractor={(row) => row.id || row.email}
         onEdit={handleEdit}
         onCreate={handleCreate}
         customActions={[

@@ -11,11 +11,12 @@ export interface UserRoleItem {
 }
 
 export interface User {
-  keycloakUserId?: string;
   id: string;
+  keycloakUserId?: string; // Khả năng tương thích ngược
   email: string;
   phoneNumber: string;
   fullName: string;
+  avatarUrl?: string;
   status?: UserStatus;
   isVerified?: boolean;
   isActive?: boolean;
@@ -24,6 +25,20 @@ export interface User {
   notificationType?: NotificationType;
   createdAt?: string;
   updatedAt?: string;
+
+  // Staff specific fields
+  legalName?: string;
+  licensePlate?: string;
+  frontVehicleImageUrl?: string;
+  backVehicleImageUrl?: string;
+  vehicleType?: string;
+  staffStatus?: string;
+  reviewedById?: string;
+  reviewNote?: string;
+  reviewedAt?: string;
+  rejectionCount?: number;
+  latitude?: number;
+  longitude?: number;
 }
 
 /** Helper: lấy status string để hiển thị */
