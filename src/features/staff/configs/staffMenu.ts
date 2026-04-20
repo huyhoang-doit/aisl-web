@@ -14,11 +14,16 @@ import {
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
 export const staffNavMain: NavItem[] = [
+  // {
+  //   title: "Trang chủ",
+  //   url: "/staff/dashboard",
+  //   icon: LayoutDashboard,
+  //   isActive: false,
+  // },
   {
-    title: "Trang chủ",
-    url: "/staff/dashboard",
-    icon: LayoutDashboard,
-    isActive: false,
+    title: "Task của tôi",
+    url: "/staff/my-tasks",
+    icon: ClipboardList,
   },
   {
     title: "Quản lý tủ Locker",
@@ -52,11 +57,6 @@ export const staffNavMain: NavItem[] = [
     title: "Quản lý Đơn hàng",
     url: "/staff/orders",
     icon: ShoppingBag,
-  },
-  {
-    title: "Task của tôi",
-    url: "/staff/my-tasks",
-    icon: ClipboardList,
   },
   {
     title: "Hồ sơ của tôi",

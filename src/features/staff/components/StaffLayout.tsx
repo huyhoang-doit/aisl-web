@@ -11,7 +11,7 @@ export function StaffLayout() {
           logo: {
             title: "Lockerly",
             subtitle: "Cổng nhân viên",
-            href: "/staff/dashboard",
+            href: "/staff/my-tasks",
           },
           navMain: staffNavMain,
           navSecondary: staffNavSecondary,
