@@ -9,6 +9,8 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
   OCCUPIED: { label: "Đã thuê", variant: "secondary" },
   MAINTENANCE: { label: "Bảo trì", variant: "destructive" },
   RESERVED: { label: "Đã đặt", variant: "outline" },
+  LOCKED_BY_BALANCE: { label: "Đã khóa bởi ví", variant: "outline" },
+  INITIALIZING: { label: "Đang khởi tạo", variant: "outline" },
 };
 
 interface LockerTablePagination {

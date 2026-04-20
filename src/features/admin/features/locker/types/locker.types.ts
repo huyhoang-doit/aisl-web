@@ -1,6 +1,6 @@
-export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED' | 'LOCKED_BY_BALANCE' | 'FAULT' | 'INITIALIZING';
+export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED' | 'LOCKED_BY_BALANCE' | 'INITIALIZING';
 
-export type HwState = 'OPENING' | 'CLOSING' | 'JAMMED' | 'OFFLINE' | 'ERROR' | string;
+export type HwState = 'OPENING' | 'CLOSING'  | 'OFFLINE' |  string;
 
 export interface LockerSizeType {
   id: string;
