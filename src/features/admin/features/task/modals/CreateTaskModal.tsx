@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 import { Textarea } from "@/shared/components/ui/textarea";
 import {
   Form,
@@ -27,6 +26,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import { TechnicalStaffSelector } from "@/features/admin/features/staff/components/TechnicalStaffSelector";
+import { LocationSelector } from "@/features/admin/features/location/components/LocationSelector";
 import { useAuthStore } from "@/features/auth/store/auth.store";
 import type { CreateTaskPayload } from "../services/task.service";
 import { TechnicalTaskPriority, TechnicalTaskType } from "../types/task.types";
@@ -36,6 +36,7 @@ type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 export interface CreateTaskFormData {
   incidentReportId: string;
   assignedToId: string;
+  locationId: string;
   taskType: string;
   priority: TaskPriority;
   techNote: string;
@@ -43,8 +44,8 @@ export interface CreateTaskFormData {
 
 interface CreateTaskModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CreateTaskPayload) => void | Promise<void>;
+  onOpenChange: (_open: boolean) => void;
+  onSubmit: (_data: CreateTaskPayload) => void | Promise<void>;
   isSubmitting?: boolean;
 }
 
@@ -60,6 +61,7 @@ export function CreateTaskModal({
     defaultValues: {
       incidentReportId: "",
       assignedToId: "",
+      locationId: "",
       taskType: TechnicalTaskType.REPAIR,
       priority: TechnicalTaskPriority.MEDIUM,
       techNote: "",
@@ -71,6 +73,7 @@ export function CreateTaskModal({
     form.reset({
       incidentReportId: "",
       assignedToId: "",
+      locationId: "",
       taskType: TechnicalTaskType.REPAIR,
       priority: TechnicalTaskPriority.MEDIUM,
       techNote: "",
@@ -82,6 +85,7 @@ export function CreateTaskModal({
     await onSubmit({
       incidentReportId: incidentReportId || undefined,
       assignedToId: formData.assignedToId,
+      locationId: formData.locationId || undefined,
       taskType: formData.taskType,
       priority: formData.priority,
       assignedByName,
@@ -128,6 +132,24 @@ export function CreateTaskModal({
                       value={field.value}
                       onValueChange={field.onChange}
                       placeholder="Chọn nhân viên kỹ thuật"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="locationId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Địa điểm</FormLabel>
+                  <FormControl>
+                    <LocationSelector
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      placeholder="Chọn địa điểm thực hiện task"
                     />
                   </FormControl>
                   <FormMessage />

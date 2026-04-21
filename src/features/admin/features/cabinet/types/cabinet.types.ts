@@ -9,4 +9,7 @@ export interface Cabinet {
   totalColumns: number;
   createdAt?: string;
   updatedAt?: string;
+  locationName?: string;
+  address?: string;
+  status?: string;
 }

@@ -161,7 +161,7 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
             </h3>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <span className="text-sm text-muted-foreground">Nhãn locker:</span>
+                <span className="text-sm text-muted-foreground">Mã tủ:</span>
                 <p className="font-medium font-mono">{displayTitle}</p>
               </div>
               <div>
@@ -171,7 +171,7 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
                 </p>
               </div>
               <div>
-                <span className="text-sm text-muted-foreground">Cabinet ID:</span>
+                <span className="text-sm text-muted-foreground">ID của Cụm tủ:</span>
                 <p className="font-medium font-mono text-sm">{locker.cabinetId}</p>
               </div>
               {locker.sizeType && (locker.sizeType.width != null || locker.sizeType.height != null || locker.sizeType.depth != null) && (

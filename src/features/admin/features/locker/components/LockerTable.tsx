@@ -1,7 +1,7 @@
 import React from "react";
 import { DataTable, type Column } from "@/shared/components/DataTable";
 import { Badge } from "@/shared/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Link2Off } from "lucide-react";
 import type { Locker, LockerStatus } from "../types/locker.types";
 
 const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -17,22 +17,23 @@ interface LockerTablePagination {
   page: number;
   pageSize: number;
   total: number;
-  onPageChange: (page: number) => void;
-  onPageSizeChange?: (size: number) => void;
+  onPageChange: (_page: number) => void;
+  onPageSizeChange?: (_size: number) => void;
   pageSizeOptions?: number[];
 }
 
 interface LockerTableProps {
   lockers: Locker[];
-  onEdit?: (locker: Locker) => void;
-  onDelete?: (locker: Locker) => void;
-  onViewDetails?: (locker: Locker) => void;
+  onEdit?: (_locker: Locker) => void;
+  onDelete?: (_locker: Locker) => void;
+  onViewDetails?: (_locker: Locker) => void;
+  onUnassign?: (_locker: Locker) => void;
   onCreate?: () => void;
   isLoading?: boolean;
   pagination?: LockerTablePagination;
   searchable?: boolean;
   searchPlaceholder?: string;
-  onSearch?: (query: string) => void;
+  onSearch?: (_query: string) => void;
 }
 
 const LockerTable: React.FC<LockerTableProps> = ({
@@ -40,6 +41,7 @@ const LockerTable: React.FC<LockerTableProps> = ({
   onEdit,
   onDelete,
   onViewDetails,
+  onUnassign,
   onCreate,
   isLoading = false,
   pagination,
@@ -115,6 +117,16 @@ const LockerTable: React.FC<LockerTableProps> = ({
             label: "Xem chi tiết",
             icon: <Eye className="h-4 w-4" />,
             onClick: onViewDetails,
+            variant: "ghost" as const,
+          },
+        ]
+      : []),
+    ...(onUnassign
+      ? [
+          {
+            label: "Gỡ khỏi cabinet",
+            icon: <Link2Off className="h-4 w-4" />,
+            onClick: onUnassign,
             variant: "ghost" as const,
           },
         ]

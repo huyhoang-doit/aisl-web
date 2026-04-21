@@ -257,13 +257,14 @@ export function CreateOrUpdateLocationModal({
                   name="plannedCabinetQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số lượng Cabinet dự kiến <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Số lượng cụm tủ dự kiến triển khai <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          min="0"
-                          placeholder="Nhập số lượng cabinet"
+                          min="1"
+                          placeholder="Nhập số lượng cụm tủ"
                           {...field}
+                          defaultValue={1}
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 0)
                           }
@@ -280,13 +281,14 @@ export function CreateOrUpdateLocationModal({
                   name="plannedLockerQuantity"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Số lượng Locker dự kiến <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Số lượng tủ con dự kiến triển khai <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
-                          min="0"
-                          placeholder="Nhập số lượng locker"
+                          min="1"
+                          placeholder="Nhập số lượng tủ con"
                           {...field}
+                          defaultValue={1}
                           onChange={(e) =>
                             field.onChange(parseInt(e.target.value) || 0)
                           }
@@ -299,7 +301,7 @@ export function CreateOrUpdateLocationModal({
                 />
               </div>
 
-              <FormField
+              {/* <FormField
                 control={form.control}
                 name="isActive"
                 render={({ field }) => (
@@ -318,7 +320,7 @@ export function CreateOrUpdateLocationModal({
                     </div>
                   </FormItem>
                 )}
-              />
+              /> */}
             </div>
 
             <DialogFooter>

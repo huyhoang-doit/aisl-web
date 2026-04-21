@@ -26,12 +26,20 @@ export interface SizeListResponse {
   };
 }
 
+export interface SizeListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  orderBy?: string;
+  orderDirection?: 'ASC' | 'DESC';
+}
+
 export const sizeService = {
   /**
-   * Lấy danh sách tất cả sizes
+   * Lấy danh sách tất cả sizes có phân trang và tìm kiếm
    */
-  getAll: async (): Promise<SizeListResponse> => {
-    return api.get<SizeListResponse>('/sizes');
+  getAll: async (params?: SizeListParams): Promise<SizeListResponse> => {
+    return api.get<SizeListResponse>('/sizes', { params });
   },
 
   /**

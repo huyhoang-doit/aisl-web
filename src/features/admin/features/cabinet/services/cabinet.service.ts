@@ -56,6 +56,20 @@ export const cabinetService = {
   },
 
   /**
+   * Gán danh sách locker vào cabinet
+   */
+  assignLockers: async (id: string, lockerIds: string[]): Promise<void> => {
+    return api.post<void>(`/cabinets/${id}/assign-lockers`, { lockerIds });
+  },
+
+  /**
+   * Bỏ gán danh sách locker khỏi cabinet
+   */
+  unassignLockers: async (id: string, lockerIds: string[]): Promise<void> => {
+    return api.post<void>(`/cabinets/${id}/unassign-lockers`, { lockerIds });
+  },
+
+  /**
    * Lấy thông tin cabinet theo ID
    */
   getById: async (id: string): Promise<CabinetResponse> => {

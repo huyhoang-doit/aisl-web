@@ -4,7 +4,7 @@
  * Response chuẩn { data: { tasks?, pagination? } } do service xử lý, hook dùng trực tiếp.
  */
 import { api } from "@/shared/lib/api/client";
-import type { TaskDetail, TaskDetailResponse, TaskListResponse } from "../types/task.types";
+import type { TaskDetail, TaskDetailResponse, TaskListResponse, WorkLogListResponse } from "../types/task.types";
 import type { Pagination } from "@/shared/types/pagination.types";
 
 export type TaskType = "REPAIR" | "INSPECTION" | "SETUP" | "MAINTENANCE" | string;
@@ -17,6 +17,7 @@ export interface CreateTaskPayload {
   priority: TaskPriority;
   assignedByName?: string;
   techNote?: string;
+  locationId?: string;
 }
 
 export interface UpdateTaskStatusPayload {
@@ -34,6 +35,7 @@ export interface TaskListParams {
   taskType?: string;
   priority?: string;
   assignedToId?: string;
+  locationId?: string;
 }
 
 /** Backend có thể trả { statusCode, message, data } */
@@ -76,6 +78,7 @@ export const taskService = {
     if (params?.taskType) searchParams.set("taskType", params.taskType);
     if (params?.priority) searchParams.set("priority", params.priority);
     if (params?.assignedToId) searchParams.set("assignedToId", params.assignedToId);
+    if (params?.locationId) searchParams.set("locationId", params.locationId);
     const query = searchParams.toString();
     const url = query ? `/maintenance/tasks?${query}` : "/maintenance/tasks";
     const res = await api.get<ApiListBody>(url);
@@ -122,5 +125,14 @@ export const taskService = {
    */
   delete: async (id: string): Promise<void> => {
     return api.delete<void>(`/maintenance/tasks/${id}`);
+  },
+
+  /**
+   * Lấy danh sách work logs theo taskId
+   * GET /maintenance/work-logs/task/{taskId}
+   */
+  getWorkLogsByTaskId: async (taskId: string): Promise<WorkLogListResponse> => {
+    const response = await api.get<WorkLogListResponse>(`/maintenance/work-logs/task/${taskId}`);
+    return response;
   },
 };
