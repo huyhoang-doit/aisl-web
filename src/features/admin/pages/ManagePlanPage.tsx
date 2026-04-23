@@ -196,21 +196,24 @@ const ManagePlanPage = () => {
         }}
       />
 
-      <CreateOrUpdatePlanModal
-        open={isModalOpen}
-        onOpenChange={(open) => {
-          setIsModalOpen(open);
-          if (!open && selectedPlan && isDetailModalOpen) {
-            const updatedPlan = plans.find((p) => p.id === selectedPlan.id);
-            if (updatedPlan) {
-              setSelectedPlan(updatedPlan);
+      {isModalOpen && (
+        <CreateOrUpdatePlanModal
+          key={`${selectedPlan?.id || 'new'}-${isModalOpen}`}
+          open={isModalOpen}
+          onOpenChange={(open) => {
+            setIsModalOpen(open);
+            if (!open && selectedPlan && isDetailModalOpen) {
+              const updatedPlan = plans.find((p) => p.id === selectedPlan.id);
+              if (updatedPlan) {
+                setSelectedPlan(updatedPlan);
+              }
             }
-          }
-        }}
-        planData={selectedPlan}
-        onSubmit={handleSubmit}
-        mode={modalMode}
-      />
+          }}
+          planData={selectedPlan}
+          onSubmit={handleSubmit}
+          mode={modalMode}
+        />
+      )}
 
       {selectedPlan && (
         <PlanDetailModal

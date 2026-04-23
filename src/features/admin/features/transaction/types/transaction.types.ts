@@ -1,15 +1,19 @@
 export type TransactionStatus = "SUCCESS" | "FAILED" | "PENDING";
-export type TransactionType = "TOPUP" | "PAYMENT" | "REFUND" | "WITHDRAW";
+export type TransactionType = "TOPUP" | "PAYMENT" | "REFUND" | "WITHDRAW" | "LOGISTICS_DEDUCTION";
 
 export interface Transaction {
   id: string;
-  userId: string;
+  userId?: string;
+  walletId?: string;
+  orderId?: string;
   amount: number;
   type: TransactionType;
-  status: TransactionStatus;
+  status?: TransactionStatus;
   createdAt: string;
   description?: string;
+  code?: string;
   transactionCode?: string;
+  balanceAfter?: number;
 }
 
 export interface TransactionQueryParams {
@@ -25,9 +29,9 @@ export interface TransactionQueryParams {
 }
 
 export interface PaginatedTransactions {
-  items: Transaction[];
+  transactions: Transaction[];
   total: number;
   page: number;
   limit: number;
-  totalPages: number;
+  totalPages?: number;
 }
