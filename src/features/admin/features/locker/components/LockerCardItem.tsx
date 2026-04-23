@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Calendar, Package } from "lucide-react";
+import { Calendar, MapPin, Package, Server } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Locker, LockerStatus } from "../types/locker.types";
 
@@ -39,6 +39,20 @@ const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
             <CardTitle className="text-lg font-semibold font-mono">
               {displayTitle}
             </CardTitle>
+            <div className="flex flex-col gap-1 mt-1">
+              {locker.cabinetName && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Server className="h-3 w-3" />
+                  <span className="truncate max-w-[150px]">{locker.cabinetName}</span>
+                </div>
+              )}
+              {locker.locationName && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  <span className="truncate max-w-[150px]">{locker.locationName}</span>
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex flex-col gap-2 items-end">
             {/* <Badge variant={statusInfo.variant}>

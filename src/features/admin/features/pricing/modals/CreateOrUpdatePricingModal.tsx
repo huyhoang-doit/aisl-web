@@ -38,6 +38,7 @@ export interface PricingFormData {
   orderType: OrderTypeValue;
   description?: string;
   gracePeriod: number;
+  cancellationFeeRate: number;
 }
 
 interface CreateOrUpdatePricingModalProps {
@@ -66,6 +67,7 @@ export function CreateOrUpdatePricingModal({
       orderType: "PERSONAL_RENTAL",
       description: "",
       gracePeriod: 10,
+      cancellationFeeRate: 0,
     },
   });
 
@@ -84,6 +86,7 @@ export function CreateOrUpdatePricingModal({
           orderType: orderVal as OrderTypeValue,
           description: pricingData.description || "",
           gracePeriod: pricingData.gracePeriod ?? 10,
+          cancellationFeeRate: pricingData.cancellationFeeRate ?? 0,
         });
       } else {
         form.reset({
@@ -94,6 +97,7 @@ export function CreateOrUpdatePricingModal({
           orderType: "PERSONAL_RENTAL",
           description: "",
           gracePeriod: 10,
+          cancellationFeeRate: 0,
         });
       }
     }
@@ -101,11 +105,12 @@ export function CreateOrUpdatePricingModal({
 
   const handleSubmit = async (formData: PricingFormData) => {
     try {
-      if (formData.blockDuration < 0 || formData.feePerBlock < 0 || formData.lateFeePerBlock < 0 || formData.gracePeriod < 0) {
+      if (formData.blockDuration < 0 || formData.feePerBlock < 0 || formData.lateFeePerBlock < 0 || formData.gracePeriod < 0 || formData.cancellationFeeRate < 0) {
         if (formData.blockDuration < 0) form.setError("blockDuration", { type: "manual", message: "Thời gian block không thể âm" });
         if (formData.feePerBlock < 0) form.setError("feePerBlock", { type: "manual", message: "Phí/block không thể âm" });
         if (formData.lateFeePerBlock < 0) form.setError("lateFeePerBlock", { type: "manual", message: "Phí trễ/block không thể âm" });
         if (formData.gracePeriod < 0) form.setError("gracePeriod", { type: "manual", message: "Grace period không thể âm" });
+        if (formData.cancellationFeeRate < 0) form.setError("cancellationFeeRate", { type: "manual", message: "Phí hủy không thể âm" });
         return;
       }
       await onSubmit(formData);
@@ -277,6 +282,30 @@ export function CreateOrUpdatePricingModal({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="cancellationFeeRate"
+                rules={{
+                  required: "Tỷ lệ phí hủy đơn là bắt buộc",
+                  min: { value: 0, message: "Không thể âm" },
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tỷ lệ phí hủy đơn (%) <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

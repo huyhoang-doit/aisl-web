@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { DataGrid } from "@/shared/components/DataGrid";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
-import { Pencil, Trash2, DoorOpen, Loader2 } from "lucide-react";
+import { Pencil, Trash2, DoorOpen, Loader2, MapPin, Server, Package } from "lucide-react";
 import type { Locker, LockerStatus } from "../types/locker.types";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,6 +22,7 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
   RESERVED: { label: "Đã đặt", variant: "outline" },
   LOCKED_BY_BALANCE: { label: "Đã khóa bởi ví", variant: "outline" },
   INITIALIZING: { label: "Đang khởi tạo", variant: "outline" },
+  FAULT: { label: "Lỗi", variant: "destructive" },
 };
 
 const HW_STATE_CONFIG: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" | "warning" }> = {
@@ -174,15 +175,37 @@ const LockerDetailModal: React.FC<LockerDetailModalProps> = ({
                 <span className="text-sm text-muted-foreground">ID của Cụm tủ:</span>
                 <p className="font-medium font-mono text-sm">{locker.cabinetId}</p>
               </div>
-              {locker.sizeType && (locker.sizeType.width != null || locker.sizeType.height != null || locker.sizeType.depth != null) && (
+              {locker.cabinetName && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Tên Cụm tủ:</span>
+                  <div className="flex items-center gap-2">
+                    <Server className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">{locker.cabinetName}</p>
+                  </div>
+                </div>
+              )}
+              {locker.locationName && (
+                <div>
+                  <span className="text-sm text-muted-foreground">Địa điểm:</span>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">{locker.locationName}</p>
+                  </div>
+                </div>
+              )}
+              {locker.sizeType && (
                 <div>
                   <span className="text-sm text-muted-foreground">Kích thước (cm):</span>
-                  <p className="font-medium">
-                    {[locker.sizeType.width, locker.sizeType.height, locker.sizeType.depth]
-                      .filter((n) => n != null)
-                      .join(" × ")}{" "}
-                    cm
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-muted-foreground" />
+                    <p className="font-medium">
+                      {locker.sizeType.name} (
+                      {[locker.sizeType.width, locker.sizeType.height, locker.sizeType.depth]
+                        .filter((n) => n != null)
+                        .join(" × ")}{" "}
+                      cm)
+                    </p>
+                  </div>
                 </div>
               )}
               {locker.totalUsageTime != null && (

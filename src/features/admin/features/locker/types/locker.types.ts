@@ -1,4 +1,4 @@
-export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED' | 'LOCKED_BY_BALANCE' | 'INITIALIZING';
+export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED' | 'LOCKED_BY_BALANCE' | 'INITIALIZING' | 'FAULT';
 
 export type HwState = 'OPENING' | 'CLOSING'  | 'OFFLINE' |  string;
 
@@ -24,6 +24,8 @@ export interface Locker {
   hwState?: HwState;
   isActive: boolean;
   totalUsageTime?: number;
+  cabinetName?: string;
+  locationName?: string;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -12,8 +12,12 @@ export interface CreatePlanPayload {
   name: string;
   maxLockers: number;
   price: number;
+  fixedLocker: number;
+  discountLockerRental: number;
+  discountFixedLockerRental: number;
   description?: string;
   status: PlanStatus;
+  isFreeDefault: boolean;
   pricingIds: string[];
 }
 

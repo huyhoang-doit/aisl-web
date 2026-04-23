@@ -7,11 +7,14 @@ export interface Plan {
   name: string;
   maxLockers: number;
   price: number;
+  fixedLocker: number;
+  discountLockerRental: number;
+  discountFixedLockerRental: number;
   description?: string;
   status: PlanStatus;
+  isFreeDefault: boolean;
   createdAt?: string;
   updatedAt?: string;
-  isFreeDefault?: boolean;
   pricings?: Pricing[];
   pricingIds?: string[];
 }

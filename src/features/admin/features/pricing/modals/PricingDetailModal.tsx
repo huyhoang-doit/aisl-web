@@ -112,6 +112,15 @@ const PricingDetailModal: React.FC<PricingDetailModalProps> = ({
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
                 <DollarSign className="h-4 w-4" />
+                <span>Phí hủy đơn (%)</span>
+              </div>
+              <p className="text-xl font-bold text-orange-600">
+                {pricing.cancellationFeeRate ?? 0}%
+              </p>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                <DollarSign className="h-4 w-4" />
                 <span>Phí trễ mỗi block</span>
               </div>
               <p className="text-xl font-bold text-primary">

@@ -112,7 +112,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
       setTotal(response.data.pagination?.total ?? 0);
     } catch (error) {
       console.error("Error loading cabinets:", error);
-      toast.error("Không tải được danh sách cabinet");
+      toast.error("Không tải được danh sách cụm tủ");
       setCabinets([]);
       setTotal(0);
     } finally {
@@ -162,13 +162,13 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
     if (!selectedCabinet?.id) return;
     try {
       await cabinetService.delete(selectedCabinet.id);
-      toast.success("Đã xóa cabinet");
+      toast.success("Đã xóa cụm tủ thành công");
       setIsDeleteDialogOpen(false);
       setSelectedCabinet(null);
       loadCabinets();
     } catch (error) {
       console.error("Error deleting cabinet:", error);
-      toast.error("Không xóa được cabinet");
+      toast.error("Không xóa được cụm tủ");
     }
   };
 
@@ -179,20 +179,20 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
           ...data,
           locationId: location.id,
         });
-        toast.success("Đã thêm cabinet");
+        toast.success("Đã thêm cụm tủ thành công");
       } else if (selectedCabinet?.id) {
         await cabinetService.update(selectedCabinet.id, {
           ...data,
           locationId: data.locationId || location.id,
         });
-        toast.success("Đã cập nhật cabinet");
+        toast.success("Đã cập nhật cụm tủ thành công");
       }
       setIsCabinetModalOpen(false);
       setSelectedCabinet(null);
       loadCabinets();
     } catch (error) {
       console.error("Error saving cabinet:", error);
-      toast.error(cabinetModalMode === "create" ? "Không tạo được cabinet" : "Không cập nhật được cabinet");
+      toast.error(cabinetModalMode === "create" ? "Không tạo được cụm tủ" : "Không cập nhật được cụm tủ");
       throw error;
     }
   };
@@ -357,7 +357,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
                       <LayoutGrid className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Cabinet dự kiến</p>
+                      <p className="text-sm font-medium text-muted-foreground">Cụm tủ dự kiến</p>
                       <h4 className="text-2xl font-bold">{location.plannedCabinetQuantity}</h4>
                     </div>
                   </div>
@@ -517,7 +517,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Danh sách Cabinet</h3>
+              <h3 className="text-lg font-semibold">Danh sách cụm tủ</h3>
               <div className="flex items-center gap-2">
                 <Button 
                   variant="outline" 
@@ -530,7 +530,7 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
                 </Button>
                 <Button size="sm" onClick={handleCreateCabinet} className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Thêm cabinet mới
+                  Thêm cụm tủ mới
                 </Button>
               </div>
             </div>
@@ -580,9 +580,9 @@ const LocationDetailModal: React.FC<LocationDetailModalProps> = ({
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa cabinet</AlertDialogTitle>
+            <AlertDialogTitle>Xác nhận xóa cụm tủ</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa cabinet{" "}
+              Bạn có chắc chắn muốn xóa cụm tủ{" "}
               <strong>{selectedCabinet?.name}</strong>? Hành động này không thể hoàn tác.
             </AlertDialogDescription>
           </AlertDialogHeader>

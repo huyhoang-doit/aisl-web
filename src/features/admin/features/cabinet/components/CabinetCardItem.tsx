@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Calendar, Cpu, Network, ServerCog } from "lucide-react";
+import { Calendar, Cpu, MapPin, Network, ServerCog } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Cabinet } from "../types/cabinet.types";
 import { Button } from "@/shared/components/ui/button";
@@ -34,9 +34,17 @@ const CabinetCardItem: React.FC<CabinetCardItemProps> = ({ cabinet, onClick }) =
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-lg font-semibold">{cabinet.name}</CardTitle>
-            <CardDescription className="mt-1 font-mono text-xs">
-              {cabinet.macAddress}
-            </CardDescription>
+            <div className="flex flex-col gap-1 mt-1">
+              <CardDescription className="font-mono text-xs">
+                {cabinet.macAddress}
+              </CardDescription>
+              {cabinet.locationName && (
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  <span className="truncate max-w-[150px]">{cabinet.locationName}</span>
+                </div>
+              )}
+            </div>
           </div>
           <Button 
             variant="outline" 
