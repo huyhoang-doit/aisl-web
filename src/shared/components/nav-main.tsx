@@ -12,7 +12,6 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
@@ -44,24 +43,18 @@ export function NavMain({
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild 
-                tooltip={item.title}
-                isActive={item.isActive}
-                className={item.isActive ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/10 border-l-2 border-sidebar-primary" : ""}
-              >
-                <Link to={item.url} className="w-full">
-                  <item.icon className={item.isActive ? "text-sidebar-primary" : ""} />
-                  <span>{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
               {item.items?.length ? (
                 <>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
-                      <span className="sr-only">Toggle</span>
-                    </SidebarMenuAction>
+                    <SidebarMenuButton 
+                      tooltip={item.title}
+                      isActive={item.isActive}
+                      className={item.isActive ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/10 border-l-2 border-sidebar-primary cursor-pointer hover:bg-sidebar-accent/50 group/collapsible" : "cursor-pointer hover:bg-sidebar-accent/50 group/collapsible"}
+                    >
+                      <item.icon className={item.isActive ? "text-sidebar-primary" : ""} />
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
@@ -78,7 +71,19 @@ export function NavMain({
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </>
-              ) : null}
+              ) : (
+                <SidebarMenuButton 
+                  asChild 
+                  tooltip={item.title}
+                  isActive={item.isActive}
+                  className={item.isActive ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm shadow-sidebar-primary/10 border-l-2 border-sidebar-primary" : ""}
+                >
+                  <Link to={item.url} className="w-full">
+                    <item.icon className={item.isActive ? "text-sidebar-primary" : ""} />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              )}
             </SidebarMenuItem>
           </Collapsible>
         ))}
