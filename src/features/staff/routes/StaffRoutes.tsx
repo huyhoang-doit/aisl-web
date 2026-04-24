@@ -1,0 +1,46 @@
+import StaffDashboardPage from "@/features/staff/pages/StaffDashboardPage"
+import ManageLockerAreaPage from "@/features/staff/pages/ManageLockerAreaPage"
+import ManageCustomerReport from "@/features/admin/pages/ManageCustomerReport"
+import ManageTask from "@/features/admin/pages/ManageTask"
+import ManageCabinetPage from "@/features/admin/pages/ManageCabinetPage";
+import ManageLocationPage from "@/features/admin/pages/ManageLocationPage";
+import ManageOrderPage from "@/features/admin/pages/ManageOrderPage";
+import MyTaskPages from "@/features/staff/pages/MyTaskPages"
+import { StaffLayout } from "@/features/staff/components/StaffLayout"
+import ProfilePage from "@/shared/pages/ProfilePage"
+import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/CabinetSetupPage";
+import SettingPage from "@/shared/pages/SettingPage"
+import { Route, Routes } from "react-router-dom"
+import NotFoundPage from "@/shared/pages/NotFoundPage"
+import NotificationsPage from "@/shared/pages/NotificationsPage";
+import NotificationDetailPage from "@/shared/pages/NotificationDetailPage";
+import ManageLockerPage from "@/features/admin/pages/ManageLockerPage";
+
+const StaffRoutes = () => {
+  return (
+    <Routes>
+      <Route element={<StaffLayout />}>
+        <Route path="dashboard" element={<StaffDashboardPage />} />
+        <Route path="list-lockers" element={<ManageLockerAreaPage />} />
+        <Route path="locations" element={<ManageLocationPage />} />
+        <Route path="cabinets" element={<ManageCabinetPage />} />
+        <Route path="lockers" element={<ManageLockerPage />} />
+        <Route path="orders" element={<ManageOrderPage />} />
+        <Route path="setup-cabinet" element={<CabinetSetupPage />} />
+        <Route path="manage-reports" element={<ManageCustomerReport />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="notifications/:id" element={<NotificationDetailPage />} />
+        <Route path="manage-tasks" element={<ManageTask />} />
+        <Route path="my-tasks" element={<MyTaskPages />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="settings" element={<SettingPage />} />
+        <Route index element={<StaffDashboardPage />} />
+
+      </Route>
+        <Route path="not-found" element={<NotFoundPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  )
+}
+
+export default StaffRoutes
