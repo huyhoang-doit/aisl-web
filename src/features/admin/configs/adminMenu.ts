@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Users,
   Package,
   DollarSign,
@@ -21,12 +20,12 @@ import {
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
 export const adminNavMain: NavItem[] = [
-  {
-    title: "Trang chủ",
-    url: "/admin/dashboard",
-    icon: LayoutDashboard,
-    isActive: false,
-  },
+  // {
+  //   title: "Trang chủ",
+  //   url: "/admin/dashboard",
+  //   icon: LayoutDashboard,
+  //   isActive: false,
+  // },
   // {
   //   title: "Báo cáo doanh thu",
   //   url: "/admin/revenue",

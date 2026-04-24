@@ -28,7 +28,6 @@ export interface DataGridProps<T> {
   className?: string;
   cardClassName?: string | ((row: T) => string);
   isLoading?: boolean;
-  loadingMessage?: string;
   gridCols?: {
     default?: number;
     md?: number;
@@ -69,7 +68,6 @@ export function DataGrid<T extends Record<string, any>>({
   className,
   cardClassName,
   isLoading = false,
-  loadingMessage = "Đang tải...",
   gridCols = { default: 1, md: 2, lg: 3 },
   filterable = false,
   onFilter,

@@ -147,7 +147,7 @@ const ManageUserPage = () => {
   const handleEdit = async (user: User) => {
     try {
       const res = await userService.getDetail(user.id);
-      setSelectedUser(res.data.user);  
+      setSelectedUser((res.data as any).user);  
       setModalMode("update");
       setIsDetailModalOpen(false);
       setIsModalOpen(true);
@@ -169,7 +169,7 @@ const ManageUserPage = () => {
   const handleViewDetails = async (user: User) => {
     try {
       const res = await userService.getDetail(user.id);
-      setSelectedUser(res.data.user);
+      setSelectedUser((res.data as any).user);
       setIsDetailModalOpen(true);
     } catch {
       toast.error("Không tải được chi tiết người dùng");

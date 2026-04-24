@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Bell,
   User,
   ClipboardList,
@@ -17,7 +16,6 @@ export const staffNavMain: NavItem[] = [
   // {
   //   title: "Trang chủ",
   //   url: "/staff/dashboard",
-  //   icon: LayoutDashboard,
   //   isActive: false,
   // },
   {

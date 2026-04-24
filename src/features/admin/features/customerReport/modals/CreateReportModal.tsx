@@ -31,7 +31,7 @@ import { CabinetSelector } from "@/features/admin/features/cabinet/components/Ca
 import { lockerService } from "@/features/admin/features/locker/services/locker.service";
 import type { Locker } from "@/features/admin/features/locker/types/locker.types";
 import { useState, useCallback } from "react";
-import { Loader2,  ImagePlus, X  } from "lucide-react";
+import { ImagePlus, X  } from "lucide-react";
 import type { CreateReportPayload } from "../services/maintenanceReport.service";
 
 export interface CreateReportFormData {

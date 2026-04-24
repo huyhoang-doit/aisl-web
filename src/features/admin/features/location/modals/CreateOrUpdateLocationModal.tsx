@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/components/ui/form";
-import { Checkbox } from "@/shared/components/ui/checkbox";
 import type { Location } from "../types/location.types";
 import SelectLocationMap from "../components/SelectLocationMap";
 

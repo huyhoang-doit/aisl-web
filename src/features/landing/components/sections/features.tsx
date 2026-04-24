@@ -88,14 +88,14 @@ export const FeaturesSection = () => {
       </motion.div>
 
       <motion.div 
-        variants={containerVariants}
+        variants={containerVariants as any}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
         className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
       >
         {featureList.map(({ icon, title, description }) => (
-          <motion.div key={title} variants={itemVariants} className="h-full">
+          <motion.div key={title} variants={itemVariants as any} className="h-full">
             <Card className="h-full bg-card/40 backdrop-blur-sm border-border/50 hover:border-primary/50 transition-all duration-300 group hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-primary/10 overflow-hidden relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-[30px] group-hover:bg-primary/20 transition-colors duration-500" />

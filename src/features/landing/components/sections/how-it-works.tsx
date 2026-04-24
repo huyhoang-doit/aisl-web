@@ -99,14 +99,14 @@ export const HowItWorksSection = () => {
 
       {/* Three Panel Layout */}
       <motion.div 
-        variants={containerVariants}
+        variants={containerVariants as any}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: "-100px" }}
         className="grid md:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto"
       >
         {workflowPanels.map(({ title, icon, steps }, index) => (
-          <motion.div key={index} variants={cardVariants} className="h-full">
+          <motion.div key={index} variants={cardVariants as any} className="h-full">
             <Card
               className="bg-card/60 backdrop-blur-md border-border/60 hover:border-primary/60 transition-all duration-500 overflow-hidden group h-full flex flex-col shadow-lg hover:shadow-xl hover:shadow-primary/5 relative"
             >

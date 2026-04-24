@@ -1,4 +1,3 @@
-import React from "react";
 import { DataTable, type Column } from "@/shared/components/DataTable";
 import { Badge } from "@/shared/components/ui/badge";
 import { Eye, Link2Off } from "lucide-react";
@@ -11,32 +10,33 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
   RESERVED: { label: "Đã đặt", variant: "outline" },
   LOCKED_BY_BALANCE: { label: "Đã khóa bởi ví", variant: "outline" },
   INITIALIZING: { label: "Đang khởi tạo", variant: "outline" },
+  FAULT: { label: "Lỗi", variant: "destructive" },
 };
 
 interface LockerTablePagination {
   page: number;
   pageSize: number;
   total: number;
-  onPageChange: (_page: number) => void;
-  onPageSizeChange?: (_size: number) => void;
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
   pageSizeOptions?: number[];
 }
 
 interface LockerTableProps {
   lockers: Locker[];
-  onEdit?: (_locker: Locker) => void;
-  onDelete?: (_locker: Locker) => void;
-  onViewDetails?: (_locker: Locker) => void;
-  onUnassign?: (_locker: Locker) => void;
+  onEdit?: (locker: Locker) => void;
+  onDelete?: (locker: Locker) => void;
+  onViewDetails?: (locker: Locker) => void;
+  onUnassign?: (locker: Locker) => void;
   onCreate?: () => void;
   isLoading?: boolean;
   pagination?: LockerTablePagination;
   searchable?: boolean;
   searchPlaceholder?: string;
-  onSearch?: (_query: string) => void;
+  onSearch?: (query: string) => void;
 }
 
-const LockerTable: React.FC<LockerTableProps> = ({
+const LockerTable = ({
   lockers,
   onEdit,
   onDelete,
@@ -48,8 +48,7 @@ const LockerTable: React.FC<LockerTableProps> = ({
   searchable = false,
   searchPlaceholder = "Tìm theo mã, vị trí locker...",
   onSearch,
-}) => {
-  // Hiển thị theo response BE: row, column, lockerLabel, sizeType, status, hwState?, isActive, totalUsageTime?
+}: LockerTableProps) => {
   const columns: Column<Locker>[] = [
     {
       key: "row",
@@ -87,7 +86,7 @@ const LockerTable: React.FC<LockerTableProps> = ({
       sortable: true,
       accessor: (row) => {
         const config = STATUS_CONFIG[row.status];
-        return <Badge variant={config.variant}>{config.label}</Badge>;
+        return <Badge variant={config.variant as any}>{config.label}</Badge>;
       },
     },
     {
@@ -144,7 +143,6 @@ const LockerTable: React.FC<LockerTableProps> = ({
       customActions={customActions}
       emptyMessage="Chưa có locker nào"
       isLoading={isLoading}
-      loadingMessage="Đang tải danh sách locker..."
       pagination={pagination}
       searchable={searchable}
       searchPlaceholder={searchPlaceholder}

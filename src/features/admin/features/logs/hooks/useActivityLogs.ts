@@ -46,7 +46,7 @@ export const useActivityLogs = (initialPageSize = 10) => {
       const response = await logsService.getActivityLogs(params);
       const data = response.data;
       setLogs(data.items || []);
-      setTotal(data.pagination?.total || data.pagination?.totalElements || 0);
+      setTotal(data.pagination?.total || 0);
     } catch (error) {
       console.error("Error fetching activity logs:", error);
       toast.error("Không thể tải nhật ký hoạt động");
