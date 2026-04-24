@@ -137,6 +137,7 @@ const ManageLocationPage = () => {
   // Xử lý xem chi tiết
   const handleViewDetails = (location: Location) => {
     setSelectedLocation(location);
+    setModalMode("update");
     setIsDetailModalOpen(true);
   };
 

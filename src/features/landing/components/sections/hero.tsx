@@ -101,9 +101,9 @@ export const HeroSection = () => {
 
         {/* Right side: Hero Image */}
         <motion.div 
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          initial={{ opacity: 0, x: 30 } as any}
+          animate={{ opacity: 1, x: 0 } as any}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" } as any}
           className="flex justify-center lg:justify-end items-center order-1 lg:order-2"
         >
           <HeroRight />

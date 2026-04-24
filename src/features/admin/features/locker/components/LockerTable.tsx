@@ -1,7 +1,6 @@
-import React from "react";
 import { DataTable, type Column } from "@/shared/components/DataTable";
 import { Badge } from "@/shared/components/ui/badge";
-import { Eye } from "lucide-react";
+import { Eye, Link2Off } from "lucide-react";
 import type { Locker, LockerStatus } from "../types/locker.types";
 
 const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -9,6 +8,9 @@ const STATUS_CONFIG: Record<LockerStatus, { label: string; variant: "default" | 
   OCCUPIED: { label: "Đã thuê", variant: "secondary" },
   MAINTENANCE: { label: "Bảo trì", variant: "destructive" },
   RESERVED: { label: "Đã đặt", variant: "outline" },
+  LOCKED_BY_BALANCE: { label: "Đã khóa bởi ví", variant: "outline" },
+  INITIALIZING: { label: "Đang khởi tạo", variant: "outline" },
+  FAULT: { label: "Lỗi", variant: "destructive" },
 };
 
 interface LockerTablePagination {
@@ -25,6 +27,7 @@ interface LockerTableProps {
   onEdit?: (locker: Locker) => void;
   onDelete?: (locker: Locker) => void;
   onViewDetails?: (locker: Locker) => void;
+  onUnassign?: (locker: Locker) => void;
   onCreate?: () => void;
   isLoading?: boolean;
   pagination?: LockerTablePagination;
@@ -33,19 +36,19 @@ interface LockerTableProps {
   onSearch?: (query: string) => void;
 }
 
-const LockerTable: React.FC<LockerTableProps> = ({
+const LockerTable = ({
   lockers,
   onEdit,
   onDelete,
   onViewDetails,
+  onUnassign,
   onCreate,
   isLoading = false,
   pagination,
   searchable = false,
   searchPlaceholder = "Tìm theo mã, vị trí locker...",
   onSearch,
-}) => {
-  // Hiển thị theo response BE: row, column, lockerLabel, sizeType, status, hwState?, isActive, totalUsageTime?
+}: LockerTableProps) => {
   const columns: Column<Locker>[] = [
     {
       key: "row",
@@ -83,7 +86,7 @@ const LockerTable: React.FC<LockerTableProps> = ({
       sortable: true,
       accessor: (row) => {
         const config = STATUS_CONFIG[row.status];
-        return <Badge variant={config.variant}>{config.label}</Badge>;
+        return <Badge variant={config.variant as any}>{config.label}</Badge>;
       },
     },
     {
@@ -117,6 +120,16 @@ const LockerTable: React.FC<LockerTableProps> = ({
           },
         ]
       : []),
+    ...(onUnassign
+      ? [
+          {
+            label: "Gỡ khỏi cabinet",
+            icon: <Link2Off className="h-4 w-4" />,
+            onClick: onUnassign,
+            variant: "ghost" as const,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -130,7 +143,6 @@ const LockerTable: React.FC<LockerTableProps> = ({
       customActions={customActions}
       emptyMessage="Chưa có locker nào"
       isLoading={isLoading}
-      loadingMessage="Đang tải danh sách locker..."
       pagination={pagination}
       searchable={searchable}
       searchPlaceholder={searchPlaceholder}

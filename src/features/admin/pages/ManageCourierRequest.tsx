@@ -48,7 +48,7 @@ const ManageCourierRequest = () => {
     queryFn: () => userService.getAll({
       page,
       limit: pageSize,
-      role: COURIER_ROLE, // Only fetching users acting as couriers
+      roles: [COURIER_ROLE], // Only fetching users acting as couriers
       search: searchQuery || undefined,
       status: statusFilter,
       orderBy: sortConfig?.key,
@@ -58,8 +58,8 @@ const ManageCourierRequest = () => {
 
   // Map backend users to format expected by UI until CourierRequest components are refactored
   const requests: CourierApplication[] = useMemo(() => {
-    if (!usersResponse?.data?.users) return [];
-    return usersResponse.data.users.map((user: any) => ({
+    const users = (usersResponse?.data as any)?.users || [];
+    return users.map((user: any) => ({
       id: user.id || user.keycloakUserId,
       userId: user.id,
       legalName: user.fullName || "Unknown",

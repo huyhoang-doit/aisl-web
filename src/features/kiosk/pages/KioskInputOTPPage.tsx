@@ -4,6 +4,8 @@ import { Command, ArrowLeft, Delete } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { KioskScreenLayout } from "../components/KioskScreenLayout";
 import { cn } from "@/shared/lib/utils";
+import { axiosInstance } from "@/shared/lib/api/axios-instance";
+import { toast } from "sonner";
 
 const OTP_LENGTH = 6;
 const KEYPAD_ROWS = [
@@ -29,6 +31,21 @@ const KioskInputOTPPage = () => {
     setOtp((prev) => prev.slice(0, -1));
   }, []);
 
+  const handleVerify = useCallback(async () => {
+    if (otp.length !== OTP_LENGTH) return;
+    try {
+      await axiosInstance.post("/access-codes/validate", { otp });
+      toast.success("Mã xác thực chính xác! Đang mở tủ...");
+      // Giả lập mở tủ thành công
+      setTimeout(() => {
+        navigate("/kiosk/home");
+      }, 2000);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Mã truy cập không chính xác hoặc đã hết hạn");
+      setOtp(""); // Reset OTP on failure
+    }
+  }, [otp, navigate]);
+
   const handleKeypadPress = useCallback(
     (key: string) => {
       if (key === "backspace") {
@@ -36,17 +53,14 @@ const KioskInputOTPPage = () => {
         return;
       }
       if (key === "confirm") {
-        if (otp.length === OTP_LENGTH) {
-          // TODO: gửi OTP lên server / xác thực
-          navigate(-1);
-        }
+        handleVerify();
         return;
       }
       if (/^\d$/.test(key)) {
         appendDigit(key);
       }
     },
-    [otp.length, appendDigit, removeDigit, navigate]
+    [appendDigit, removeDigit, handleVerify]
   );
 
   const canConfirm = otp.length === OTP_LENGTH;

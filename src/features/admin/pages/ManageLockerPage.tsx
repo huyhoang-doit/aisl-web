@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import LockerCardItem from "../features/locker/components/LockerCardItem";
 import CreateOrUpdateLockerModal, {
   type LockerFormData,
@@ -17,9 +18,8 @@ import {
   AlertDialogTitle,
 } from "@/shared/components/ui/alert-dialog";
 import { Button } from "@/shared/components/ui/button";
-import { RefreshCw, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import type { Locker } from "../features/locker/types/locker.types";
-import ManageSizeModal from "../features/locker/modals/ManageSizeModal";
 import ClearLockerSetupModal from "../features/locker/modals/ClearLockerSetupModal";
 import { lockerService } from "../features/locker/services/locker.service";
 import { useLocker } from "../features/locker/hooks/useLocker";
@@ -52,7 +52,7 @@ const ManageLockerPage = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedLocker, setSelectedLocker] = useState<Locker | null>(null);
   const [modalMode, setModalMode] = useState<"create" | "update">("create");
-  const [isManageSizeModalOpen, setIsManageSizeModalOpen] = useState(false);
+  const navigate = useNavigate();
   const [isClearSetupModalOpen, setIsClearSetupModalOpen] = useState(false);
 
   const quickFilters: QuickFilter[] = [
@@ -171,16 +171,16 @@ const ManageLockerPage = () => {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          {/* <Button
             variant="destructive"
             onClick={() => setIsClearSetupModalOpen(true)}
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Clear setup locker
-          </Button>
+          </Button> */}
           <Button
             variant="outline"
-            onClick={() => setIsManageSizeModalOpen(true)}
+            onClick={() => navigate("/admin/sizes")}
           >
             <Settings className="h-4 w-4 mr-2" />
             Quản lý kích thước
@@ -294,10 +294,6 @@ const ManageLockerPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <ManageSizeModal
-        open={isManageSizeModalOpen}
-        onOpenChange={setIsManageSizeModalOpen}
-      />
 
       <ClearLockerSetupModal
         open={isClearSetupModalOpen}

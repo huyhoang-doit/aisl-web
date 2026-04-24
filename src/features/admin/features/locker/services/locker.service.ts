@@ -3,10 +3,8 @@
  * Service layer cho locker API calls
  */
 import { api } from '@/shared/lib/api/client';
-import type { Locker } from '../types/locker.types';
+import type { Locker, LockerStatus } from '../types/locker.types';
 import type { Pagination } from '@/shared/types/pagination.types';
-
-export type LockerStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'RESERVED';
 
 export interface CreateLockerPayload {
   cabinetId: string;

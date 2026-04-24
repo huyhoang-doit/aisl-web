@@ -1,3 +1,5 @@
+import type { TaskDetail } from "../../task/types/task.types";
+
 export interface Location {
   id: string;
   name: string;
@@ -10,4 +12,5 @@ export interface Location {
   plannedLockerQuantity: number;
   createdAt?: string;
   updatedAt?: string;
+  tasks?: TaskDetail[];
 }

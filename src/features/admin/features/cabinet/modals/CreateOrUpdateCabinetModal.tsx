@@ -110,12 +110,12 @@ export function CreateOrUpdateCabinetModal({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isUpdateMode ? "Cập nhật cabinet" : "Thêm cabinet mới"}
+            {isUpdateMode ? "Cập nhật cụm tủ" : "Thêm cụm tủ mới"}
           </DialogTitle>
           <DialogDescription>
             {isUpdateMode
-              ? "Cập nhật thông tin cabinet (cụm chứa nhiều locker). Những thay đổi sẽ được lưu vào hệ thống."
-              : "Thêm cabinet mới vào địa điểm. Cabinet là cụm chứa nhiều locker."}
+              ? "Cập nhật thông tin cụm tủ. Những thay đổi sẽ được lưu vào hệ thống."
+              : "Thêm cụm tủ mới vào địa điểm. Cụm tủ là cụm chứa nhiều tủ."}
           </DialogDescription>
         </DialogHeader>
 
@@ -126,24 +126,24 @@ export function CreateOrUpdateCabinetModal({
           >
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                Thông tin cabinet
+                Thông tin cụm tủ
               </h3>
 
               {!isFromLocationDetail ? (
                 <FormField
                   control={form.control}
                   name="locationId"
-                  rules={{
-                    required: "Vui lòng chọn địa điểm",
-                  }}
+                  // rules={{
+                  //   required: "Vui lòng chọn địa điểm",
+                  // }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Địa điểm <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Địa điểm</FormLabel>
                       <FormControl>
                         <LocationSelector
                           value={field.value}
                           onValueChange={field.onChange}
-                          placeholder="Chọn địa điểm đặt cabinet"
+                          placeholder="Chọn địa điểm đặt cụm tủ"
                           filterActiveOnly={true}
                           allowClear={false}
                           className="min-w-[200px]"
@@ -172,18 +172,18 @@ export function CreateOrUpdateCabinetModal({
                   control={form.control}
                   name="name"
                   rules={{
-                    required: "Tên cabinet là bắt buộc",
+                    required: "Tên cụm tủ là bắt buộc",
                     minLength: {
                       value: 2,
-                      message: "Tên cabinet phải có ít nhất 2 ký tự",
+                      message: "Tên cụm tủ phải có ít nhất 2 ký tự",
                     },
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Tên cabinet <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Tên cụm tủ <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Nhập tên cabinet"
+                          placeholder="Nhập tên cụm tủ"
                           {...field}
                         />
                       </FormControl>
@@ -200,7 +200,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>MAC Address</FormLabel>
+                      <FormLabel>Địa chỉ MAC</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="VD: AA:BB:CC:DD:EE:FF"
@@ -220,7 +220,7 @@ export function CreateOrUpdateCabinetModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>IP Address</FormLabel>
+                      <FormLabel>Địa chỉ IP</FormLabel>
                       <FormControl>
                         <Input
                           placeholder="VD: 192.168.1.100"

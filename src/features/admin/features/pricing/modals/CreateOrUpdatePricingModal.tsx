@@ -28,16 +28,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
+import { FeeBlockUnit } from "@/shared/constants/enums";
 import type { Pricing, OrderTypeValue } from "../types/pricing.types";
 
 export interface PricingFormData {
   name: string;
   blockDuration: number;
+  blockUnit: string;
   feePerBlock: number;
   lateFeePerBlock: number;
   orderType: OrderTypeValue;
   description?: string;
   gracePeriod: number;
+  cancellationFeeRate: number;
 }
 
 interface CreateOrUpdatePricingModalProps {
@@ -61,13 +64,18 @@ export function CreateOrUpdatePricingModal({
     defaultValues: {
       name: "",
       blockDuration: 60,
+      blockUnit: "HOUR",
       feePerBlock: 10000,
       lateFeePerBlock: 5000,
       orderType: "PERSONAL_RENTAL",
       description: "",
       gracePeriod: 10,
+      cancellationFeeRate: 0,
     },
   });
+
+  const orderType = form.watch("orderType");
+  const isLogistics = orderType === "LOGISTICS";
 
   useEffect(() => {
     if (open) {
@@ -79,33 +87,46 @@ export function CreateOrUpdatePricingModal({
         form.reset({
           name: pricingData.name,
           blockDuration: pricingData.blockDuration ?? 60,
+          blockUnit: pricingData.blockUnit || "HOUR",
           feePerBlock: pricingData.feePerBlock ?? 10000,
           lateFeePerBlock: pricingData.lateFeePerBlock ?? 5000,
           orderType: orderVal as OrderTypeValue,
           description: pricingData.description || "",
           gracePeriod: pricingData.gracePeriod ?? 10,
+          cancellationFeeRate: pricingData.cancellationFeeRate ?? 0,
         });
       } else {
         form.reset({
           name: "",
           blockDuration: 60,
+          blockUnit: "HOUR",
           feePerBlock: 10000,
           lateFeePerBlock: 5000,
           orderType: "PERSONAL_RENTAL",
           description: "",
           gracePeriod: 10,
+          cancellationFeeRate: 0,
         });
       }
     }
   }, [open, pricingData, isUpdateMode, form]);
 
+  useEffect(() => {
+    if (isLogistics) {
+      form.setValue("blockDuration", 0);
+      form.setValue("lateFeePerBlock", 0);
+      form.setValue("gracePeriod", 0);
+    }
+  }, [isLogistics, form]);
+
   const handleSubmit = async (formData: PricingFormData) => {
     try {
-      if (formData.blockDuration < 0 || formData.feePerBlock < 0 || formData.lateFeePerBlock < 0 || formData.gracePeriod < 0) {
+      if (formData.blockDuration < 0 || formData.feePerBlock < 0 || formData.lateFeePerBlock < 0 || formData.gracePeriod < 0 || formData.cancellationFeeRate < 0) {
         if (formData.blockDuration < 0) form.setError("blockDuration", { type: "manual", message: "Thời gian block không thể âm" });
         if (formData.feePerBlock < 0) form.setError("feePerBlock", { type: "manual", message: "Phí/block không thể âm" });
         if (formData.lateFeePerBlock < 0) form.setError("lateFeePerBlock", { type: "manual", message: "Phí trễ/block không thể âm" });
         if (formData.gracePeriod < 0) form.setError("gracePeriod", { type: "manual", message: "Grace period không thể âm" });
+        if (formData.cancellationFeeRate < 0) form.setError("cancellationFeeRate", { type: "manual", message: "Phí hủy không thể âm" });
         return;
       }
       await onSubmit(formData);
@@ -188,16 +209,47 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thời gian block (phút) <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Thời gian block <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min="0"
                           placeholder="60"
+                          disabled={isLogistics}
                           {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="blockUnit"
+                  rules={{ required: "Đơn vị block là bắt buộc" }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Đơn vị block <span className="text-red-500">*</span></FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger disabled={isLogistics}>
+                            <SelectValue placeholder="Chọn đơn vị" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.values(FeeBlockUnit).map((unit) => (
+                            <SelectItem key={unit} value={unit}>
+                              {unit}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -212,12 +264,13 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Grace period (phút) <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Thời gian ân hạn <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min="0"
                           placeholder="10"
+                          disabled={isLogistics}
                           {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
@@ -268,6 +321,7 @@ export function CreateOrUpdatePricingModal({
                           type="number"
                           min="0"
                           placeholder="5000"
+                          disabled={isLogistics}
                           {...field}
                           onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                         />
@@ -277,6 +331,30 @@ export function CreateOrUpdatePricingModal({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="cancellationFeeRate"
+                rules={{
+                  required: "Tỷ lệ phí hủy đơn là bắt buộc",
+                  min: { value: 0, message: "Không thể âm" },
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tỷ lệ phí hủy đơn (%) <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

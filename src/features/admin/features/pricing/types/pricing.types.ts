@@ -13,6 +13,7 @@ export interface Pricing {
   orderType: OrderType;
   description?: string;
   gracePeriod: number;
+  cancellationFeeRate?: number;
   createdAt?: string;
   updatedAt?: string;
 }

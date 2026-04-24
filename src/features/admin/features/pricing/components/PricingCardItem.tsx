@@ -63,14 +63,14 @@ const PricingCardItem: React.FC<PricingCardItemProps> = ({ pricing, onClick }) =
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span>Block (phút)</span>
+                <span>Block</span>
               </div>
               <p className="text-lg font-semibold">{pricing.blockDuration}</p>
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Clock className="h-4 w-4" />
-                <span>Grace (phút)</span>
+                <span>Thời gian ân hạn</span>
               </div>
               <p className="text-lg font-semibold">{pricing.gracePeriod}</p>
             </div>

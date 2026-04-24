@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { CheckCircle2, Loader2, XCircle, AlertTriangle } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { CheckCircle2, Loader2, XCircle, AlertTriangle, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { Progress } from "@/shared/components/ui/progress";
 import { Button } from "@/shared/components/ui/button";
 import { cabinetSetupService } from "../../services/cabinetSetup.service";
@@ -10,8 +11,6 @@ interface SetupProgressStepProps {
   cabinetId: string;
   macAddress: string;
   totalLockers: number;
-  mqttBrokerHost: string;
-  mqttBrokerPort: number;
   onReset: () => void;
   onComplete: () => void;
 }
@@ -26,7 +25,7 @@ interface LockerStatus {
   errorCode?: string;
 }
 
-export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBrokerHost, mqttBrokerPort, onReset, onComplete }: SetupProgressStepProps) {
+export function SetupProgressStep({ cabinetId, macAddress, totalLockers, onReset, onComplete }: SetupProgressStepProps) {
   const [state, setState] = useState<SetupState>("INITIALIZING");
   const [testedCount, setTestedCount] = useState(0);
   const [okCount, setOkCount] = useState(0);
@@ -39,6 +38,12 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
       testResult: "PENDING",
     }))
   );
+  const [isResetting, setIsResetting] = useState(false);
+  const stateRef = useRef<SetupState>("INITIALIZING");
+
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
 
   // WebSocket Integration
   const { setupProgress, setupResult, isConnected } = useDiscoverySocket(macAddress);
@@ -49,7 +54,7 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
 
     // Defer state updates to avoid cascading render warning
     setTimeout(() => {
-      if (state !== "IN_PROGRESS") {
+      if (stateRef.current !== "IN_PROGRESS") {
         setState("IN_PROGRESS");
       }
   
@@ -80,7 +85,7 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
         setFailCount(setupProgress.progress.failCount);
       }
     }, 0);
-  }, [setupProgress, cabinetId, state]);
+  }, [setupProgress, cabinetId]);
 
   // 2. Handle Setup Result Event (Final)
   useEffect(() => {
@@ -90,11 +95,11 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
                        setupResult.status === "PARTIAL" ? "PARTIAL" : "ERROR";
     
     setTimeout(() => {
-      if (state !== finalStatus) {
+      if (stateRef.current !== finalStatus) {
         setState(finalStatus);
       }
     }, 0);
-  }, [setupResult, cabinetId, state]);
+  }, [setupResult, cabinetId]);
 
   // 3. Polling logic (Fallback & Initial Snapshot)
   useEffect(() => {
@@ -116,7 +121,23 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
           errorCode: rl.hwState === "ERROR" ? "HARDWARE_FAILURE" : undefined
         }));
 
-        setLockers(updatedLockers);
+        setLockers(prev => {
+          const isSame =
+            prev.length === updatedLockers.length &&
+            prev.every((locker, index) => {
+              const updated = updatedLockers[index];
+              return (
+                updated &&
+                locker.slotIndex === updated.slotIndex &&
+                locker.row === updated.row &&
+                locker.column === updated.column &&
+                locker.testResult === updated.testResult &&
+                locker.errorCode === updated.errorCode
+              );
+            });
+
+          return isSame ? prev : updatedLockers;
+        });
         
         const ok = updatedLockers.filter(l => l.testResult === "OK").length;
         const fail = updatedLockers.filter(l => l.testResult === "FAIL").length;
@@ -127,19 +148,19 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
         setTestedCount(tested);
 
         if (cabData.status === CABINET_STATUS.SETTING_UP) {
-          if (state !== "IN_PROGRESS" && state !== "COMPLETED") setState("IN_PROGRESS");
+          if (stateRef.current !== "IN_PROGRESS" && stateRef.current !== "COMPLETED") setState("IN_PROGRESS");
         } else if (cabData.status === CABINET_STATUS.ACTIVE) {
-          if (state !== "COMPLETED") {
+          if (stateRef.current !== "COMPLETED") {
             setState("COMPLETED");
             if (pollInterval) clearInterval(pollInterval);
           }
         } else if (cabData.status === CABINET_STATUS.PARTIAL_ERROR) {
-          if (state !== "PARTIAL") {
+          if (stateRef.current !== "PARTIAL") {
             setState("PARTIAL");
             if (pollInterval) clearInterval(pollInterval);
           }
         } else if (cabData.status === CABINET_STATUS.OFFLINE && tested > 0) {
-          if (state !== "ERROR") {
+          if (stateRef.current !== "ERROR") {
             setState("ERROR");
             if (pollInterval) clearInterval(pollInterval);
           }
@@ -155,7 +176,29 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
     return () => {
       if (pollInterval) clearInterval(pollInterval);
     };
-  }, [cabinetId, state]);
+  }, [cabinetId]);
+
+  const handleResetSetup = async () => {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa cài đặt cabinet này? Toàn bộ slotIndex của các locker sẽ bị xóa và Location sẽ trở nên Inactive.")) {
+      return;
+    }
+    
+    setIsResetting(true);
+    try {
+      const result = await cabinetSetupService.resetSetup(cabinetId);
+      if (result.success) {
+        toast.success(result.message);
+        onReset();
+      } else {
+        toast.error("Không thể xóa cài đặt");
+      }
+    } catch (error) {
+      console.error("Reset setup error:", error);
+      toast.error("Đã xảy ra lỗi khi xóa cài đặt");
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const progressPercent = (testedCount / totalLockers) * 100;
 
@@ -199,10 +242,7 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
           {state === "IN_PROGRESS" && "Raspberry Pi đang lần lượt mở từng ô tủ để kiểm tra động cơ servo và cảm biến khoá cửa."}
           {state === "COMPLETED" && (
             <>
-              Cabinet đã sẵn sàng hoạt động với 100% khoá tủ đạt chuẩn.
-              <div className="mt-4 p-3 bg-primary/5 rounded-lg border border-primary/10 text-xs font-medium text-primary">
-                Broker MQTT: {mqttBrokerHost}:{mqttBrokerPort}
-              </div>
+              Cabinet đã sẵn sàng hoạt động.
             </>
           )}
           {state === "PARTIAL" && `Hoàn tất kiểm tra nhưng phát hiện ${failCount} ngăn tủ bị lỗi cần bảo trì.`}
@@ -252,9 +292,21 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, mqttBro
       </div>
 
       {(state === "COMPLETED" || state === "PARTIAL" || state === "ABORTED" || state === "ERROR") && (
-        <div className="flex justify-end space-x-3 pt-4 border-t mt-4">
-          <Button variant="outline" onClick={onReset}>Thiết lập tủ khác</Button>
-          <Button onClick={onComplete}>Hoàn tất & Đóng</Button>
+        <div className="flex justify-between items-center pt-4 border-t mt-4">
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={handleResetSetup}
+            disabled={isResetting}
+            className="gap-2"
+          >
+            {isResetting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            Xóa Setup
+          </Button>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={onReset}>Thiết lập tủ khác</Button>
+            <Button onClick={onComplete}>Hoàn tất & Đóng</Button>
+          </div>
         </div>
       )}
     </div>

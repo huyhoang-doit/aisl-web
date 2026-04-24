@@ -58,7 +58,7 @@ const Login = () => {
       if (user?.roles.includes(roles.ADMIN)) {
         navigate("/admin/dashboard", { replace: true });
       } else if (user?.roles.includes(roles.TECHNICIAN)) {
-        navigate("/staff/dashboard", { replace: true });
+        navigate("/staff/my-tasks", { replace: true });
       } else {
         navigate("/", { replace: true });
       }

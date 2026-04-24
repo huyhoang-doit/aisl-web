@@ -1,6 +1,6 @@
 import React from "react";
 import { DataTable, type Column, type QuickFilter } from "@/shared/components/DataTable";
-import { Eye } from "lucide-react";
+import { Eye, Link2Off } from "lucide-react";
 import type { Cabinet } from "../types/cabinet.types";
 
 interface CabinetTablePagination {
@@ -27,6 +27,8 @@ interface CabinetTableProps {
   onSearch?: (query: string) => void;
   quickFilters?: QuickFilter[];
   onQuickFilterChange?: (key: string, value: string) => void;
+  // eslint-disable-next-line no-unused-vars
+  onUnassign?: (cabinet: Cabinet) => void;
 }
 
 const CabinetTable: React.FC<CabinetTableProps> = ({
@@ -41,6 +43,7 @@ const CabinetTable: React.FC<CabinetTableProps> = ({
   onSearch,
   quickFilters,
   onQuickFilterChange,
+  onUnassign,
 }) => {
   const columns: Column<Cabinet>[] = [
     {
@@ -87,6 +90,17 @@ const CabinetTable: React.FC<CabinetTableProps> = ({
             icon: <Eye className="h-4 w-4" />,
             onClick: onViewDetails,
             variant: "ghost" as const,
+          },
+        ]
+      : []),
+    ...(onUnassign
+      ? [
+          {
+            label: "Gỡ khỏi địa điểm",
+            icon: <Link2Off className="h-4 w-4" />,
+            onClick: onUnassign,
+            variant: "ghost" as const,
+            className: "text-orange-500 hover:text-orange-600 hover:bg-orange-50",
           },
         ]
       : []),

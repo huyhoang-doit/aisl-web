@@ -145,15 +145,15 @@ const ManageCabinetPage = () => {
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Quản lý cabinet</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Quản lý cụm tủ</h1>
         <p className="text-muted-foreground mt-2">
-          Quản lý các cụm cabinet chứa nhiều locker trong hệ thống
+          Quản lý các cụm tủ chứa nhiều tủ
         </p>
       </div>
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="text-sm text-muted-foreground">
-          Tổng số cabinet: <strong>{total}</strong>
+          Tổng số cụm tủ: <strong>{total}</strong>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ const ManageCabinetPage = () => {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onCreate={handleCreate}
-        emptyMessage="Chưa có cabinet nào"
+        emptyMessage="Chưa có cụm tủ nào"
         isLoading={isLoading}
         gridCols={{ default: 1, md: 2, lg: 3, xl: 4 }}
         searchable={true}
@@ -221,11 +221,11 @@ const ManageCabinetPage = () => {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa cabinet</AlertDialogTitle>
+            <AlertDialogTitle>Xác nhận xóa cụm tủ</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa cabinet{" "}
+              Bạn có chắc chắn muốn xóa cụm tủ{" "}
               <strong>{selectedCabinet?.name}</strong>? Hành động này không thể
-              hoàn tác. Tất cả các locker trong cabinet này cũng sẽ bị xóa.
+              hoàn tác. Tất cả các tủ trong cụm tủ này cũng sẽ bị xóa.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,9 +1,9 @@
 import { api } from "@/shared/lib/api/client";
 import type {
   ActivityLog,
-  ActivityLogPagination,
   DeviceLog,
 } from "../types/logs.types";
+import type { Pagination } from "@/shared/types/pagination.types";
 
 export interface ActivityLogsParams {
   userId?: string;
@@ -24,9 +24,8 @@ export interface ActivityLogsResponse {
   message?: string;
   data: {
     items: ActivityLog[];
-    pagination: ActivityLogPagination;
+    pagination: Pagination;
   };
-  pagination?: ActivityLogPagination;
 }
 
 export interface DeviceLogsParams {
@@ -48,9 +47,8 @@ export interface DeviceLogsResponse {
   message?: string;
   data: {
     items: DeviceLog[];
-    pagination: ActivityLogPagination;
+    pagination: Pagination;
   };
-  pagination?: ActivityLogPagination;
 }
 
 export const logsService = {

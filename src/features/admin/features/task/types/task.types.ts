@@ -57,6 +57,7 @@ export interface TaskDetail {
   taskType: "REPAIR" | "INSPECTION" | "CLEANING" | string;
   priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT" | string;
   status: string;
+  locationId?: string;
   createdAt: string;
   updatedAt: string;
   incidentReport?: TaskDetailIncidentReport;
@@ -68,10 +69,35 @@ export interface TaskDetailResponse {
 
 /** Pagination từ API danh sách task */
 
-/** Response GET /maintenance/tasks (danh sách) */
+/**Response GET /maintenance/tasks (danh sách) */
 export interface TaskListResponse {
   data: {
     tasks: TaskDetail[];
     pagination: Pagination;
+  };
+}
+
+/** Tech work log detail */
+export interface TechWorkLog {
+  id: string;
+  code: string;
+  technicalTaskId: string;
+  technicianId: string;
+  technicianName?: string;
+  workDescription: string;
+  partsReplaced?: string; // JSON string from backend
+  beforePhotoUrls: string[];
+  afterPhotoUrls: string[];
+  startedAt?: string;
+  completedAt?: string;
+  techNote?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Response standard for work logs list */
+export interface WorkLogListResponse {
+  data: {
+    workLogs: TechWorkLog[];
   };
 }

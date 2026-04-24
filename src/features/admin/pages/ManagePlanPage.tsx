@@ -95,12 +95,18 @@ const ManagePlanPage = () => {
   };
 
   const handleSubmit = async (data: PlanFormData) => {
-    const payload = {
+      const payload: any = {
       name: data.name,
       maxLockers: data.maxLockers,
       price: data.price,
+      fixedLocker: data.fixedLocker,
+      discountLocker: data.discountLockerRental,
+      discountFixedLocker: data.discountFixedLockerRental,
+      discountLockerRental: data.discountLockerRental,
+      discountFixedLockerRental: data.discountFixedLockerRental,
       description: data.description,
       status: data.status,
+      isFreeDefault: data.isFreeDefault,
       pricingIds: data.pricingIds,
     };
 
@@ -113,7 +119,7 @@ const ManagePlanPage = () => {
         if (!selectedPlan?.id) return;
         const response = await planService.update(selectedPlan.id, payload);
         setPlans(
-          plans.map((p) => (p.id === selectedPlan.id ? response.data : p))
+          plans.map((p) => (p.id === selectedPlan.id ? (response.data as any) : p))
         );
         toast.success("Cập nhật gói đăng ký thành công");
       }
@@ -196,21 +202,24 @@ const ManagePlanPage = () => {
         }}
       />
 
-      <CreateOrUpdatePlanModal
-        open={isModalOpen}
-        onOpenChange={(open) => {
-          setIsModalOpen(open);
-          if (!open && selectedPlan && isDetailModalOpen) {
-            const updatedPlan = plans.find((p) => p.id === selectedPlan.id);
-            if (updatedPlan) {
-              setSelectedPlan(updatedPlan);
+      {isModalOpen && (
+        <CreateOrUpdatePlanModal
+          key={`${selectedPlan?.id || 'new'}-${isModalOpen}`}
+          open={isModalOpen}
+          onOpenChange={(open) => {
+            setIsModalOpen(open);
+            if (!open && selectedPlan && isDetailModalOpen) {
+              const updatedPlan = plans.find((p) => p.id === selectedPlan.id);
+              if (updatedPlan) {
+                setSelectedPlan(updatedPlan);
+              }
             }
-          }
-        }}
-        planData={selectedPlan}
-        onSubmit={handleSubmit}
-        mode={modalMode}
-      />
+          }}
+          planData={selectedPlan}
+          onSubmit={handleSubmit}
+          mode={modalMode}
+        />
+      )}
 
       {selectedPlan && (
         <PlanDetailModal

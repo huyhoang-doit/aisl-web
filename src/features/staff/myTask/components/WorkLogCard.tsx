@@ -3,7 +3,7 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { workLogService } from "../services/workLog.service";
 import type { WorkLogDetail } from "../types/myTask.types";
@@ -36,6 +36,28 @@ export function WorkLogCard({
   const isUpdating = updatingWorkLogId === log.id;
   const isCompleting = completeWorkLogId === log.id;
   const isCompleted = !!log.completedAt;
+
+  const handleUpdateFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files?.length) {
+      setUpdateAfterPhotos((prev) => [...prev, ...Array.from(files)]);
+    }
+  };
+
+  const removeUpdatePhoto = (index: number) => {
+    setUpdateAfterPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleCompleteFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files?.length) {
+      setCompleteAfterPhotos((prev) => [...prev, ...Array.from(files)]);
+    }
+  };
+
+  const removeCompletePhoto = (index: number) => {
+    setCompleteAfterPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleUpdate = async () => {
     try {
@@ -92,7 +114,7 @@ export function WorkLogCard({
           <div className="flex gap-1 shrink-0">
             {!isUpdating && !isCompleting && (
               <>
-                <Button
+                {/* <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => {
@@ -101,7 +123,7 @@ export function WorkLogCard({
                   }}
                 >
                   Cập nhật
-                </Button>
+                </Button> */}
                 <Button
                   size="sm"
                   variant="default"
@@ -170,15 +192,46 @@ export function WorkLogCard({
             onChange={(e) => setUpdateNote(e.target.value)}
           />
           <Label>Ảnh sau khi sửa</Label>
-          <Input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => {
-              const files = e.target.files;
-              if (files) setUpdateAfterPhotos(Array.from(files));
-            }}
-          />
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById(`update-photo-upload-${log.id}`)?.click()}
+              >
+                <ImagePlus className="h-4 w-4 mr-1" />
+                Thêm ảnh
+              </Button>
+              <input
+                id={`update-photo-upload-${log.id}`}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleUpdateFileChange}
+              />
+            </div>
+            {updateAfterPhotos.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {updateAfterPhotos.map((file, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-sm"
+                  >
+                    <span className="truncate max-w-[150px]">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeUpdatePhoto(i)}
+                      className="text-muted-foreground hover:text-foreground shrink-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleUpdate} disabled={submitting}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Lưu"}
@@ -197,15 +250,46 @@ export function WorkLogCard({
             onChange={(e) => setCompleteNote(e.target.value)}
           />
           <Label>Ảnh kết quả cuối</Label>
-          <Input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={(e) => {
-              const files = e.target.files;
-              if (files) setCompleteAfterPhotos(Array.from(files));
-            }}
-          />
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById(`complete-photo-upload-${log.id}`)?.click()}
+              >
+                <ImagePlus className="h-4 w-4 mr-1" />
+                Thêm ảnh
+              </Button>
+              <input
+                id={`complete-photo-upload-${log.id}`}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleCompleteFileChange}
+              />
+            </div>
+            {completeAfterPhotos.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {completeAfterPhotos.map((file, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-sm"
+                  >
+                    <span className="truncate max-w-[150px]">{file.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeCompletePhoto(i)}
+                      className="text-muted-foreground hover:text-foreground shrink-0"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleComplete} disabled={submitting}>
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Hoàn thành"}

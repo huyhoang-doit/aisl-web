@@ -4,11 +4,10 @@
 import type { Dispatch, SetStateAction } from "react";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import type { Locker } from "../types/locker.types";
+import type { Locker, LockerStatus } from "../types/locker.types";
 import {
   lockerService,
   type LockerListParams,
-  type LockerStatus,
 } from "../services/locker.service";
 import type { FilterConfig } from "@/shared/components/DataGrid";
 

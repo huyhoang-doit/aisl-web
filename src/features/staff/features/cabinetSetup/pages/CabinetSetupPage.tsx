@@ -240,8 +240,6 @@ export default function CabinetSetupPage() {
             cabinetId={setupResult.cabinetIds[0]} // Show first one for status
             macAddress={setupResult.macAddress}
             totalLockers={setupResult.totalLockers}
-            mqttBrokerHost={setupResult.mqttBrokerHost}
-            mqttBrokerPort={setupResult.mqttBrokerPort}
             onReset={() => {
               setSetupResult(null);
               setCurrentStep(0);

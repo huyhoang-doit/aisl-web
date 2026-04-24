@@ -117,4 +117,18 @@ export const locationService = {
       : `/locations/${locationId}/cabinets`;
     return api.get<CabinetLocationListResponse>(url);
   },
+
+  /**
+   * Gán danh sách cabinet vào location
+   */
+  assignCabinets: async (id: string, cabinetIds: string[]): Promise<void> => {
+    return api.post<void>(`/locations/${id}/assign-cabinets`, { cabinetIds });
+  },
+
+  /**
+   * Bỏ gán cabinet khỏi location
+   */
+  unassignCabinet: async (id: string, cabinetId: string): Promise<void> => {
+    return api.post<void>(`/locations/${id}/unassign-cabinets`, { cabinetIds: [cabinetId] });
+  },
 };

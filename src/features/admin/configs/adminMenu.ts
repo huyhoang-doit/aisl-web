@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   Users,
   Package,
   DollarSign,
@@ -16,16 +15,17 @@ import {
   Monitor,
   Bell,
   ShoppingBag,
+  Ruler,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
 export const adminNavMain: NavItem[] = [
-  {
-    title: "Trang chủ",
-    url: "/admin/dashboard",
-    icon: LayoutDashboard,
-    isActive: false,
-  },
+  // {
+  //   title: "Trang chủ",
+  //   url: "/admin/dashboard",
+  //   icon: LayoutDashboard,
+  //   isActive: false,
+  // },
   // {
   //   title: "Báo cáo doanh thu",
   //   url: "/admin/revenue",
@@ -84,6 +84,11 @@ export const adminNavMain: NavItem[] = [
         icon: Box,
       },
       {
+        title: "Kích thước",
+        url: "/admin/sizes",
+        icon: Ruler,
+      },
+      {
         title: "Thiết bị gắn tủ",
         url: "/admin/device-attachments",
         icon: Monitor,
@@ -121,6 +126,11 @@ export const adminNavMain: NavItem[] = [
     title: "Quản lý Đơn hàng",
     url: "/admin/orders",
     icon: ShoppingBag,
+  },
+  {
+    title: "Giao dịch",
+    url: "/admin/transactions",
+    icon: DollarSign,
   },
   {
     title: "Quản lý báo cáo",

@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,11 +7,9 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
-import { ImageIcon, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { ImageIcon, Loader2, ImagePlus, X } from "lucide-react";
 import { toast } from "sonner";
 import { workLogService } from "../services/workLog.service";
 
@@ -33,6 +31,20 @@ export function CreateWorkLogModal({
   const [workDescription, setWorkDescription] = useState("");
   const [beforePhotos, setBeforePhotos] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files?.length) {
+      setBeforePhotos((prev) => {
+        const newFiles = [...prev, ...Array.from(files)];
+        return newFiles.slice(0, MAX_BEFORE_PHOTOS);
+      });
+    }
+  };
+
+  const removePhoto = (index: number) => {
+    setBeforePhotos((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async () => {
     if (!workDescription.trim()) {
@@ -94,20 +106,46 @@ export function CreateWorkLogModal({
               <ImageIcon className="h-4 w-4" />
               Ảnh trước khi sửa (tối đa {MAX_BEFORE_PHOTOS})
             </Label>
-            <Input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={(e) => {
-                const files = e.target.files;
-                if (files) setBeforePhotos(Array.from(files).slice(0, MAX_BEFORE_PHOTOS));
-              }}
-            />
-            {beforePhotos.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Đã chọn {beforePhotos.length} ảnh
-              </p>
-            )}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.getElementById("before-photo-upload")?.click()}
+                >
+                  <ImagePlus className="h-4 w-4 mr-1" />
+                  Thêm ảnh
+                </Button>
+                <input
+                  id="before-photo-upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+              </div>
+              {beforePhotos.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {beforePhotos.map((file, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-1 px-2 py-1 bg-muted rounded text-sm"
+                    >
+                      <span className="truncate max-w-[150px]">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(i)}
+                        className="text-muted-foreground hover:text-foreground shrink-0"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => handleOpenChange(false)}>

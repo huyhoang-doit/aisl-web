@@ -166,29 +166,29 @@ export default function ManageTransactionPage() {
                     Đã có lỗi xảy ra khi tải dữ liệu giao dịch.
                   </TableCell>
                 </TableRow>
-              ) : !data?.items?.length ? (
+              ) : !data?.transactions?.length ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                     Không tìm thấy giao dịch nào.
                   </TableCell>
                 </TableRow>
               ) : (
-                data.items.map((tx) => (
+                data.transactions.map((tx) => (
                   <TableRow key={tx.id}>
-                    <TableCell className="font-medium">{tx.transactionCode || tx.id}</TableCell>
+                    <TableCell className="font-medium">{tx.code || tx.transactionCode || tx.id}</TableCell>
                     <TableCell className="text-muted-foreground truncate max-w-[120px]" title={tx.userId}>
-                      {tx.userId}
+                      {tx.userId || tx.walletId || "-"}
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {tx.type === "PAYMENT" || tx.type === "WITHDRAW" ? "-" : "+"}
+                      {tx.type === "PAYMENT" || tx.type === "WITHDRAW" || tx.type === "LOGISTICS_DEDUCTION" ? "-" : "+"}
                       {tx.amount.toLocaleString("vi-VN")} đ
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{tx.type}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(tx.status)} variant="secondary">
-                        {tx.status}
+                      <Badge className={getStatusColor(tx.status || "SUCCESS")} variant="secondary">
+                        {tx.status || "SUCCESS"}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -201,10 +201,10 @@ export default function ManageTransactionPage() {
           </Table>
         </div>
         {/* Pagination Controls */}
-        {data && data.totalPages > 1 && (
+        {data && (data.totalPages || Math.ceil(data.total / data.limit)) > 1 && (
           <div className="flex items-center justify-between p-4 border-t">
             <span className="text-sm text-muted-foreground">
-              Hiển thị trang {data.page} / {data.totalPages}
+              Hiển thị trang {data.page} / {data.totalPages || Math.ceil(data.total / data.limit)}
             </span>
             <div className="flex gap-2">
               <Button
@@ -219,7 +219,7 @@ export default function ManageTransactionPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => setParams((p) => ({ ...p, page: (p.page || 1) + 1 }))}
-                disabled={data.page >= data.totalPages}
+                disabled={data.page >= (data.totalPages || Math.ceil(data.total / data.limit))}
               >
                 Sau
               </Button>

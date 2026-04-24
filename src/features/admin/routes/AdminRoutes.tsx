@@ -28,6 +28,7 @@ import ManageTask from "../pages/ManageTask";
 import ManageVehiclesPage from "../pages/ManageVehiclesPage";
 import ManageDeviceAttachmentPage from "../pages/ManageDeviceAttachmentPage";
 import LogsDevicePage from "../pages/LogsDevicePage";
+import ManageSizePage from "../pages/ManageSizePage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -45,6 +46,7 @@ const AdminRoutes = () => {
         <Route path="manage-tasks" element={<ManageTask />} />
         <Route path="locations" element={<ManageLocationPage />} />
         <Route path="lockers" element={<ManageLockerPage />} />
+        <Route path="sizes" element={<ManageSizePage />} />
         <Route path="cabinets" element={<ManageCabinetPage />} />
         <Route path="transactions" element={<ManageTransactionPage />} />
         <Route path="orders" element={<ManageOrderPage />} />
