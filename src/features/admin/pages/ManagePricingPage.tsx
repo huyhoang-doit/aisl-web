@@ -115,11 +115,13 @@ const ManagePricingPage = () => {
       const payload = {
         name: data.name,
         blockDuration: data.blockDuration,
+        blockUnit: data.blockUnit,
         feePerBlock: data.feePerBlock,
         lateFeePerBlock: data.lateFeePerBlock,
         orderType: data.orderType,
         description: data.description,
         gracePeriod: data.gracePeriod,
+        cancellationFeeRate: data.cancellationFeeRate,
       };
 
       if (modalMode === "create") {

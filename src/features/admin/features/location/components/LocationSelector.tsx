@@ -25,7 +25,7 @@ export function LocationSelector({
   onValueChange,
   placeholder = "Chọn địa điểm",
   disabled = false,
-  filterActiveOnly = true,
+  filterActiveOnly = false,
   className,
 }: LocationSelectorProps) {
   const { locations, isLoading } = useLocation({

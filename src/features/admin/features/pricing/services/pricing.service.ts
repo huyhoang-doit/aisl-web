@@ -12,21 +12,25 @@ export type OrderType = "LOGISTICS" | "PERSONAL_RENTAL";
 export interface CreatePricingPayload {
   name: string;
   blockDuration: number;
+  blockUnit: string;
   feePerBlock: number;
   lateFeePerBlock: number;
   orderType: OrderType;
   description?: string;
   gracePeriod: number;
+  cancellationFeeRate?: number;
 }
 
 export interface UpdatePricingPayload {
   name?: string;
   blockDuration?: number;
+  blockUnit?: string;
   feePerBlock?: number;
   lateFeePerBlock?: number;
   orderType?: OrderType;
   description?: string;
   gracePeriod?: number;
+  cancellationFeeRate?: number;
 }
 
 /** Response get-by-id / getDetail / create / update: data là pricing  */
