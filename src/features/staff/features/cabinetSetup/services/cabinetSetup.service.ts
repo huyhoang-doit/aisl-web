@@ -34,4 +34,8 @@ export const cabinetSetupService = {
   getCabinetLockers: async (id: string, params?: any): Promise<GetCabinetLockersResponse> => {
     return api.get<GetCabinetLockersResponse>(`/cabinets/${id}/lockers`, { params });
   },
+
+  resetSetup: async (id: string): Promise<{ success: boolean; message: string }> => {
+    return api.post<{ success: boolean; message: string }>(`/cabinets/${id}/reset-setup`);
+  },
 };

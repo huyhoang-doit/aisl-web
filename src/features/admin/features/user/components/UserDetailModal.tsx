@@ -17,10 +17,13 @@ import type { User } from "../types/user.types";
 
 interface UserDetailModalProps {
   open: boolean;
+  // eslint-disable-next-line no-unused-vars
   onOpenChange: (val: boolean | User) => void;
   user: User;
-  onEdit?: (u: User) => void;
-  onLock?: (u: User) => void;
+  // eslint-disable-next-line no-unused-vars
+  onEdit?: (user: User) => void;
+  // eslint-disable-next-line no-unused-vars
+  onLock?: (user: User) => void;
 }
 
 const UserDetailModal: React.FC<UserDetailModalProps> = ({
@@ -138,7 +141,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
             </div>
           </div>
 
-          {user.roles?.some(r => r.name === "TECHNICIAN" || r.name === "COURIER") && (
+          {(user.roles?.some(r => r.name === "TECHNICIAN" || r.name === "COURIER") || user.role === "TECHNICIAN" || user.role === "COURIER") && (
             <>
               <Separator />
               <div className="space-y-4">

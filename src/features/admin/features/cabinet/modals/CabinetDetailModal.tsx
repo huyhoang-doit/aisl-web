@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Plus, Pencil, Trash2, Hash, Activity, MapPin, Calendar, Info, Globe, Link2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Hash, Activity, MapPin, Calendar, Info, Globe, Link2, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import LockerTable from "../../locker/components/LockerTable";
@@ -26,6 +26,7 @@ import {
 } from "@/shared/components/ui/alert-dialog";
 import { lockerService } from "../../locker/services/locker.service";
 import { cabinetService } from "../services/cabinet.service";
+import { cabinetSetupService } from "@/features/staff/features/cabinetSetup/services/cabinetSetup.service";
 import { toast } from "sonner";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
@@ -65,6 +66,7 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   const [selectedLocker, setSelectedLocker] = useState<Locker | null>(null);
   const [lockerModalMode, setLockerModalMode] = useState<"create" | "update">("create");
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
 
   const loadLockers = useCallback(async () => {
     if (!open || !cabinet.id) return;
@@ -170,6 +172,31 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
       toast.error("Không gỡ được ngăn tủ");
     }
   };
+  
+  const handleResetSetup = async () => {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa cài đặt cho cụm tủ "${cabinet.name}"? Toàn bộ slotIndex của các locker sẽ bị xóa và Location sẽ trở nên Inactive.`)) {
+      return;
+    }
+    
+    setIsResetting(true);
+    try {
+      const result = await cabinetSetupService.resetSetup(cabinet.id);
+      if (result.success) {
+        toast.success(result.message);
+        // Refresh lockers and cabinet info if needed
+        loadLockers();
+        // Since we don't have a direct refetch for cabinet here, we might want to close or notify parent
+        handleClose(true); // Close and signal change
+      } else {
+        toast.error("Không thể xóa cài đặt");
+      }
+    } catch (error) {
+      console.error("Reset setup error:", error);
+      toast.error("Đã xảy ra lỗi khi xóa cài đặt");
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   const handlePageChange = useCallback((newPage: number) => {
     setPage(newPage);
@@ -236,9 +263,19 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                     Xóa
                   </Button>
                 )}
-              </div>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleResetSetup}
+                disabled={isResetting}
+                className="gap-2"
+              >
+                {isResetting ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                Xóa Setup
+              </Button>
             </div>
-          </DialogHeader>
+          </div>
+        </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
             {/* Cột 1: Thông tin cơ sở & Vị trí */}

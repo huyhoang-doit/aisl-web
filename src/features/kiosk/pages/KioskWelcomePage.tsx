@@ -1,13 +1,26 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { Command, LogIn } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { KioskScreenLayout } from "../components/KioskScreenLayout";
+import { useKioskStore } from "../store/kiosk.store";
 
 /**
  * Màn hình chào tại Kiosk - hiển thị khi người dùng đến.
  * Thiết kế cho màn hình dọc (portrait), nút bấm to dễ thao tác (tương tự iPad mini).
  */
 const KioskWelcomePage = () => {
+  const [searchParams] = useSearchParams();
+  const { setKioskIdentity } = useKioskStore();
+
+  useEffect(() => {
+    const locId = searchParams.get("locationId");
+    const cabId = searchParams.get("cabinetId");
+    if (locId && cabId) {
+      setKioskIdentity(locId, cabId);
+    }
+  }, [searchParams, setKioskIdentity]);
+
   return (
     <KioskScreenLayout className="items-center justify-center py-8">
         {/* Logo */}

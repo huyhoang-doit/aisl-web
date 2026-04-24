@@ -1,10 +1,13 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Calendar, Cpu, MapPin, Network, ServerCog } from "lucide-react";
+import { Calendar, Cpu, MapPin, Network, ServerCog, RefreshCw } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Cabinet } from "../types/cabinet.types";
 import { Button } from "@/shared/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
+import { cabinetSetupService } from "@/features/staff/features/cabinetSetup/services/cabinetSetup.service";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface CabinetCardItemProps {
   cabinet: Cabinet;
@@ -20,6 +23,32 @@ const CabinetCardItem: React.FC<CabinetCardItemProps> = ({ cabinet, onClick }) =
   const handleSetup = (e: React.MouseEvent) => {
     e.stopPropagation();
     navigate(`${prefix}/setup-cabinet?cabinetId=${cabinet.id}&locationId=${cabinet.locationId}`);
+  };
+
+  const [isResetting, setIsResetting] = useState(false);
+
+  const handleResetSetup = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa cài đặt cho cụm tủ "${cabinet.name}"?`)) {
+      return;
+    }
+    
+    setIsResetting(true);
+    try {
+      const result = await cabinetSetupService.resetSetup(cabinet.id);
+      if (result.success) {
+        toast.success(result.message);
+        // We might need a way to trigger a list refresh in the parent, but for now toast + local state update for card isn't easy without props.
+        // Usually, the page will refetch if we use a shared state or event emitter.
+      } else {
+        toast.error("Không thể xóa cài đặt");
+      }
+    } catch (error) {
+      console.error("Reset setup error:", error);
+      toast.error("Đã xảy ra lỗi khi xóa cài đặt");
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   return (
@@ -46,15 +75,27 @@ const CabinetCardItem: React.FC<CabinetCardItemProps> = ({ cabinet, onClick }) =
               )}
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="shrink-0 h-8 gap-1.5"
-            onClick={handleSetup}
-          >
-            <ServerCog className="h-3.5 w-3.5" />
-            <span>Setup</span>
-          </Button>
+          <div className="flex flex-col gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="shrink-0 h-8 gap-1.5"
+              onClick={handleSetup}
+            >
+              <ServerCog className="h-3.5 w-3.5" />
+              <span>Setup</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="shrink-0 h-8 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={handleResetSetup}
+              disabled={isResetting}
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", isResetting && "animate-spin")} />
+              <span>Xóa Setup</span>
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
