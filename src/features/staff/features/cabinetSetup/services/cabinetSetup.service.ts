@@ -1,4 +1,4 @@
-import { api } from "@/shared/lib/api/client";
+
 import type { 
   SetupCabinetRequest, 
   SetupCabinetResponse, 
@@ -9,10 +9,12 @@ import type {
   CabinetBasicInfo,
   GetCabinetLockersResponse
 } from "../types/cabinetSetup.types";
+import { api } from "@/shared/lib/api/client";  
 
 export const cabinetSetupService = {
   setupCabinet: async (data: SetupCabinetRequest): Promise<SetupCabinetResponse> => {
-    return api.post<SetupCabinetResponse>("/cabinets/setup", data);
+    const response = await api.post<any>("/cabinets/setup", data);
+    return response.data;
   },
 
   getCabinetsByLocation: async (locationId: string, params?: GetCabinetsParams): Promise<LocationWithCabinetsResponse> => {
@@ -36,6 +38,7 @@ export const cabinetSetupService = {
   },
 
   resetSetup: async (id: string): Promise<{ success: boolean; message: string }> => {
-    return api.post<{ success: boolean; message: string }>(`/cabinets/${id}/reset-setup`);
+    const response = await api.post<any>(`/cabinets/${id}/reset-setup`);
+    return response.data;
   },
 };

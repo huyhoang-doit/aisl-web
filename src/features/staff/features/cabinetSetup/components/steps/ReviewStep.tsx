@@ -136,10 +136,15 @@ export function ReviewStep({ form }: ReviewStepProps) {
            </svg>
         </div>
         <div className="text-sm">
-          <p className="font-bold text-amber-800 dark:text-amber-300 mb-1">Cảnh báo vật lý:</p>
-          <p className="text-amber-700 dark:text-amber-400 leading-relaxed">
-            Hệ thống sẽ gán Slave ID tự động cho từng tủ theo thứ tự trên. Raspberry Pi sẽ bắt đầu kích hoạt solenoid để kiểm tra phần cứng ngay khi bắt đầu. Đảm bảo khu vực tủ an toàn.
-          </p>
+          <p className="font-bold text-amber-800 dark:text-amber-300 mb-1">Cảnh báo quy trình:</p>
+          <div className="text-amber-700 dark:text-amber-400 space-y-2 leading-relaxed">
+            <p>
+              1. <b>Thứ tự vật lý:</b> Hệ thống tự động gán <b>slotIndex</b> theo kích thước ngăn tủ từ <b>LỚN đến NHỎ</b> (tính theo Rộng x Cao x Sâu). Vui lòng đấu dây Arduino theo đúng thứ tự này.
+            </p>
+            <p>
+              2. <b>Khởi chạy:</b> Raspberry Pi sẽ bắt đầu kích hoạt solenoid để kiểm tra phần cứng ngay khi bắt đầu. Đảm bảo khu vực tủ an toàn.
+            </p>
+          </div>
         </div>
       </div>
     </div>

@@ -30,6 +30,5 @@
       ]
     }
   },
-  "include": ["src"],
-  "exclude": ["src/**/*.service.ts"]
+  "include": ["src"]
 }

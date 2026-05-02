@@ -75,7 +75,6 @@ export function CreateOrUpdatePricingModal({
   });
 
   const orderType = form.watch("orderType");
-  const isLogistics = orderType === "LOGISTICS";
 
   useEffect(() => {
     if (open) {
@@ -111,6 +110,9 @@ export function CreateOrUpdatePricingModal({
     }
   }, [open, pricingData, isUpdateMode, form]);
 
+  const isLogistics = orderType === "LOGISTICS";
+  const isPersonalRental = orderType === "PERSONAL_RENTAL";
+
   useEffect(() => {
     if (isLogistics) {
       form.setValue("blockDuration", 0);
@@ -118,6 +120,12 @@ export function CreateOrUpdatePricingModal({
       form.setValue("gracePeriod", 0);
     }
   }, [isLogistics, form]);
+
+  useEffect(() => {
+    if (isPersonalRental) {
+      form.setValue("cancellationFeeRate", 0);
+    }
+  }, [isPersonalRental, form]);
 
   const handleSubmit = async (formData: PricingFormData) => {
     try {
@@ -264,7 +272,7 @@ export function CreateOrUpdatePricingModal({
                   }}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Thời gian ân hạn <span className="text-red-500">*</span></FormLabel>
+                      <FormLabel>Thời gian ân hạn (mỗi block) <span className="text-red-500">*</span></FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -347,6 +355,7 @@ export function CreateOrUpdatePricingModal({
                         type="number"
                         min="0"
                         placeholder="0"
+                        disabled={isPersonalRental}
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                       />
