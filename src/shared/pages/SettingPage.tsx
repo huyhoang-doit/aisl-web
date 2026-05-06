@@ -8,7 +8,14 @@ import {
   Trash2,
   Bell,
   BellOff,
+  Server,
+  DoorOpen,
+  Loader2,
 } from "lucide-react"
+import { cabinetService } from "@/features/admin/features/cabinet/services/cabinet.service"
+import { lockerService } from "@/features/admin/features/locker/services/locker.service"
+import type { Cabinet } from "@/features/admin/features/cabinet/types/cabinet.types"
+import type { Locker } from "@/features/admin/features/locker/types/locker.types"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent } from "@/shared/components/ui/card"
 import { Label } from "@/shared/components/ui/label"
@@ -53,6 +60,57 @@ export default function SettingPage() {
   const [settings, setSettings] = React.useState({
     theme: theme || "light",
   })
+
+  // Cabinets & Lockers State
+  const [cabinets, setCabinets] = React.useState<Cabinet[]>([])
+  const [loadingCabinets, setLoadingCabinets] = React.useState(false)
+  const [selectedCabinetId, setSelectedCabinetId] = React.useState<string | null>(null)
+  const [lockers, setLockers] = React.useState<Locker[]>([])
+  const [loadingLockers, setLoadingLockers] = React.useState(false)
+  const [openingLockerId, setOpeningLockerId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    const fetchCabinets = async () => {
+      try {
+        setLoadingCabinets(true)
+        const response = await cabinetService.getAll({ limit: 100 })
+        setCabinets(response.data.cabinets || [])
+      } catch (error) {
+        console.error("Failed to load cabinets:", error)
+        toast.error("Không thể tải danh sách cụm tủ")
+      } finally {
+        setLoadingCabinets(false)
+      }
+    }
+    fetchCabinets()
+  }, [])
+
+  const handleSelectCabinet = async (cabinetId: string) => {
+    setSelectedCabinetId(cabinetId)
+    try {
+      setLoadingLockers(true)
+      const response = await lockerService.getLockerCabinet(cabinetId, { limit: 100, page: 1 })
+      setLockers(response.data.lockers || [])
+    } catch (error) {
+      console.error("Failed to load lockers:", error)
+      toast.error("Không thể tải danh sách ngăn tủ")
+    } finally {
+      setLoadingLockers(false)
+    }
+  }
+
+  const handleOpenLocker = async (lockerId: string, lockerLabel: string | number) => {
+    try {
+      setOpeningLockerId(lockerId)
+      await lockerService.open(lockerId)
+      toast.success(`Đã gửi lệnh mở ngăn tủ ${lockerLabel} thành công!`)
+    } catch (error: any) {
+      console.error("Failed to open locker:", error)
+      toast.error(error?.response?.data?.message || `Không thể mở ngăn tủ ${lockerLabel}`)
+    } finally {
+      setOpeningLockerId(null)
+    }
+  }
 
   const handleToggleNotification = async (checked: boolean) => {
     if (typeof Notification === "undefined") {
@@ -316,6 +374,118 @@ export default function SettingPage() {
               <Lock className="mr-2 h-4 w-4" />
               {changingPassword ? "Đang đổi mật khẩu..." : "Đổi mật khẩu"}
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Administrative Cabinets & Lockers */}
+        <Card className="overflow-hidden border border-muted/80 shadow-md">
+          <CardContent className="pt-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-green-500/10 text-green-600 rounded-lg shrink-0">
+                <Server className="w-5 h-5" />
+              </div>
+              <div>
+                <Label className="text-base font-bold">Điều khiển Cụm tủ & Ngăn tủ</Label>
+                <p className="text-sm text-muted-foreground">Chọn cụm tủ để kiểm tra và mở khoá từng ngăn trực tiếp tại chỗ</p>
+              </div>
+            </div>
+
+            {loadingCabinets ? (
+              <div className="flex items-center gap-2 justify-center py-8 text-sm text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin text-primary" /> Đang tải danh sách cụm tủ...
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Cabinets Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  {cabinets.map((cabinet) => {
+                    const isSelected = selectedCabinetId === cabinet.id;
+                    return (
+                      <button
+                        key={cabinet.id}
+                        type="button"
+                        onClick={() => handleSelectCabinet(cabinet.id)}
+                        className={`p-4 rounded-xl border text-left transition-all duration-300 ${
+                          isSelected 
+                            ? "bg-primary/5 border-primary shadow-[0_0_0_1px_rgba(59,130,246,0.5)] text-foreground" 
+                            : "bg-muted/10 border-muted hover:border-primary/20 hover:bg-muted/20"
+                        }`}
+                      >
+                        <div className="font-bold text-sm truncate">{cabinet.name}</div>
+                        <div className="text-xs text-muted-foreground font-mono mt-0.5 truncate">{cabinet.macAddress}</div>
+                        <div className="text-[10px] text-muted-foreground font-mono truncate">{cabinet.ipAddress || "No IP"}</div>
+                      </button>
+                    )
+                  })}
+                  {cabinets.length === 0 && (
+                    <div className="col-span-full text-center py-6 text-sm text-muted-foreground border border-dashed rounded-xl">
+                      Không tìm thấy cụm tủ nào.
+                    </div>
+                  )}
+                </div>
+
+                {/* Lockers Grid for selected Cabinet */}
+                {selectedCabinetId && (
+                  <div className="border-t pt-5 mt-4 space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                        <DoorOpen className="w-4 h-4 text-green-600 animate-pulse" />
+                        Danh sách ngăn tủ của: {cabinets.find(c => c.id === selectedCabinetId)?.name}
+                      </h4>
+                      {loadingLockers && (
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      )}
+                    </div>
+
+                    {loadingLockers ? (
+                      <div className="flex items-center gap-2 justify-center py-8 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" /> Đang tải dữ liệu ngăn tủ...
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {lockers.map((locker) => {
+                          const isLockerOpening = openingLockerId === locker.id;
+                          const lockerLabel = locker.lockerLabel || (locker as any).slotIndex || `${locker.row}-${locker.column}`;
+                          
+                          return (
+                            <div 
+                              key={locker.id}
+                              className="p-3 bg-muted/10 rounded-xl border border-muted/60 shadow-sm flex flex-col justify-between items-center gap-3 hover:border-primary/20 transition-all duration-300"
+                            >
+                              <div className="text-center">
+                                <span className="text-xs text-muted-foreground block font-medium">Ngăn tủ</span>
+                                <span className="text-lg font-extrabold font-mono text-foreground leading-none">#{lockerLabel}</span>
+                                <span className="text-[10px] text-muted-foreground block mt-1 font-mono">Hàng {locker.row} • Cột {locker.column}</span>
+                              </div>
+                              
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenLocker(locker.id, lockerLabel)}
+                                disabled={isLockerOpening || !!openingLockerId}
+                                className="w-full text-xs font-semibold gap-1.5 hover:bg-green-50 hover:text-green-600 hover:border-green-200 transition-all duration-200"
+                              >
+                                {isLockerOpening ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin text-green-600" />
+                                ) : (
+                                  <DoorOpen className="h-3.5 w-3.5 text-green-600" />
+                                )}
+                                Mở tủ
+                              </Button>
+                            </div>
+                          )
+                        })}
+                        {lockers.length === 0 && (
+                          <div className="col-span-full text-center py-8 text-sm text-muted-foreground border border-dashed rounded-xl bg-muted/5">
+                            Cụm tủ này hiện không có ngăn tủ nào được liên kết.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
 

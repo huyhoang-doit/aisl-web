@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { SetupCabinetFormValues } from "../schemas/cabinetSetup.schema";
@@ -74,6 +75,7 @@ export default function CabinetSetupPage() {
     mqttBrokerHost: string;
     mqttBrokerPort: number;
   } | null>(null);
+  const [activeCabinetIndex, setActiveCabinetIndex] = useState(0);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -95,6 +97,14 @@ export default function CabinetSetupPage() {
   });
 
   const macAddress = useWatch({ control: form.control, name: "macAddress" });
+  const locationIdValue = useWatch({ control: form.control, name: "locationId" });
+  
+  const { data: cabinetsData } = useQuery({
+    queryKey: ["cabinets-by-location", locationIdValue],
+    queryFn: () => cabinetSetupService.getCabinetsByLocation(locationIdValue, { page: 1, limit: 100 }),
+    enabled: !!locationIdValue,
+  });
+
   const { discoveryResult, isConnected, resetDiscovery } = useDiscoverySocket(macAddress);
 
   useEffect(() => {
@@ -156,7 +166,12 @@ export default function CabinetSetupPage() {
         toast.warning(`Chỉ có thể chọn tối đa ${discoveredSlaves.length} tủ (tương ứng số controller)`);
         return;
       }
-      append({ cabinetId, totalRows: 4, totalColumns: 6 });
+      
+      const cabinets = cabinetsData?.data?.cabinets || [];
+      const cabinetEntity = cabinets.find((c: any) => c.id === cabinetId);
+      const totalRows = cabinetEntity?.totalRows || 4;
+      const totalColumns = cabinetEntity?.totalColumns || 6;
+      append({ cabinetId, totalRows, totalColumns });
     }
   };
 
@@ -228,25 +243,70 @@ export default function CabinetSetupPage() {
     }
   };
 
+
+
   if (setupResult) {
+    const activeCabinetId = setupResult.cabinetIds[activeCabinetIndex];
+    const activeConfig = form.getValues("configurations").find(c => c.cabinetId === activeCabinetId);
+    const activeTotalLockers = activeConfig ? (activeConfig.totalRows * activeConfig.totalColumns) : 0;
+    
+    const cabinets = cabinetsData?.data?.cabinets || [];
+    const cabinetEntity = cabinets.find((c: any) => c.id === activeCabinetId);
+    const cabinetName = cabinetEntity ? cabinetEntity.name : `Cụm tủ ${activeCabinetIndex + 1}`;
+
     return (
-      <div className="container max-w-4xl py-10 space-y-8">
+      <div className="container max-w-4xl py-10 space-y-8 animate-in fade-in duration-500">
         <div>
-           <h2 className="text-3xl font-bold tracking-tight">Tiến độ thiết lập</h2>
-           <p className="text-muted-foreground mt-2">Đang cấu hình {setupResult.cabinetIds.length} tủ tại RPi {setupResult.macAddress}</p>
+           <h2 className="text-3xl font-bold tracking-tight">Tiến độ thiết lập: {cabinetName}</h2>
+           <p className="text-muted-foreground mt-2">
+             Đang cấu hình tủ {activeCabinetIndex + 1}/{setupResult.cabinetIds.length} ({cabinetName}) tại RPi {setupResult.macAddress}
+           </p>
         </div>
+
+        {setupResult.cabinetIds.length > 1 && (
+          <div className="flex gap-3 items-center justify-center bg-muted/40 p-3 rounded-xl border">
+            {setupResult.cabinetIds.map((_, idx) => {
+              const isActive = idx === activeCabinetIndex;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveCabinetIndex(idx)}
+                  className={`h-4 px-3 rounded-full text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                    isActive 
+                      ? "bg-primary text-primary-foreground shadow shadow-primary/30 min-w-[80px]" 
+                      : "bg-muted hover:bg-muted/80 text-muted-foreground min-w-[60px]"
+                  }`}
+                  title={`Cấu hình tủ ${idx + 1}`}
+                >
+                  Tủ {idx + 1}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         <div className="bg-card border rounded-2xl p-6 shadow-sm">
           <SetupProgressStep 
-            cabinetId={setupResult.cabinetIds[0]} // Show first one for status
+            key={activeCabinetId}
+            cabinetId={activeCabinetId}
             macAddress={setupResult.macAddress}
-            totalLockers={setupResult.totalLockers}
+            totalLockers={activeTotalLockers}
+            isLastCabinet={activeCabinetIndex === setupResult.cabinetIds.length - 1}
             onReset={() => {
               setSetupResult(null);
               setCurrentStep(0);
+              setActiveCabinetIndex(0);
               form.reset();
             }}
             onComplete={() => {
-              navigate('/admin/setup-cabinet');
+              if (activeCabinetIndex < setupResult.cabinetIds.length - 1) {
+                setActiveCabinetIndex(prev => prev + 1);
+                toast.success(`Cụm tủ thứ ${activeCabinetIndex + 1} đã hoàn tất. Chuyển sang cụm tủ tiếp theo.`);
+              } else {
+                toast.success("Tất cả các cụm tủ đã thiết lập thành công!");
+                navigate('/admin/setup-cabinet');
+              }
             }}
           />
         </div>

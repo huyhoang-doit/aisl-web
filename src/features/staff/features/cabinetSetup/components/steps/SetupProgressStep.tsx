@@ -13,6 +13,7 @@ interface SetupProgressStepProps {
   totalLockers: number;
   onReset: () => void;
   onComplete: () => void;
+  isLastCabinet?: boolean;
 }
 
 type SetupState = "INITIALIZING" | "IN_PROGRESS" | "COMPLETED" | "PARTIAL" | "ABORTED" | "ERROR";
@@ -25,7 +26,7 @@ interface LockerStatus {
   errorCode?: string;
 }
 
-export function SetupProgressStep({ cabinetId, macAddress, totalLockers, onReset, onComplete }: SetupProgressStepProps) {
+export function SetupProgressStep({ cabinetId, macAddress, totalLockers, onReset, onComplete, isLastCabinet = true }: SetupProgressStepProps) {
   const [state, setState] = useState<SetupState>("INITIALIZING");
   const [testedCount, setTestedCount] = useState(0);
   const [okCount, setOkCount] = useState(0);
@@ -305,7 +306,9 @@ export function SetupProgressStep({ cabinetId, macAddress, totalLockers, onReset
           </Button>
           <div className="flex space-x-3">
             <Button variant="outline" onClick={onReset}>Thiết lập tủ khác</Button>
-            <Button onClick={onComplete}>Hoàn tất & Đóng</Button>
+            <Button onClick={onComplete}>
+              {isLastCabinet ? "Hoàn tất & Đóng" : "Chuyển sang cụm tủ tiếp theo"}
+            </Button>
           </div>
         </div>
       )}

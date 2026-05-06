@@ -14,11 +14,23 @@ import { Input } from "@/shared/components/ui/input";
 import { Search, Loader2, Info, Grid3X3, X } from "lucide-react";
 import { lockerService } from "../../locker/services/locker.service";
 import { cabinetService } from "../services/cabinet.service";
+import { sizeService } from "../../size/services/size.service";
 import type { Cabinet } from "../types/cabinet.types";
 import type { Locker } from "../../locker/types/locker.types";
+import type { Size } from "../../size/types/size.types";
 import { toast } from "sonner";
 import { Badge } from "@/shared/components/ui/badge";
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
+
+const STATUS_CONFIG: Record<string, { label: string; variant: "success" | "secondary" | "destructive" | "outline" | "default" }> = {
+  AVAILABLE: { label: "Trống", variant: "success" },
+  OCCUPIED: { label: "Đã thuê", variant: "secondary" },
+  MAINTENANCE: { label: "Bảo trì", variant: "destructive" },
+  RESERVED: { label: "Đã đặt", variant: "outline" },
+  LOCKED_BY_BALANCE: { label: "Đã khóa bởi ví", variant: "outline" },
+  INITIALIZING: { label: "Đang khởi tạo", variant: "outline" },
+  FAULT: { label: "Lỗi", variant: "destructive" },
+};
 
 interface AssignLockerModalProps {
   open: boolean;
@@ -34,6 +46,7 @@ const AssignLockerModal: React.FC<AssignLockerModalProps> = ({
   onSuccess,
 }) => {
   const [availableLockers, setAvailableLockers] = useState<Locker[]>([]);
+  const [sizes, setSizes] = useState<Size[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,12 +55,18 @@ const AssignLockerModal: React.FC<AssignLockerModalProps> = ({
   const loadAvailableLockers = useCallback(async () => {
     try {
       setIsLoading(true);
-      // Lấy tất cả locker. Ta lọc những cái không thuộc cabinet hiện tại.
-      const response = await lockerService.getAll({ limit: 100 });
-      const lockers = response.data.lockers || [];
-      
-      // Lọc ra các locker chưa gán cho cabinet hiện tại
-      const filtered = lockers.filter(l => l.cabinetId !== cabinet.id);
+      // Lấy tất cả locker và sizes.
+      const [lockersRes, sizesRes] = await Promise.all([
+        lockerService.getAll({ limit: 100 }),
+        sizeService.getAll({ limit: 100 }),
+      ]);
+      const lockers = lockersRes.data.lockers || [];
+      const sizeList = sizesRes.data.sizes || [];
+
+      setSizes(sizeList);
+
+      // Lọc ra các locker chưa gán cho bất kỳ cabinet nào
+      const filtered = lockers.filter(l => !l.cabinetId);
       setAvailableLockers(filtered);
     } catch (error) {
       console.error("Error loading available lockers:", error);
@@ -55,7 +74,7 @@ const AssignLockerModal: React.FC<AssignLockerModalProps> = ({
     } finally {
       setIsLoading(false);
     }
-  }, [cabinet.id]);
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -101,7 +120,7 @@ const AssignLockerModal: React.FC<AssignLockerModalProps> = ({
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-xl font-bold flex items-center gap-2">
             <Grid3X3 className="h-5 w-5 text-primary" />
-            Gán ngăn tủ vào Cabinet
+            Gán tủ vào cụm tủ
           </DialogTitle>
           <DialogDescription>
             Tìm và chọn các ngăn tủ để gán cho cabinet <strong>{cabinet.name}</strong>.
@@ -133,44 +152,54 @@ const AssignLockerModal: React.FC<AssignLockerModalProps> = ({
                 </div>
               ) : (
                 <div className="divide-y divide-border">
-                  {filteredLockers.map((locker) => (
-                    <div 
-                      key={locker.id} 
-                      className={`flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors cursor-pointer ${
-                        selectedIds.includes(locker.id) ? "bg-primary/5" : ""
-                      }`}
-                      onClick={() => toggleSelection(locker.id)}
-                    >
-                      <Checkbox 
-                        checked={selectedIds.includes(locker.id)}
-                        onCheckedChange={() => toggleSelection(locker.id)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="font-semibold text-sm truncate">{locker.lockerLabel || `Locker ${locker.id.substring(0, 8)}`}</p>
-                          {locker.cabinetId && (
-                            <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
-                              Đã gán cabinet khác
-                            </Badge>
-                          )}
+                  {filteredLockers.map((locker) => {
+                    const size = sizes.find((s) => s.id === locker.sizeTypeId);
+                    const statusInfo = STATUS_CONFIG[locker.status] || { label: locker.status, variant: "secondary" };
+                    return (
+                      <div 
+                        key={locker.id} 
+                        className={`flex items-center gap-4 p-4 hover:bg-muted/50 transition-colors cursor-pointer ${
+                          selectedIds.includes(locker.id) ? "bg-primary/5" : ""
+                        }`}
+                        onClick={() => toggleSelection(locker.id)}
+                      >
+                        <Checkbox 
+                          checked={selectedIds.includes(locker.id)}
+                          onCheckedChange={() => toggleSelection(locker.id)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <p className="font-semibold text-sm truncate">{locker.lockerLabel || `Locker ${locker.id.substring(0, 8)}`}</p>
+                            {locker.cabinetId && (
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 font-normal">
+                                Đã gán cabinet khác
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                            <span className="font-mono">{locker.id}</span>
+                            <span>•</span>
+                            <span>Vị trí: {locker.row}-{locker.column}</span>
+                            {size && (
+                              <>
+                                <span>•</span>
+                                <span>Kích thước: {size.name}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span className="font-mono">{locker.id}</span>
-                          <span>•</span>
-                          <span>Vị trí: {locker.row}-{locker.column}</span>
+                        <div className="text-right shrink-0">
+                          <Badge 
+                            variant={statusInfo.variant} 
+                            className="text-[10px]"
+                          >
+                            {statusInfo.label}
+                          </Badge>
                         </div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <Badge 
-                          variant={locker.status === "AVAILABLE" ? "success" : "secondary"} 
-                          className="text-[10px]"
-                        >
-                          {locker.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </ScrollArea>
@@ -207,7 +236,7 @@ const AssignLockerModal: React.FC<AssignLockerModalProps> = ({
             className="min-w-[120px]"
           >
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Gán ngăn tủ
+            Gán tủ vào cụm tủ
           </Button>
         </DialogFooter>
       </DialogContent>

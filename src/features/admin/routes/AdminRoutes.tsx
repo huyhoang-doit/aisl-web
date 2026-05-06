@@ -29,6 +29,7 @@ import ManageVehiclesPage from "../pages/ManageVehiclesPage";
 import ManageDeviceAttachmentPage from "../pages/ManageDeviceAttachmentPage";
 import LogsDevicePage from "../pages/LogsDevicePage";
 import ManageSizePage from "../pages/ManageSizePage";
+import AiSystemConfigPage from "../pages/AiSystemConfigPage";
 const AdminRoutes = () => {
   return (
     <Routes>
@@ -62,6 +63,7 @@ const AdminRoutes = () => {
         <Route path="device-attachments" element={<ManageDeviceAttachmentPage />} />
         <Route path="device-logs" element={<LogsDevicePage />} />
         <Route path="activity-logs" element={<LogsActivityPage />} />
+        <Route path="ai-config" element={<AiSystemConfigPage />} />
 
       </Route>
         <Route path="not-found" element={<NotFoundPage />} />
