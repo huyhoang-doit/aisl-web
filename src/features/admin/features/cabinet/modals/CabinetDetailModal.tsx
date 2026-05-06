@@ -385,7 +385,7 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                   className="gap-2 border-primary text-primary hover:bg-primary/5"
                 >
                   <Link2 className="h-4 w-4" />
-                  Gán ngăn tủ
+                  Gán tủ vào cụm tủ
                 </Button>
                 <Button size="sm" onClick={handleCreateLocker} className="gap-2">
                   <Plus className="h-4 w-4" />

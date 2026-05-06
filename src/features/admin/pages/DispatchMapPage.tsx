@@ -15,16 +15,28 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-const customCourierIcon = new L.Icon({
-  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+const customCourierIcon = L.divIcon({
+  className: "custom-courier-marker",
+  html: `
+    <div style="
+      background-color: #10B981; 
+      width: 32px; 
+      height: 32px; 
+      border-radius: 50%; 
+      border: 3px solid white; 
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    ">
+      🛵
+    </div>
+  `,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16]
 });
-
-
 
 const DispatchMapPage = () => {
   // Default center point: Ho Chi Minh City
@@ -32,11 +44,18 @@ const DispatchMapPage = () => {
   const adminLng = 106.660172;
   const maxDistanceKm = 50;
 
-  const { data: couriers, isLoading, refetch, isRefetching } = useQuery({
+  const { data: rawData, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["dispatch", "couriers", "nearest"],
     queryFn: () => dispatchApi.getNearestCouriers({ latitude: adminLat, longitude: adminLng, maxDistanceKm }),
     refetchInterval: 15000, // Auto-refresh every 15s
   });
+
+  // Extract array of couriers safely
+  const couriers = Array.isArray(rawData)
+    ? rawData
+    : (rawData as any)?.couriers && Array.isArray((rawData as any).couriers)
+    ? (rawData as any).couriers
+    : [];
 
   return (
     <div className="p-6 space-y-6 h-full flex flex-col">
@@ -61,30 +80,30 @@ const DispatchMapPage = () => {
         {/* Sidebar Status List */}
         <Card className="col-span-1 h-full overflow-hidden flex flex-col">
           <CardHeader>
-            <CardTitle className="text-lg">Danh sách tài xế ({Array.isArray(couriers) ? couriers.length : 0})</CardTitle>
+            <CardTitle className="text-lg">Danh sách tài xế ({couriers.length})</CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-auto p-0 border-t">
             {isLoading ? (
                <div className="flex h-32 items-center justify-center">
                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                </div>
-            ) : (Array.isArray(couriers) && couriers.length === 0) ? (
+            ) : couriers.length === 0 ? (
                <div className="p-4 text-center text-sm text-muted-foreground">
                  Không tìm thấy tài xế trực tuyến gần khu vực.
                </div>
             ) : (
                <ul className="divide-y">
-                 {Array.isArray(couriers) ? couriers.map((c: any) => (
+                 {couriers.map((c: any) => (
                    <li key={c.courierId} className="p-4 hover:bg-slate-50 transition-colors">
                      <div className="font-medium text-sm">{c.name || c.courierId}</div>
                      <div className="text-xs text-muted-foreground mt-1">
-                       Khoảng cách: {c.distanceKm.toFixed(2)} km
+                       Khoảng cách: {typeof c.distanceKm === "number" ? c.distanceKm.toFixed(2) : "0"} km
                      </div>
                      <div className="text-xs text-muted-foreground">
                        Trạng thái: <span className="text-green-600 font-medium">Sẵn sàng</span>
                      </div>
                    </li>
-                 )) : null}
+                 ))}
                </ul>
             )}
           </CardContent>
@@ -109,7 +128,7 @@ const DispatchMapPage = () => {
             </Marker>
 
             {/* Couriers */}
-            {Array.isArray(couriers) ? couriers.map((c: any) => (
+            {couriers.map((c: any) => (
               <Marker 
                 key={c.courierId} 
                 position={[c.latitude, c.longitude]}
@@ -118,10 +137,10 @@ const DispatchMapPage = () => {
                 <Popup>
                   <div className="font-semibold">{c.name || "Courier"}</div>
                   <div className="text-xs text-muted-foreground mt-1">ID: {c.courierId}</div>
-                  <div className="text-xs mt-1">Khoảng cách: {c.distanceKm.toFixed(2)} km</div>
+                  <div className="text-xs mt-1">Khoảng cách: {typeof c.distanceKm === "number" ? c.distanceKm.toFixed(2) : "0"} km</div>
                 </Popup>
               </Marker>
-            )) : null}
+            ))}
           </MapContainer>
         </Card>
       </div>
