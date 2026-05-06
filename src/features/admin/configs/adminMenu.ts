@@ -16,6 +16,7 @@ import {
   Bell,
   ShoppingBag,
   Ruler,
+  Cpu,
 } from "lucide-react"
 import { type NavItem } from "@/shared/components/layouts/AppSidebar"
 
@@ -64,7 +65,7 @@ export const adminNavMain: NavItem[] = [
     ],
   },
   {
-    title: "Quản lý locker",
+    title: "Quản lý tủ",
     url: "/admin/locations",
     icon: Package,
     items: [
@@ -104,6 +105,11 @@ export const adminNavMain: NavItem[] = [
         icon: ServerCog,
       },
     ],
+  },
+  {
+    title: "Cấu hình Hệ thống AI",
+    url: "/admin/ai-config",
+    icon: Cpu,
   },
   {
     title: "Điều phối Logistics",

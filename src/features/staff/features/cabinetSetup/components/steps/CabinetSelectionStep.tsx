@@ -105,7 +105,9 @@ export function CabinetSelectionStep({
                   >
                     {cabinet.name || "Tủ không tên"}
                   </Label>
-                  <p className="text-xs text-muted-foreground">Mã: {cabinet.code || "---"}</p>
+                  {cabinet.code && (
+                    <p className="text-xs text-muted-foreground">Mã: {cabinet.code}</p>
+                  )}
                 </div>
               </div>
             );
