@@ -267,7 +267,6 @@ export default function CabinetSetupPage() {
           <div className="flex gap-3 items-center justify-center bg-muted/40 p-3 rounded-xl border">
             {setupResult.cabinetIds.map((_, idx) => {
               const isActive = idx === activeCabinetIndex;
-              const isCompleted = idx < activeCabinetIndex;
               return (
                 <button
                   key={idx}
