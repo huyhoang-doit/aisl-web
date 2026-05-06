@@ -445,7 +445,7 @@ export default function SettingPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {lockers.map((locker) => {
                           const isLockerOpening = openingLockerId === locker.id;
-                          const lockerLabel = locker.lockerLabel || locker.slotIndex || `${locker.row}-${locker.column}`;
+                          const lockerLabel = locker.lockerLabel || (locker as any).slotIndex || `${locker.row}-${locker.column}`;
                           
                           return (
                             <div 
