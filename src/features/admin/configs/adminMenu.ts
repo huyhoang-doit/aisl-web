@@ -90,7 +90,7 @@ export const adminNavMain: NavItem[] = [
         icon: Ruler,
       },
       {
-        title: "Thiết bị gắn tủ",
+        title: "Thiết bị tủ và setup",
         url: "/admin/device-attachments",
         icon: Monitor,
       },

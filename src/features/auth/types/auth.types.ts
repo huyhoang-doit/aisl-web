@@ -35,6 +35,13 @@ export interface RegisterInput {
   fullName: string;
   phoneNumber: string;
   roles: string[];
+  legalName?: string;
+  licensePlate?: string;
+  vehicleType?: string;
+  frontVehicleImageUrl?: string;
+  backVehicleImageUrl?: string;
+  portraitUrl?: string;
+  staffStatus?: string;
 }
 
 export interface RegisterResponse {

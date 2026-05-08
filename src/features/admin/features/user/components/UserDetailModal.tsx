@@ -124,15 +124,15 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Vai trò:</span>
-                <p className="font-medium">
+                <div className="font-medium">
                   <UserRoleComponent user={user} />
-                </p>
+                </div>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">Trạng thái:</span>
-                <p className="font-medium">
+                <div className="font-medium">
                   <StatusComponent status={user.status} />
-                </p>
+                </div>
               </div>
               <div>
                 <span className="text-sm text-muted-foreground">ID:</span>
@@ -168,8 +168,18 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({
                     </Badge>
                   </div>
                 </div>
-                {(user.frontVehicleImageUrl || user.backVehicleImageUrl) && (
-                  <div className="grid gap-4 grid-cols-2 mt-4">
+                {(user.portraitUrl || user.frontVehicleImageUrl || user.backVehicleImageUrl) && (
+                  <div className={`grid gap-4 mt-4 ${
+                    [user.portraitUrl, user.frontVehicleImageUrl, user.backVehicleImageUrl].filter(Boolean).length >= 3 
+                      ? "grid-cols-3" 
+                      : "grid-cols-2"
+                  }`}>
+                    {user.portraitUrl && (
+                      <div>
+                        <span className="text-xs text-muted-foreground">Ảnh chân dung:</span>
+                        <img src={user.portraitUrl} alt="Portrait" className="mt-1 rounded-md border w-full h-32 object-cover" />
+                      </div>
+                    )}
                     {user.frontVehicleImageUrl && (
                       <div>
                         <span className="text-xs text-muted-foreground">Ảnh trước xe:</span>

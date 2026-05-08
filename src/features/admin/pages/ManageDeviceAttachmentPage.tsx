@@ -193,10 +193,10 @@ const ManageDeviceAttachmentPage = () => {
     <div className="container mx-auto py-6 space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
-          Quản lý thiết bị gắn cabinet
+          Quản lý thiết bị tủ và setup
         </h1>
         <p className="text-muted-foreground mt-2">
-          Quản lý danh sách thiết bị gắn vào cabinet (device attachments)
+          Quản lý danh sách thiết bị tủ và setup
         </p>
       </div>
 
