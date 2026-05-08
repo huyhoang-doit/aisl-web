@@ -181,7 +181,7 @@ const ManageUserPage = () => {
     const userId = selectedUser.id || selectedUser.keycloakUserId;
 
     try {
-      await userService.update(userId!, { status: "BLOCKED" });
+      await userService.blockUser(userId!);
       setIsLockDialogOpen(false);
       setSelectedUser(null);
       refetch();
@@ -197,7 +197,7 @@ const ManageUserPage = () => {
     const userId = selectedUser.id || selectedUser.keycloakUserId;
 
     try {
-      await userService.update(userId!, { status: "ACTIVE" });
+      await userService.unblockUser(userId!);
       setIsUnlockDialogOpen(false);
       setSelectedUser(null);
       refetch();

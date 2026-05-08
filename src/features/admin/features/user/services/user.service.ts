@@ -164,4 +164,21 @@ export const userService = {
     const response = await api.get<RolesResponse>("/roles");
     return response as unknown as RolesResponse;
   },
+
+  /**
+   * Block User
+   */
+  blockUser: async (userId: string): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/users/${userId}/block`);
+    return response as unknown as UserResponse;
+  },
+
+  /**
+   * Unblock User
+   */
+  unblockUser: async (userId: string): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/users/${userId}/unblock`);
+    return response as unknown as UserResponse;
+  },
+
 };
