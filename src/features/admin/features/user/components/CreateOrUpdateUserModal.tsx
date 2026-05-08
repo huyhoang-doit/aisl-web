@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
-import { Loader2, ImagePlus, X, Upload } from "lucide-react";
+import { Loader2, ImagePlus, X } from "lucide-react";
 import { useForm, useWatch } from "react-hook-form";
 import { api } from "@/shared/lib/api/client";
 import { toast } from "sonner";
