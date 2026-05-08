@@ -109,8 +109,8 @@ export function CreateOrUpdateDeviceAttachmentModal({
           </DialogTitle>
           <DialogDescription>
             {isUpdateMode
-              ? "Cập nhật thông tin thiết bị gắn vào cabinet. Những thay đổi sẽ được lưu vào hệ thống."
-              : "Thêm thiết bị gắn vào cabinet. Vui lòng điền đầy đủ thông tin."}
+              ? "Cập nhật thông tin thiết bị tủ và setup. Những thay đổi sẽ được lưu vào hệ thống."
+              : "Thêm thiết bị tủ mới và setup. Vui lòng điền đầy đủ thông tin."}
           </DialogDescription>
         </DialogHeader>
 

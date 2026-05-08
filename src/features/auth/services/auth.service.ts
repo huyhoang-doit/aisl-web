@@ -43,7 +43,7 @@ export const authService = {
    * Tạo tài khoản (admin tạo user mới)
    */
    createAccount: async (data: RegisterInput): Promise<RegisterResponse> => {
-    return api.post<RegisterResponse>('/auth/create-account', data);
+    return api.post<RegisterResponse>('/auth/create-user', data);
   },
 
 

@@ -143,15 +143,15 @@ const SubscriptionDetailModal: React.FC<SubscriptionDetailModalProps> = ({
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Vai trò:</span>
-                  <p className="font-medium">
+                  <div className="font-medium">
                     <UserRoleComponent user={userDetail} />
-                  </p>
+                  </div>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Trạng thái:</span>
-                  <p className="font-medium">
+                  <div className="font-medium">
                     <StatusComponent status={userDetail.status} />
-                  </p>
+                  </div>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">ID:</span>

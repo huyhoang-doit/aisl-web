@@ -239,6 +239,13 @@ const ManageUserPage = () => {
           fullName: data.fullName,
           phoneNumber: data.phoneNumber,
           roles: data.roles,
+          legalName: data.legalName,
+          licensePlate: data.licensePlate,
+          vehicleType: data.vehicleType,
+          frontVehicleImageUrl: data.frontVehicleImageUrl,
+          backVehicleImageUrl: data.backVehicleImageUrl,
+          portraitUrl: data.portraitUrl,
+          staffStatus: data.staffStatus,
         });
         toast.success("Thêm người dùng thành công");
         refetch();

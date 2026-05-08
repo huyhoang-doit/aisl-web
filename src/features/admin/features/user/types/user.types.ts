@@ -31,6 +31,7 @@ export interface User {
   licensePlate?: string;
   frontVehicleImageUrl?: string;
   backVehicleImageUrl?: string;
+  portraitUrl?: string;
   vehicleType?: string;
   staffStatus?: string;
   reviewedById?: string;
