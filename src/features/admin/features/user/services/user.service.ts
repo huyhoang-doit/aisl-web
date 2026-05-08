@@ -169,7 +169,7 @@ export const userService = {
    * Block User
    */
   blockUser: async (userId: string): Promise<UserResponse> => {
-    const response = await api.put<UserResponse>(`/users/${userId}/block`);
+    const response = await api.put<UserResponse>(`/users/${userId}/lock`);
     return response as unknown as UserResponse;
   },
 
@@ -177,7 +177,7 @@ export const userService = {
    * Unblock User
    */
   unblockUser: async (userId: string): Promise<UserResponse> => {
-    const response = await api.put<UserResponse>(`/users/${userId}/unblock`);
+    const response = await api.put<UserResponse>(`/users/${userId}/unlock`);
     return response as unknown as UserResponse;
   },
 
