@@ -124,6 +124,30 @@ axiosInstance.interceptors.request.use(
   }
 );
 
+const cleanErrorMessage = (message: string): string => {
+  if (!message) return '';
+  // Strip gRPC prefix like "2 UNKNOWN: Message" or "13 INTERNAL: Message"
+  return message.replace(/^\d+\s+[A-Z_]+:\s*/i, '');
+};
+
+const extractMessage = (data: any, defaultMessage: string): string => {
+  if (!data) return cleanErrorMessage(defaultMessage);
+  if (typeof data === 'string') return cleanErrorMessage(data);
+  
+  const msg = data.message;
+  if (typeof msg === 'string') {
+    return cleanErrorMessage(msg);
+  }
+  if (Array.isArray(msg)) {
+    return msg.map((item: any) => cleanErrorMessage(typeof item === 'object' ? JSON.stringify(item) : String(item))).join(', ');
+  }
+  if (msg && typeof msg === 'object') {
+    return cleanErrorMessage(msg.message || msg.error || JSON.stringify(msg));
+  }
+  
+  return cleanErrorMessage(data.error || defaultMessage);
+};
+
 /**
  * Response Interceptor
  * Xử lý response và error handling
@@ -202,7 +226,7 @@ axiosInstance.interceptors.response.use(
 
       // Tạo error object với thông tin chi tiết
       const apiError = {
-        message: data?.message || error.message || 'Có lỗi xảy ra',
+        message: extractMessage(data, error.message || 'Có lỗi xảy ra'),
         status: status,
         errors: data?.errors || undefined,
         data: data,
