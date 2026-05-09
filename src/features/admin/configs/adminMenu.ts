@@ -111,23 +111,23 @@ export const adminNavMain: NavItem[] = [
     url: "/admin/ai-config",
     icon: Cpu,
   },
-  {
-    title: "Điều phối Logistics",
-    url: "/admin/dispatch-map",
-    icon: MapPin,
-    items: [
-      {
-        title: "Bản đồ Shipper",
-        url: "/admin/dispatch-map",
-        icon: MapPin,
-      },
-      {
-        title: "Loại phương tiện",
-        url: "/admin/vehicles",
-        icon: MapPin,
-      },
-    ],
-  },
+  // {
+  //   title: "Điều phối Logistics",
+  //   url: "/admin/dispatch-map",
+  //   icon: MapPin,
+  //   items: [
+  //     {
+  //       title: "Bản đồ Shipper",
+  //       url: "/admin/dispatch-map",
+  //       icon: MapPin,
+  //     },
+  //     {
+  //       title: "Loại phương tiện",
+  //       url: "/admin/vehicles",
+  //       icon: MapPin,
+  //     },
+  //   ],
+  // },
   {
     title: "Quản lý Đơn hàng",
     url: "/admin/orders",

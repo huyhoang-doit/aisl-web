@@ -165,9 +165,9 @@ const ManageLockerPage = () => {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Quản lý locker</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý tủ đồ</h1>
           <p className="text-muted-foreground mt-2">
-            Quản lý các locker trong hệ thống
+            Quản lý các tủ đồ trong hệ thống
           </p>
         </div>
         <div className="flex items-center gap-2">
