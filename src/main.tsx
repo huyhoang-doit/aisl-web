@@ -1,3 +1,4 @@
+// Trigger deploy: 2026-05-09
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThemeProvider } from "@/features/landing/components/theme-provider";
