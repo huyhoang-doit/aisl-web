@@ -1,3 +1,8 @@
+/**
+ * Hook useFcmToken
+ * Hỗ trợ lấy FCM Token từ Firebase và đăng ký thiết bị lên hệ thống Backend.
+ * Được tích hợp trong hệ thống quản trị AISL Web Portal.
+ */
 import { useCallback } from "react";
 import { getToken } from "firebase/messaging";
 import { messaging } from "@/shared/configs/firebase";
