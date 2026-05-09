@@ -5,7 +5,6 @@ import {
   type QuickFilter,
 } from "@/shared/components/DataTable";
 import TransactionDetailModal from "../features/transaction/components/TransactionDetailModal";
-import { transactionService } from "../features/transaction/services/transaction.service";
 import { useTransaction } from "../features/transaction/hooks/useTransaction";
 import type {
   Transaction,
@@ -13,10 +12,7 @@ import type {
   TransactionType,
 } from "../features/transaction/types/transaction.types";
 import { Badge } from "@/shared/components/ui/badge";
-import { Eye } from "lucide-react";
 import { format } from "date-fns";
-import { toast } from "sonner";
-
 // ─── Display helpers ──────────────────────────────────────────────────────────
 
 const TYPE_LABEL: Record<TransactionType, string> = {
@@ -197,15 +193,15 @@ const ManageTransactionPage = () => {
 
   // ── Actions ────────────────────────────────────────────────────────────────
 
-  const handleViewDetails = async (tx: Transaction) => {
-    try {
-      const res = await transactionService.getDetail(tx.id);
-      setSelectedTransaction(res.data.transaction);
-      setIsDetailModalOpen(true);
-    } catch {
-      toast.error("Không tải được chi tiết giao dịch");
-    }
-  };
+  // const handleViewDetails = async (tx: Transaction) => {
+  //   try {
+  //     const res = await transactionService.getDetail(tx.id);
+  //     setSelectedTransaction(res.data.transaction);
+  //     setIsDetailModalOpen(true);
+  //   } catch {
+  //     toast.error("Không tải được chi tiết giao dịch");
+  //   }
+  // };
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
