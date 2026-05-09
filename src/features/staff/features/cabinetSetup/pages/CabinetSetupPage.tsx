@@ -89,7 +89,11 @@ export default function CabinetSetupPage() {
     queryFn: () => cabinetSetupService.checkActiveSetup(),
   });
 
-  const hasActiveSetup = activeSetupData?.data?.tasks && activeSetupData.data.tasks.length > 0;
+  const hasActiveSetup = !!(
+    activeSetupData?.data?.tasks && 
+    activeSetupData.data.tasks.length > 0 && 
+    (activeSetupData?.data?.pagination?.total ?? 0) > 0
+  );
 
   const form = useForm<SetupCabinetFormValues>({
     resolver: zodResolver(setupCabinetSchema),
@@ -339,7 +343,7 @@ export default function CabinetSetupPage() {
         <div className="bg-destructive/15 text-destructive border border-destructive/25 p-4 rounded-xl flex items-center gap-3 shadow-sm animate-pulse pointer-events-auto">
           <AlertTriangle className="w-5 h-5 shrink-0" />
           <div className="text-sm">
-            <span className="font-bold">Chế độ bị vô hiệu hóa:</span> Bạn không có nhiệm vụ thiết lập tủ (SETUP) ở trạng thái đang thực hiện. Toàn bộ tính năng đã bị khóa.
+            <span className="font-bold">Chế độ bị vô hiệu hóa:</span> Bạn không có nhiệm vụ thiết lập tủ (SETUP) ở trạng thái đang thực hiện. Toàn bộ tính năng đã bị khóa. <span className="font-bold text-destructive underline block mt-1">Chỉ nhân viên có task mới được setup.</span>
           </div>
         </div>
       )}
