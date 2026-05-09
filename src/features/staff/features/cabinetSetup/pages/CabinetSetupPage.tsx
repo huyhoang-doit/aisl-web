@@ -145,7 +145,7 @@ export default function CabinetSetupPage() {
 
   const selectedCabinetIds = fields.map(f => f.cabinetId);
 
-  const isBlocked = !isAdmin && (!isStaff || !hasActiveSetup);
+  const isBlocked = !hasActiveSetup;
 
   if (isLoadingCheck) {
     return (
