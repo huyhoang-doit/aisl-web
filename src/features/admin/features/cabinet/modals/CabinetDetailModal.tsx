@@ -388,6 +388,43 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                   </div>
                 </div>
               </div>
+
+              <div className="rounded-xl border border-border bg-card p-5 shadow-sm mt-4">
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
+                    <Settings className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold text-sm">Cấu hình IoT (Cabinet Config)</h4>
+                </div>
+                {isLoadingConfig ? (
+                  <div className="py-6 flex justify-center">
+                    <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : !config ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">Chưa có cấu hình IoT</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                    <div className="space-y-1 p-3 rounded-lg bg-muted/20 border">
+                      <span className="text-muted-foreground block">Topic Prefix:</span>
+                      <span className="font-mono font-bold text-primary select-all block break-all">{config.mqttTopicPrefix || "N/A"}</span>
+                    </div>
+                    <div className="space-y-1 p-3 rounded-lg bg-muted/20 border">
+                      <span className="text-muted-foreground block">Heartbeat:</span>
+                      <span className="font-bold block">{config.heartbeatInterval ? `${config.heartbeatInterval} giây` : "N/A"}</span>
+                    </div>
+                    <div className="space-y-1 p-3 rounded-lg bg-muted/20 border">
+                      <span className="text-muted-foreground block">Timeout mở cửa:</span>
+                      <span className="font-bold block">{config.openDoorTimeout ? `${config.openDoorTimeout} giây` : "N/A"}</span>
+                    </div>
+                    <div className="space-y-2 p-3 rounded-lg bg-muted/20 border flex flex-col justify-between">
+                      <span className="text-muted-foreground block">Trạng thái đồng bộ:</span>
+                      <Badge variant={config.isSynced ? "success" : "warning"} className="text-[10px] w-fit px-1.5 py-0.5">
+                        {config.isSynced ? "Đã đồng bộ" : "Chưa đồng bộ"}
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Cột 2: Thống kê nhanh hoặc trạng thái */}
@@ -437,43 +474,6 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                         </Badge>
                       </div>
                     ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-                <div className="flex items-center gap-4 mb-3">
-                  <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
-                    <Settings className="h-5 w-5" />
-                  </div>
-                  <h4 className="font-semibold text-sm">Cấu hình IoT (Cabinet Config)</h4>
-                </div>
-                {isLoadingConfig ? (
-                  <div className="py-6 flex justify-center">
-                    <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
-                  </div>
-                ) : !config ? (
-                  <p className="text-xs text-muted-foreground text-center py-4">Chưa có cấu hình IoT</p>
-                ) : (
-                  <div className="space-y-3 text-xs">
-                    <div className="flex justify-between items-center border-b border-dashed pb-2">
-                      <span className="text-muted-foreground">Topic Prefix:</span>
-                      <span className="font-mono font-medium text-primary select-all">{config.mqttTopicPrefix || "N/A"}</span>
-                    </div>
-                    <div className="flex justify-between items-center border-b border-dashed pb-2">
-                      <span className="text-muted-foreground">Heartbeat:</span>
-                      <span className="font-medium">{config.heartbeatInterval ? `${config.heartbeatInterval} giây` : "N/A"}</span>
-                    </div>
-                    <div className="flex justify-between items-center border-b border-dashed pb-2">
-                      <span className="text-muted-foreground">Timeout mở cửa:</span>
-                      <span className="font-medium">{config.openDoorTimeout ? `${config.openDoorTimeout} giây` : "N/A"}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-muted-foreground">Đã đồng bộ:</span>
-                      <Badge variant={config.isSynced ? "success" : "warning"} className="text-[10px] px-1.5 py-0">
-                        {config.isSynced ? "Đã đồng bộ" : "Chưa đồng bộ"}
-                      </Badge>
-                    </div>
                   </div>
                 )}
               </div>
