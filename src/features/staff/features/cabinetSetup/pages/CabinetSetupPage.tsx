@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Check, ChevronRight, Wifi, AlertTriangle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { cabinetSetupService } from "../services/cabinetSetup.service";
-import { useAuthStore } from "@/features/auth/store/auth.store";
+import { useAuthStore, useIsAdmin, useIsStaff } from "@/features/auth/store/auth.store";
 import type { SlaveDetail } from "../types/cabinetSetup.types";
 import { useDiscoverySocket } from "../hooks/useDiscoverySocket";
 import React from "react";
@@ -80,8 +80,16 @@ export default function CabinetSetupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
-
+  const isAdmin = useIsAdmin();
+  const isStaff = useIsStaff();
   const paramLocationId = searchParams.get("locationId") || "";
+
+  const { data: activeSetupData, isLoading: isLoadingCheck } = useQuery({
+    queryKey: ["active-setup-check"],
+    queryFn: () => cabinetSetupService.checkActiveSetup(),
+  });
+
+  const hasActiveSetup = activeSetupData?.data?.tasks && activeSetupData.data.tasks.length > 0;
 
   const form = useForm<SetupCabinetFormValues>({
     resolver: zodResolver(setupCabinetSchema),
@@ -132,6 +140,17 @@ export default function CabinetSetupPage() {
   });
 
   const selectedCabinetIds = fields.map(f => f.cabinetId);
+
+  const isBlocked = !isAdmin && (!isStaff || !hasActiveSetup);
+
+  if (isLoadingCheck) {
+    return (
+      <div className="container max-w-5xl py-20 flex flex-col items-center justify-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <p className="text-muted-foreground font-medium text-lg">Đang kiểm tra nhiệm vụ thiết lập của bạn...</p>
+      </div>
+    );
+  }
 
   const handleScan = async () => {
     const mac = form.getValues("macAddress");
@@ -315,7 +334,15 @@ export default function CabinetSetupPage() {
   }
 
   return (
-    <div className="container max-w-5xl py-10 space-y-8">
+    <div className={`container max-w-5xl py-10 space-y-8 ${isBlocked ? "pointer-events-none opacity-50 select-none cursor-not-allowed filter grayscale" : ""}`}>
+      {isBlocked && (
+        <div className="bg-destructive/15 text-destructive border border-destructive/25 p-4 rounded-xl flex items-center gap-3 shadow-sm animate-pulse pointer-events-auto">
+          <AlertTriangle className="w-5 h-5 shrink-0" />
+          <div className="text-sm">
+            <span className="font-bold">Chế độ bị vô hiệu hóa:</span> Bạn không có nhiệm vụ thiết lập tủ (SETUP) ở trạng thái đang thực hiện. Toàn bộ tính năng đã bị khóa.
+          </div>
+        </div>
+      )}
       <div>
          <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0">

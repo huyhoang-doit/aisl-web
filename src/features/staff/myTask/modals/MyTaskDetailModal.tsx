@@ -140,7 +140,7 @@ export function MyTaskDetailModal({
                   </DialogTitle>
                   <DialogDescription>Chi tiết task của tôi</DialogDescription>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 mr-8">
                   <StatusComponent status={task.status} />
                   <Badge variant={priorityVariant[task.priority] ?? "default"}>
                     {PRIORITY_LABELS[task.priority] ?? task.priority}
