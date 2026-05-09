@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Plus, Pencil, Trash2, Hash, Activity, MapPin, Calendar, Info, Globe, Link2, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Hash, Activity, MapPin, Calendar, Info, Globe, Link2, RefreshCw, Plug } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import LockerTable from "../../locker/components/LockerTable";
@@ -27,6 +27,7 @@ import {
 import { lockerService } from "../../locker/services/locker.service";
 import { cabinetService } from "../services/cabinet.service";
 import { cabinetSetupService } from "@/features/staff/features/cabinetSetup/services/cabinetSetup.service";
+import { deviceAttachmentService } from "@/features/admin/features/deviceAttachment/services/deviceAttachment.service";
 import { toast } from "sonner";
 import { Badge } from "@/shared/components/ui/badge";
 import { Separator } from "@/shared/components/ui/separator";
@@ -67,6 +68,27 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   const [lockerModalMode, setLockerModalMode] = useState<"create" | "update">("create");
   const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [attachments, setAttachments] = useState<any[]>([]);
+  const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+
+  const loadAttachments = useCallback(async () => {
+    if (!open || !cabinet.id) return;
+    try {
+      setIsLoadingAttachments(true);
+      const response = await deviceAttachmentService.getAll({
+        cabinetId: cabinet.id,
+        page: 1,
+        limit: 100,
+      });
+      const items = response.data.deviceAttachments ?? response.data.items ?? response.data.content ?? response.data.data ?? [];
+      setAttachments(items);
+    } catch (error) {
+      console.error("Error loading attachments:", error);
+      setAttachments([]);
+    } finally {
+      setIsLoadingAttachments(false);
+    }
+  }, [open, cabinet.id]);
 
   const loadLockers = useCallback(async () => {
     if (!open || !cabinet.id) return;
@@ -91,7 +113,8 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
 
   useEffect(() => {
     loadLockers();
-  }, [loadLockers]);
+    loadAttachments();
+  }, [loadLockers, loadAttachments]);
 
   const handleClose = (value: boolean | Cabinet) => {
     if (typeof onOpenChange === "function") {
@@ -368,6 +391,36 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                     <span className="text-lg font-bold">{total}</span>
                   </div>
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="rounded-lg bg-success/10 p-2 text-success">
+                    <Plug className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold text-sm">Thiết bị đi kèm ({attachments.length})</h4>
+                </div>
+                {isLoadingAttachments ? (
+                  <div className="py-6 flex justify-center">
+                    <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : attachments.length === 0 ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">Chưa gán thiết bị nào</p>
+                ) : (
+                  <div className="space-y-3 max-h-[180px] overflow-y-auto pr-1">
+                    {attachments.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between p-2.5 rounded-lg border bg-muted/20 hover:bg-muted/40 transition-colors">
+                        <div className="space-y-0.5">
+                          <p className="text-xs font-bold">{item.name}</p>
+                          <p className="font-mono text-[10px] text-muted-foreground">SN: {item.serialNumber}</p>
+                        </div>
+                        <Badge variant={item.isActive ? "success" : "secondary"} className="text-[10px] px-1.5 py-0">
+                          {item.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
