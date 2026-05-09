@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Check, ChevronRight, Wifi, AlertTriangle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { cabinetSetupService } from "../services/cabinetSetup.service";
-import { useAuthStore, useIsAdmin, useIsStaff } from "@/features/auth/store/auth.store";
+import { useAuthStore } from "@/features/auth/store/auth.store";
 import type { SlaveDetail } from "../types/cabinetSetup.types";
 import { useDiscoverySocket } from "../hooks/useDiscoverySocket";
 import React from "react";
@@ -80,8 +80,6 @@ export default function CabinetSetupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user } = useAuthStore();
-  const isAdmin = useIsAdmin();
-  const isStaff = useIsStaff();
   const paramLocationId = searchParams.get("locationId") || "";
 
   const { data: activeSetupData, isLoading: isLoadingCheck } = useQuery({
