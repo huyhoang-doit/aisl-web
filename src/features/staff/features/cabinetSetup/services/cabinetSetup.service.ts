@@ -41,4 +41,8 @@ export const cabinetSetupService = {
     const response = await api.post<any>(`/cabinets/${id}/reset-setup`);
     return response.data;
   },
+
+  checkActiveSetup: async (): Promise<any> => {
+    return api.get<any>("/maintenance/tasks/check-active-setup");
+  },
 };

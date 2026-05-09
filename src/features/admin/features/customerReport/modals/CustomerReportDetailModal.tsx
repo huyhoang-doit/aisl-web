@@ -27,6 +27,7 @@ import StatusComponent from "@/shared/components/StatusComponent";
 import type { CustomerReport, AssignedStaffItem } from "../types/customerReport.types";
 import { maintenanceReportService } from "../services/maintenanceReport.service";
 import { TaskDetailModal } from "@/features/admin/features/task/modals/TaskDetailModal";
+import { ViewWorkLogsOfTask } from "@/features/staff/myTask/components/ViewWorkLogsOfTask";
 
 interface CustomerReportDetailModalProps {
   open: boolean;
@@ -270,6 +271,29 @@ function AssignedStaffContent({
   );
 }
 
+function ReportWorkLogsContent({ assignedStaff }: { assignedStaff: AssignedStaffItem[] }) {
+  return (
+    <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1">
+      {assignedStaff.map((staff) => (
+        <div key={staff.taskId} className="space-y-3 border p-4 rounded-lg bg-card shadow-sm">
+          <div className="flex items-center justify-between border-b pb-2 mb-2">
+            <div>
+              <span className="font-bold text-sm text-foreground">{staff.staffName}</span>
+              <span className="text-xs text-muted-foreground ml-2">
+                ({TASK_TYPE_LABELS[staff.taskType] ?? staff.taskType})
+              </span>
+            </div>
+            <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded border">
+              {staff.taskCode}
+            </span>
+          </div>
+          <ViewWorkLogsOfTask taskId={staff.taskId} taskStatus={staff.taskStatus as any} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function CustomerReportDetailModal({
   open,
   onOpenChange,
@@ -356,7 +380,7 @@ export function CustomerReportDetailModal({
 
         {report.assignedStaff?.length ? (
           <Tabs defaultValue="report" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="report" className="active-tab flex items-center gap-2">
                 <ClipboardList className="h-4 w-4" />
                 Thông tin báo cáo
@@ -364,6 +388,10 @@ export function CustomerReportDetailModal({
               <TabsTrigger value="staff" className="active-tab flex items-center gap-2">
                 <Users className="h-4 w-4" />
                 Danh sách nhân viên
+              </TabsTrigger>
+              <TabsTrigger value="worklog" className="active-tab flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Work log
               </TabsTrigger>
             </TabsList>
             <TabsContent value="report" className="mt-4">
@@ -375,6 +403,9 @@ export function CustomerReportDetailModal({
                 assignmentSummary={report.assignmentSummary}
                 onViewTask={(taskId) => setTaskDetailTaskId(taskId)}
               />
+            </TabsContent>
+            <TabsContent value="worklog" className="mt-4">
+              <ReportWorkLogsContent assignedStaff={report.assignedStaff} />
             </TabsContent>
           </Tabs>
         ) : (
