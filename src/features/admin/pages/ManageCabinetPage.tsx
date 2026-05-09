@@ -171,7 +171,7 @@ const ManageCabinetPage = () => {
         onCreate={handleCreate}
         emptyMessage="Chưa có cụm tủ nào"
         isLoading={isLoading}
-        gridCols={{ default: 1, md: 2, lg: 3, xl: 4 }}
+        gridCols={{ default: 1, md: 2, lg: 3, xl: 3 }}
         searchable={true}
         searchPlaceholder="Tìm kiếm theo tên, MAC..."
         onSearch={handleSearch}
