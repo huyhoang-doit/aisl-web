@@ -67,6 +67,7 @@ export default function CabinetSetupPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
   const [discoveredSlaves, setDiscoveredSlaves] = useState<SlaveDetail[]>([]);
+  const [socketMacAddress, setSocketMacAddress] = useState<string>("");
   
   const [setupResult, setSetupResult] = useState<{ 
     macAddress: string;
@@ -97,8 +98,8 @@ export default function CabinetSetupPage() {
     resolver: zodResolver(setupCabinetSchema),
     mode: "onChange",
     defaultValues: {
-      locationId: paramLocationId,
-      macAddress: "",
+      locationId: paramLocationId || localStorage.getItem("web_setup_locationId") || "",
+      macAddress: localStorage.getItem("web_setup_macAddress") || "",
       heartbeatInterval: 60,
       openDoorTimeout: 5,
       configurations: [],
@@ -115,11 +116,30 @@ export default function CabinetSetupPage() {
     enabled: !!locationIdValue,
   });
 
-  const { discoveryResult, isConnected, resetDiscovery } = useDiscoverySocket(macAddress);
+  const { discoveryResult, isConnected, resetDiscovery } = useDiscoverySocket(socketMacAddress || undefined);
 
   useEffect(() => {
     console.log(`[Page] WebSocket Status: ${isConnected ? 'CONNECTED' : 'DISCONNECTED'}`);
   }, [isConnected]);
+
+  useEffect(() => {
+    const initialMac = form.getValues("macAddress");
+    if (initialMac) {
+      setSocketMacAddress(initialMac);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (macAddress) {
+      localStorage.setItem("web_setup_macAddress", macAddress);
+    }
+  }, [macAddress]);
+
+  useEffect(() => {
+    if (locationIdValue) {
+      localStorage.setItem("web_setup_locationId", locationIdValue);
+    }
+  }, [locationIdValue]);
 
   useEffect(() => {
     if (isScanning && discoveryResult) {
@@ -161,6 +181,7 @@ export default function CabinetSetupPage() {
       return;
     }
 
+    setSocketMacAddress(mac);
     resetDiscovery();
     setIsScanning(true);
     setHasScanned(false);
@@ -326,6 +347,7 @@ export default function CabinetSetupPage() {
                 toast.success(`Cụm tủ thứ ${activeCabinetIndex + 1} đã hoàn tất. Chuyển sang cụm tủ tiếp theo.`);
               } else {
                 toast.success("Tất cả các cụm tủ đã thiết lập thành công!");
+                localStorage.setItem("web_cabinet_id", activeCabinetId);
                 navigate('/admin/setup-cabinet');
               }
             }}
@@ -335,10 +357,12 @@ export default function CabinetSetupPage() {
     );
   }
 
+  const previouslySetupCabinetId = localStorage.getItem("web_cabinet_id");
+
   return (
-    <div className={`container max-w-5xl py-10 space-y-8 ${isBlocked ? "pointer-events-none opacity-50 select-none cursor-not-allowed filter grayscale" : ""}`}>
+    <div className="container max-w-5xl py-10 space-y-8 animate-in fade-in duration-500">
       {isBlocked && (
-        <div className="bg-destructive/15 text-destructive border border-destructive/25 p-4 rounded-xl flex items-center gap-3 shadow-sm animate-pulse pointer-events-auto">
+        <div className="bg-destructive/15 text-destructive border border-destructive/25 p-4 rounded-xl flex items-center gap-3 shadow-sm animate-pulse">
           <AlertTriangle className="w-5 h-5 shrink-0" />
           <div className="text-sm">
             <span className="font-bold">Chế độ bị vô hiệu hóa:</span> Bạn không có nhiệm vụ thiết lập tủ (SETUP) ở trạng thái đang thực hiện. Toàn bộ tính năng đã bị khóa. <span className="font-bold text-destructive underline block mt-1">Chỉ nhân viên có task mới được setup.</span>
@@ -351,13 +375,20 @@ export default function CabinetSetupPage() {
                <Wifi className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">Thiết lập kết nối Tủ (Cabinet)</h2>
+              <div className="flex items-center gap-4">
+                <h2 className="text-3xl font-bold tracking-tight">Thiết lập kết nối Tủ (Cabinet)</h2>
+                {previouslySetupCabinetId && (
+                  <span className="px-3 py-1 bg-green-500/10 text-green-600 border border-green-500/20 text-xs font-bold rounded-lg">
+                    ✓ ĐÃ SETUP (ID: {previouslySetupCabinetId.substring(0, 8)}...)
+                  </span>
+                )}
+              </div>
               <p className="text-muted-foreground mt-1">Quy trình 4 bước: Kết nối &rarr; Chọn Tủ &rarr; Cấu hình &rarr; Hoàn tất</p>
             </div>
          </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+      <div className={`grid grid-cols-1 md:grid-cols-12 gap-8 ${isBlocked ? "pointer-events-none opacity-50 select-none cursor-not-allowed filter grayscale" : ""}`}>
         <div className="md:col-span-3">
           <div className="sticky top-6 rounded-xl border bg-card p-4 shadow-sm">
             <nav aria-label="Progress" className="hidden md:block">
