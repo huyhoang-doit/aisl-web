@@ -1,5 +1,12 @@
 export type TransactionStatus = "SUCCESS" | "FAILED" | "PENDING";
-export type TransactionType = "TOPUP" | "PAYMENT" | "REFUND" | "WITHDRAW" | "LOGISTICS_DEDUCTION";
+export type TransactionType =
+  | "DEPOSIT"
+  | "RENTAL_DEDUCTION"
+  | "LOGISTICS_DEDUCTION"
+  | "OVERDUE_PENALTY"
+  | "REFUND"
+  | "TOP_UP"
+  | "WITHDRAW";
 
 export interface Transaction {
   id: string;
