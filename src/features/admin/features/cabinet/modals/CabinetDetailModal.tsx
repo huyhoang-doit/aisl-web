@@ -7,7 +7,7 @@ import {
   DialogTitle,
 } from "@/shared/components/ui/dialog";
 import { Button } from "@/shared/components/ui/button";
-import { Plus, Pencil, Trash2, Hash, Activity, MapPin, Calendar, Info, Globe, Link2, RefreshCw, Plug } from "lucide-react";
+import { Plus, Pencil, Trash2, Hash, Activity, MapPin, Calendar, Info, Globe, Link2, RefreshCw, Plug, Settings } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import LockerTable from "../../locker/components/LockerTable";
@@ -70,6 +70,23 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   const [isResetting, setIsResetting] = useState(false);
   const [attachments, setAttachments] = useState<any[]>([]);
   const [isLoadingAttachments, setIsLoadingAttachments] = useState(false);
+  const [config, setConfig] = useState<any>(null);
+  const [isLoadingConfig, setIsLoadingConfig] = useState(false);
+
+  const loadConfig = useCallback(async () => {
+    if (!open || !cabinet.macAddress) return;
+    try {
+      setIsLoadingConfig(true);
+      const response = await cabinetService.getConfig(cabinet.macAddress);
+      // Backend might wrap data in response.data or return directly
+      setConfig(response?.data ?? response ?? null);
+    } catch (error) {
+      console.error("Error loading config:", error);
+      setConfig(null);
+    } finally {
+      setIsLoadingConfig(false);
+    }
+  }, [open, cabinet.macAddress]);
 
   const loadAttachments = useCallback(async () => {
     if (!open || !cabinet.id) return;
@@ -114,7 +131,8 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
   useEffect(() => {
     loadLockers();
     loadAttachments();
-  }, [loadLockers, loadAttachments]);
+    loadConfig();
+  }, [loadLockers, loadAttachments, loadConfig]);
 
   const handleClose = (value: boolean | Cabinet) => {
     if (typeof onOpenChange === "function") {
@@ -419,6 +437,43 @@ const CabinetDetailModal: React.FC<CabinetDetailModalProps> = ({
                         </Badge>
                       </div>
                     ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="rounded-lg bg-blue-500/10 p-2 text-blue-600">
+                    <Settings className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold text-sm">Cấu hình IoT (Cabinet Config)</h4>
+                </div>
+                {isLoadingConfig ? (
+                  <div className="py-6 flex justify-center">
+                    <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : !config ? (
+                  <p className="text-xs text-muted-foreground text-center py-4">Chưa có cấu hình IoT</p>
+                ) : (
+                  <div className="space-y-3 text-xs">
+                    <div className="flex justify-between items-center border-b border-dashed pb-2">
+                      <span className="text-muted-foreground">Topic Prefix:</span>
+                      <span className="font-mono font-medium text-primary select-all">{config.mqttTopicPrefix || "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-dashed pb-2">
+                      <span className="text-muted-foreground">Heartbeat:</span>
+                      <span className="font-medium">{config.heartbeatInterval ? `${config.heartbeatInterval} giây` : "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-dashed pb-2">
+                      <span className="text-muted-foreground">Timeout mở cửa:</span>
+                      <span className="font-medium">{config.openDoorTimeout ? `${config.openDoorTimeout} giây` : "N/A"}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">Đã đồng bộ:</span>
+                      <Badge variant={config.isSynced ? "success" : "warning"} className="text-[10px] px-1.5 py-0">
+                        {config.isSynced ? "Đã đồng bộ" : "Chưa đồng bộ"}
+                      </Badge>
+                    </div>
                   </div>
                 )}
               </div>

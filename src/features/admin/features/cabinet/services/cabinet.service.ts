@@ -96,4 +96,11 @@ export const cabinetService = {
   delete: async (id: string): Promise<void> => {
     return api.delete<void>(`/cabinets/${id}`);
   },
+
+  /**
+   * Lấy cấu hình của cabinet qua MAC address
+   */
+  getConfig: async (macAddress: string): Promise<any> => {
+    return api.get<any>(`/cabinets/config/${macAddress}`);
+  },
 };
