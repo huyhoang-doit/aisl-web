@@ -360,7 +360,7 @@ export default function CabinetSetupPage() {
   const previouslySetupCabinetId = localStorage.getItem("web_cabinet_id");
 
   return (
-    <div className="container max-w-5xl py-10 space-y-8 animate-in fade-in duration-500">
+    <div className="container mx-auto py-6 space-y-6">
       {isBlocked && (
         <div className="bg-destructive/15 text-destructive border border-destructive/25 p-4 rounded-xl flex items-center gap-3 shadow-sm animate-pulse">
           <AlertTriangle className="w-5 h-5 shrink-0" />
@@ -371,12 +371,9 @@ export default function CabinetSetupPage() {
       )}
       <div>
          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 text-primary rounded-lg shrink-0">
-               <Wifi className="w-6 h-6" />
-            </div>
             <div>
               <div className="flex items-center gap-4">
-                <h2 className="text-3xl font-bold tracking-tight">Thiết lập kết nối Tủ (Cabinet)</h2>
+                <h2 className="text-2xl font-bold tracking-tight">Thiết lập kết nối Tủ (Cabinet)</h2>
                 {previouslySetupCabinetId && (
                   <span className="px-3 py-1 bg-green-500/10 text-green-600 border border-green-500/20 text-xs font-bold rounded-lg">
                     ✓ ĐÃ SETUP (ID: {previouslySetupCabinetId.substring(0, 8)}...)

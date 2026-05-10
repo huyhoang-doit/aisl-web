@@ -79,10 +79,10 @@ export default function ManageOrderPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10 py-4 -mt-6 mb-2">
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">Quản lý Đơn hàng</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Quản lý Đơn hàng</h1>
           <p className="text-muted-foreground">Theo dõi và quản lý các đơn gửi hàng, thuê tủ trên toàn hệ thống.</p>
         </div>
         <div className="flex gap-2">
@@ -94,36 +94,32 @@ export default function ManageOrderPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card className="border-none shadow-md overflow-hidden bg-card/50 backdrop-blur">
-            <CardContent className="p-0">
-              <OrderTable
-                orders={data?.orders || []}
-                isLoading={isLoading}
-                onViewDetails={handleViewDetails}
-                searchable
-                onSearch={(query: string) => {
-                    setSearch(query);
-                    setPage(1);
-                }}
-                pagination={
-                  data?.pagination
-                    ? {
-                        page: data.pagination.page,
-                        pageSize: data.pagination.limit,
-                        total: data.pagination.total,
-                        onPageChange: (page: number) => {
-                          setPage(page);
-                        },
-                        onPageSizeChange: (size: number) => {
-                          setLimit(size);
-                          setPage(1);
-                        },
-                      }
-                    : undefined
-                }
-              />
-            </CardContent>
-          </Card>
+          <OrderTable
+            orders={data?.orders || []}
+            isLoading={isLoading}
+            onViewDetails={handleViewDetails}
+            searchable
+            onSearch={(query: string) => {
+              setSearch(query);
+              setPage(1);
+            }}
+            pagination={
+              data?.pagination
+                ? {
+                    page: data.pagination.page,
+                    pageSize: data.pagination.limit,
+                    total: data.pagination.total,
+                    onPageChange: (page: number) => {
+                      setPage(page);
+                    },
+                    onPageSizeChange: (size: number) => {
+                      setLimit(size);
+                      setPage(1);
+                    },
+                  }
+                : undefined
+            }
+          />
         </div>
 
         <div className="space-y-6">
@@ -173,7 +169,7 @@ export default function ManageOrderPage() {
             </CardContent>
           </Card>
           
-          <div className="bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 rounded-xl p-6 shadow-sm">
+          <div className="bg-blue-50/80 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50 p-6 shadow-sm">
             <h4 className="text-blue-800 dark:text-blue-300 font-bold text-base mb-2 flex items-center gap-2">
               Lưu ý nghiệp vụ
             </h4>
