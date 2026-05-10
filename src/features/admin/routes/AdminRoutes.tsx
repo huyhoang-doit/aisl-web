@@ -21,8 +21,8 @@ import ManageHardwarePage from "../pages/ManageHardwarePage";
 import LogsActivityPage from "../pages/LogsActivityPage";
 import ManageStaffApplication from "../pages/ManageStaffApplication";
 import CabinetSetupPage from "@/features/staff/features/cabinetSetup/pages/CabinetSetupPage";
-import AdminNotificationListPage from "@/features/notification/pages/AdminNotificationListPage";
-import AdminNotificationDetailPage from "@/features/notification/pages/AdminNotificationDetailPage";
+import NotificationsPage from "@/shared/pages/NotificationsPage";
+import NotificationDetailPage from "@/shared/pages/NotificationDetailPage";
 import DispatchMapPage from "../pages/DispatchMapPage";
 import ManageTask from "../pages/ManageTask";
 import ManageVehiclesPage from "../pages/ManageVehiclesPage";
@@ -54,8 +54,8 @@ const AdminRoutes = () => {
         <Route path="hardware-monitor" element={<ManageHardwarePage />} />
         <Route path="setup-cabinet" element={<CabinetSetupPage />} />
         <Route path="plans" element={<ManagePlanPage />} />
-        <Route path="notifications" element={<AdminNotificationListPage />} />
-        <Route path="notifications/:id" element={<AdminNotificationDetailPage />} />
+        <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="notifications/:id" element={<NotificationDetailPage />} />
         <Route path="dispatch-map" element={<DispatchMapPage />} />
         <Route path="vehicles" element={<ManageVehiclesPage />} />
         <Route path="pricing" element={<ManagePricingPage />} />
