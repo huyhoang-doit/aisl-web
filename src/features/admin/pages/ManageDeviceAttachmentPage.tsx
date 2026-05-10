@@ -200,18 +200,6 @@ const ManageDeviceAttachmentPage = () => {
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-4 rounded-md border border-border bg-card p-4">
-        <span className="text-sm font-medium text-muted-foreground">
-          Lọc theo cabinet:
-        </span>
-        <CabinetSelector
-          value={selectedCabinetId}
-          onValueChange={setSelectedCabinetId}
-          placeholder="Tất cả cabinet"
-          allowClear={true}
-        />
-      </div>
-
       <DataTable
         data={deviceAttachments}
         columns={columns}
@@ -231,6 +219,15 @@ const ManageDeviceAttachmentPage = () => {
           onPageSizeChange: setPageSize,
           pageSizeOptions: [5, 10, 20, 50, 100],
         }}
+        extraFiltersComponent={
+          <CabinetSelector
+            value={selectedCabinetId}
+            onValueChange={setSelectedCabinetId}
+            placeholder="Tất cả cabinet"
+            allowClear={true}
+            className="w-[200px]"
+          />
+        }
         searchable={true}
         searchPlaceholder="Tìm theo tên, số serial..."
         onSearch={handleSearch}

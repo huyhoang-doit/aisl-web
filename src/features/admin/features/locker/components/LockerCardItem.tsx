@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
-import { Calendar, MapPin, Package, Server } from "lucide-react";
+import { MapPin, Package, Server } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import type { Locker, LockerStatus } from "../types/locker.types";
 
@@ -28,76 +28,59 @@ const LockerCardItem: React.FC<LockerCardItemProps> = ({ locker, onClick }) => {
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all hover:shadow-lg hover:border-primary/50",
+        "cursor-pointer transition-all hover:shadow-lg hover:border-primary/50 h-[200px] flex flex-col",
         onClick && "cursor-pointer"
       )}
       onClick={onClick}
     >
-      <CardHeader>
+      <CardHeader className="pb-2 shrink-0">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <CardTitle className="text-lg font-semibold font-mono">
+          <div className="flex-1 min-w-0">
+            <CardTitle className="text-lg font-semibold font-mono truncate">
               {displayTitle}
             </CardTitle>
             <div className="flex flex-col gap-1 mt-1">
               {locker.cabinetName && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Server className="h-3 w-3" />
+                  <Server className="h-3 w-3 shrink-0" />
                   <span className="truncate max-w-[150px]">{locker.cabinetName}</span>
                 </div>
               )}
               {locker.locationName && (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
+                  <MapPin className="h-3 w-3 shrink-0" />
                   <span className="truncate max-w-[150px]">{locker.locationName}</span>
                 </div>
               )}
             </div>
           </div>
-          <div className="flex flex-col gap-2 items-end">
-            {/* <Badge variant={statusInfo.variant}>
-              {statusInfo.label}
-            </Badge>
-            <Badge variant="outline" className="text-xs">
-              {sizeName}
-            </Badge> */}
-          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Package className="h-4 w-4" />
-                <span>Kích thước</span>
-              </div>
-              <p className="font-medium">{sizeName}</p>
+      <CardContent className="flex-1 flex flex-col justify-between pt-0">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Package className="h-4 w-4 shrink-0" />
+              <span>Kích thước</span>
             </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>Trạng thái</span>
-              </div>
-              <Badge variant={statusInfo.variant} className="w-fit">
-                {statusInfo.label}
-              </Badge>
-            </div>
+            <p className="font-medium truncate">{sizeName}</p>
           </div>
-
-          <div className="text-xs text-muted-foreground">
-            Vị trí: Hàng {locker.row}, Cột {locker.column}
-            {locker.isActive !== undefined && (
-              <span className="ml-2">
-                • {locker.isActive ? "Hoạt động" : "Không hoạt động"}
-              </span>
-            )}
-          </div>
-
-          {locker.createdAt && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3" />
-              <span>Tạo: {new Date(locker.createdAt).toLocaleDateString("vi-VN")}</span>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Trạng thái</span>
             </div>
+            <Badge variant={statusInfo.variant} className="w-fit">
+              {statusInfo.label}
+            </Badge>
+          </div>
+        </div>
+
+        <div className="text-xs text-muted-foreground mt-auto pt-2 border-t">
+          Vị trí: Hàng {locker.row}, Cột {locker.column}
+          {locker.isActive !== undefined && (
+            <span className="ml-2">
+              • {locker.isActive ? "Hoạt động" : "Không hoạt động"}
+            </span>
           )}
         </div>
       </CardContent>

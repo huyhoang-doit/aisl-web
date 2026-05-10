@@ -60,12 +60,12 @@ export interface ActionButton<T> {
   icon?: React.ReactNode;
   onClick: (_row: T) => void;
   variant?:
-    | "default"
-    | "destructive"
-    | "outline"
-    | "secondary"
-    | "ghost"
-    | "link";
+  | "default"
+  | "destructive"
+  | "outline"
+  | "secondary"
+  | "ghost"
+  | "link";
   className?: string;
   /** Chỉ hiển thị action khi return true (theo từng dòng) */
   visible?: (_row: T) => boolean;
@@ -144,6 +144,7 @@ export interface DataTableProps<T> {
   onQuickFilterChange?: (key: string, value: string) => void;
   onClearFilters?: () => void;
   hasExternalFilters?: boolean;
+  extraFiltersComponent?: React.ReactNode;
 }
 
 export function DataTable<T extends Record<string, any>>({
@@ -185,7 +186,8 @@ export function DataTable<T extends Record<string, any>>({
   quickFilters = EMPTY_QUICK_FILTERS,
   onQuickFilterChange,
   onClearFilters,
-  hasExternalFilters = false
+  hasExternalFilters = false,
+  extraFiltersComponent
 }: DataTableProps<T>) {
   console.log("🚀 ~ DataTable ~ data:", data)
   const [sortConfig, setSortConfig] = React.useState<SortConfig | null>(
@@ -351,7 +353,7 @@ export function DataTable<T extends Record<string, any>>({
                     handleQuickFilterChange(quickFilter.key, value)
                   }
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] text-muted-foreground">
                     <SelectValue
                       placeholder={quickFilter.placeholder || quickFilter.label}
                     />
@@ -370,6 +372,7 @@ export function DataTable<T extends Record<string, any>>({
               );
             })}
 
+          {extraFiltersComponent}
           {filterable && (
             <div className="relative">
               <Button
@@ -431,7 +434,7 @@ export function DataTable<T extends Record<string, any>>({
               Bỏ lọc
             </Button>
           )}
-          
+
           {onCreate && (
             <Button onClick={onCreate} size="default" className="gap-2">
               <Plus className="h-4 w-4" />
@@ -509,8 +512,8 @@ export function DataTable<T extends Record<string, any>>({
                         filterType === "date"
                           ? "date"
                           : filterType === "number"
-                          ? "number"
-                          : "text"
+                            ? "number"
+                            : "text"
                       }
                       placeholder={
                         column.filterPlaceholder || `Lọc theo ${column.header}`
@@ -578,8 +581,8 @@ export function DataTable<T extends Record<string, any>>({
                     "font-semibold",
                     column.headerClassName,
                     sortable &&
-                      column.sortable !== false &&
-                      "cursor-pointer hover:bg-muted/50"
+                    column.sortable !== false &&
+                    "cursor-pointer hover:bg-muted/50"
                   )}
                   onClick={() =>
                     sortable &&
