@@ -52,7 +52,7 @@ export const staffNavMain: NavItem[] = [
     ],
   },
   {
-    title: "Quản lý Đơn hàng",
+    title: "Quản lý đơn hàng",
     url: "/staff/orders",
     icon: ShoppingBag,
   },

@@ -107,7 +107,7 @@ export const adminNavMain: NavItem[] = [
     ],
   },
   {
-    title: "Cấu hình Hệ thống AI",
+    title: "Cấu hình hệ thống AI",
     url: "/admin/ai-config",
     icon: Cpu,
   },
@@ -129,7 +129,7 @@ export const adminNavMain: NavItem[] = [
   //   ],
   // },
   {
-    title: "Quản lý Đơn hàng",
+    title: "Quản lý đơn hàng",
     url: "/admin/orders",
     icon: ShoppingBag,
   },

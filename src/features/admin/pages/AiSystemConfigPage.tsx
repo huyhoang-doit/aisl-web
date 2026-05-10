@@ -12,15 +12,15 @@ import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Slider } from "@/shared/components/ui/slider";
 import { toast } from "sonner";
-import { 
-  Loader2, 
-  Cpu, 
-  Sliders, 
-  ShieldCheck, 
-  Eye, 
-  RefreshCw, 
-  Save, 
-  Info, 
+import {
+  Loader2,
+  Cpu,
+  Sliders,
+  ShieldCheck,
+  Eye,
+  RefreshCw,
+  Save,
+  Info,
   Sparkles,
   Zap,
   AlertTriangle
@@ -50,7 +50,7 @@ const AiSystemConfigPage = () => {
       const responseData = response?.data || {};
       const innerData = responseData.data || responseData;
       const config = innerData.config || innerData.settings || innerData;
-      
+
       return {
         CONFIDENCE_THRESHOLD: Number(config?.CONFIDENCE_THRESHOLD ?? DEFAULT_SETTINGS.CONFIDENCE_THRESHOLD),
         COSINE_THRESHOLD: Number(config?.COSINE_THRESHOLD ?? DEFAULT_SETTINGS.COSINE_THRESHOLD),
@@ -127,32 +127,32 @@ const AiSystemConfigPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">Cấu hình Hệ thống AI</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Cấu hình hệ thống AI</h1>
           </div>
           <p className="text-muted-foreground mt-1">
             Điều chỉnh các thông số và ngưỡng nhận diện khuôn mặt, chống giả mạo của mô hình AI Lockerly.
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2 self-stretch md:self-auto">
-          <Button 
-            variant="outline" 
-            onClick={() => refetch()} 
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
             disabled={isFetching}
             className="flex-1 md:flex-none gap-2 hover:bg-muted"
           >
             <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
             Làm mới
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={handleReset}
             className="flex-1 md:flex-none gap-2 hover:bg-muted"
           >
             Mặc định
           </Button>
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={updateMutation.isPending}
             className="flex-1 md:flex-none gap-2 shadow-md shadow-primary/20"
           >
@@ -192,7 +192,7 @@ const AiSystemConfigPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="p-6 space-y-8">
-              
+
               {/* Confidence Threshold */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
@@ -206,8 +206,8 @@ const AiSystemConfigPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       step="0.01"
                       min="0"
                       max="1"
@@ -219,10 +219,10 @@ const AiSystemConfigPage = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-muted-foreground font-medium">0.0</span>
-                  <Slider 
-                    value={[settingsState.CONFIDENCE_THRESHOLD ?? 0.25]} 
-                    min={0} 
-                    max={1} 
+                  <Slider
+                    value={[settingsState.CONFIDENCE_THRESHOLD ?? 0.25]}
+                    min={0}
+                    max={1}
                     step={0.01}
                     onValueChange={(val) => handleSliderChange("CONFIDENCE_THRESHOLD", val)}
                     className="flex-1"
@@ -244,8 +244,8 @@ const AiSystemConfigPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       step="0.01"
                       min="0"
                       max="1"
@@ -257,10 +257,10 @@ const AiSystemConfigPage = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-muted-foreground font-medium">0.0</span>
-                  <Slider 
-                    value={[settingsState.COSINE_THRESHOLD]} 
-                    min={0} 
-                    max={1} 
+                  <Slider
+                    value={[settingsState.COSINE_THRESHOLD]}
+                    min={0}
+                    max={1}
                     step={0.01}
                     onValueChange={(val) => handleSliderChange("COSINE_THRESHOLD", val)}
                     className="flex-1"
@@ -282,8 +282,8 @@ const AiSystemConfigPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       step="0.01"
                       min="0"
                       max="1"
@@ -295,10 +295,10 @@ const AiSystemConfigPage = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-muted-foreground font-medium">0.0</span>
-                  <Slider 
-                    value={[settingsState.QUALITY_THRESHOLD]} 
-                    min={0} 
-                    max={1} 
+                  <Slider
+                    value={[settingsState.QUALITY_THRESHOLD]}
+                    min={0}
+                    max={1}
                     step={0.01}
                     onValueChange={(val) => handleSliderChange("QUALITY_THRESHOLD", val)}
                     className="flex-1"
@@ -320,8 +320,8 @@ const AiSystemConfigPage = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       step="0.01"
                       min="0"
                       max="1"
@@ -333,10 +333,10 @@ const AiSystemConfigPage = () => {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs text-muted-foreground font-medium">0.0</span>
-                  <Slider 
-                    value={[settingsState.SPOOF_THRESHOLD]} 
-                    min={0} 
-                    max={1} 
+                  <Slider
+                    value={[settingsState.SPOOF_THRESHOLD]}
+                    min={0}
+                    max={1}
                     step={0.01}
                     onValueChange={(val) => handleSliderChange("SPOOF_THRESHOLD", val)}
                     className="flex-1"
