@@ -4,17 +4,17 @@ import { hardwareApi } from "../features/hardware/api/hardware.api";
 import { type HardwareMonitorQueryParams, type HardwareMonitorStats } from "../features/hardware/types/hardware.types";
 import { format, formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
-import { 
-  Loader2, 
-  Activity, 
-  Server, 
-  XCircle, 
-  DoorOpen, 
-  Signal, 
-  SignalLow, 
+import {
+  Loader2,
+  Activity,
+  Server,
+  XCircle,
+  DoorOpen,
+  Signal,
+  SignalLow,
   MapPin,
   RefreshCw,
-  Search
+  Search,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import {
@@ -47,53 +47,52 @@ export default function ManageHardwarePage() {
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
     queryKey: ["hardware-monitor", params],
     queryFn: () => hardwareApi.getMonitorStatus(params),
-    refetchInterval: 30000, // Tự động làm mới mỗi 30 giây
+    refetchInterval: 30000,
   });
 
   const stats: HardwareMonitorStats[] = data?.statuses || [];
   const pagination = data?.pagination;
 
-  // Tính toán thống kê tổng quát
   const totalCabinets = pagination?.total || 0;
-  const onlineCabinets = stats.filter(s => s.isOnline).length;
-  const offlineCabinets = stats.filter(s => !s.isOnline).length;
+  const onlineCabinets = stats.filter((s) => s.isOnline).length;
+  const offlineCabinets = stats.filter((s) => !s.isOnline).length;
   const totalOpenDoors = stats.reduce((acc, curr) => acc + (curr.openDoors || 0), 0);
 
-  const filteredStats = stats.filter(cabinet => 
-    cabinet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cabinet.cabinetId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cabinet.locationName?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStats = stats.filter(
+    (cabinet) =>
+      cabinet.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cabinet.cabinetId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cabinet.locationName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div className="p-6 space-y-8 max-w-[1600px] mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="container mx-auto py-6 space-y-6">
+      {/* Header — đồng bộ với AdminDashboardPage */}
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Giám sát hệ thống tủ
-          </h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-2xl font-bold tracking-tight">Giám sát hệ thống tủ</h1>
+          <p className="text-muted-foreground">
             Theo dõi trạng thái kết nối và sức khỏe phần cứng thời gian thực.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground italic flex items-center gap-1">
+          <span className="text-xs text-muted-foreground italic">
             {isFetching ? "Đang cập nhật..." : "Cập nhật tự động sau 30s"}
           </span>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => refetch()} 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => refetch()}
             disabled={isFetching}
-            className="shadow-sm"
+            className="shadow-sm gap-2"
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
             Làm mới
           </Button>
         </div>
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="pt-6">
@@ -102,7 +101,7 @@ export default function ManageHardwarePage() {
                 <p className="text-sm font-medium text-muted-foreground">Tổng số cụm tủ</p>
                 <h3 className="text-2xl font-bold mt-1">{totalCabinets}</h3>
               </div>
-              <div className="p-2 bg-blue-50 rounded-lg">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
                 <Server className="w-5 h-5 text-blue-500" />
               </div>
             </div>
@@ -114,9 +113,9 @@ export default function ManageHardwarePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Đang hoạt động</p>
-                <h3 className="text-2xl font-bold mt-1 text-green-600">{onlineCabinets}</h3>
+                <h3 className="text-2xl font-bold mt-1 text-green-500">{onlineCabinets}</h3>
               </div>
-              <div className="p-2 bg-green-50 rounded-lg">
+              <div className="p-2 bg-green-500/10 rounded-lg">
                 <Signal className="w-5 h-5 text-green-500" />
               </div>
             </div>
@@ -131,9 +130,9 @@ export default function ManageHardwarePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Mất kết nối</p>
-                <h3 className="text-2xl font-bold mt-1 text-red-600">{offlineCabinets}</h3>
+                <h3 className="text-2xl font-bold mt-1 text-red-500">{offlineCabinets}</h3>
               </div>
-              <div className="p-2 bg-red-50 rounded-lg">
+              <div className="p-2 bg-red-500/10 rounded-lg">
                 <SignalLow className="w-5 h-5 text-red-500" />
               </div>
             </div>
@@ -145,9 +144,9 @@ export default function ManageHardwarePage() {
             <div className="flex justify-between items-start">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Cửa đang mở</p>
-                <h3 className="text-2xl font-bold mt-1 text-orange-600">{totalOpenDoors}</h3>
+                <h3 className="text-2xl font-bold mt-1 text-orange-500">{totalOpenDoors}</h3>
               </div>
-              <div className="p-2 bg-orange-50 rounded-lg">
+              <div className="p-2 bg-orange-500/10 rounded-lg">
                 <DoorOpen className="w-5 h-5 text-orange-500" />
               </div>
             </div>
@@ -155,8 +154,9 @@ export default function ManageHardwarePage() {
         </Card>
       </div>
 
-      <Card className="shadow-sm border-none bg-slate-50/50">
-        <CardHeader className="pb-3 px-6">
+      {/* Detail Table Card */}
+      <Card className="shadow-sm">
+        <CardHeader className="pb-3 px-6 bg-muted/30 border-b">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />
@@ -167,7 +167,7 @@ export default function ManageHardwarePage() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Tìm kiếm tủ..."
-                  className="pl-9 bg-white"
+                  className="pl-9"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -182,7 +182,7 @@ export default function ManageHardwarePage() {
                   }))
                 }
               >
-                <SelectTrigger className="w-full md:w-[180px] bg-white">
+                <SelectTrigger className="w-full md:w-[180px]">
                   <SelectValue placeholder="Tất cả trạng thái" />
                 </SelectTrigger>
                 <SelectContent>
@@ -194,12 +194,12 @@ export default function ManageHardwarePage() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="px-0">
-          <div className="overflow-hidden bg-white border-y">
+        <CardContent className="px-0 pb-0">
+          <div className="overflow-hidden border-b">
             <Table>
-              <TableHeader className="bg-slate-50">
-                <TableRow>
-                  <TableHead className="w-[200px] pl-6">Cabinet & Vị trí</TableHead>
+              <TableHeader>
+                <TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead className="w-[200px] pl-6">Cabinet &amp; Vị trí</TableHead>
                   <TableHead>Trạng thái</TableHead>
                   <TableHead>Tín hiệu cuối</TableHead>
                   <TableHead>Tổng ngăn</TableHead>
@@ -238,16 +238,16 @@ export default function ManageHardwarePage() {
                   </TableRow>
                 ) : (
                   filteredStats.map((cabinet) => (
-                    <TableRow key={cabinet.cabinetId} className="hover:bg-slate-50/80 transition-colors">
+                    <TableRow key={cabinet.cabinetId} className="hover:bg-muted/30 transition-colors">
                       <TableCell className="pl-6 py-4">
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-900">{cabinet.name}</span>
+                          <span className="font-bold">{cabinet.name}</span>
                           <span className="text-xs text-muted-foreground flex items-center mt-1">
                             <MapPin className="w-3 h-3 mr-1" />
                             {cabinet.locationName || "Chưa gán vị trí"}
                           </span>
-                          <code className="text-[10px] mt-1 bg-slate-100 px-1 py-0.5 rounded w-fit text-slate-500 uppercase">
-                            ID: {cabinet.cabinetId.split('-')[0]}...
+                          <code className="text-[10px] mt-1 bg-muted px-1 py-0.5 rounded w-fit text-muted-foreground uppercase">
+                            ID: {cabinet.cabinetId.split("-")[0]}...
                           </code>
                         </div>
                       </TableCell>
@@ -255,14 +255,14 @@ export default function ManageHardwarePage() {
                         {cabinet.isOnline ? (
                           <div className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none px-2 py-0.5">
+                            <Badge className="bg-green-500/15 text-green-600 dark:text-green-400 hover:bg-green-500/15 border-none px-2 py-0.5">
                               ONLINE
                             </Badge>
                           </div>
                         ) : (
                           <div className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full bg-red-400" />
-                            <Badge className="bg-red-50 text-red-600 hover:bg-red-50 border-none px-2 py-0.5">
+                            <Badge className="bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/15 border-none px-2 py-0.5">
                               OFFLINE
                             </Badge>
                           </div>
@@ -276,8 +276,8 @@ export default function ManageHardwarePage() {
                               : "N/A"}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
-                            {cabinet.lastHeartbeat 
-                              ? `${formatDistanceToNow(new Date(cabinet.lastHeartbeat), { addSuffix: true, locale: vi })}` 
+                            {cabinet.lastHeartbeat
+                              ? formatDistanceToNow(new Date(cabinet.lastHeartbeat), { addSuffix: true, locale: vi })
                               : "Chưa nhận tín hiệu"}
                           </span>
                         </div>
@@ -291,21 +291,21 @@ export default function ManageHardwarePage() {
                       <TableCell>
                         <div className="space-y-1.5 w-[140px]">
                           <div className="flex justify-between text-[10px] font-medium">
-                            <span className="text-green-600">Ổn định: {cabinet.onlineLockers}</span>
-                            <span className="text-red-600">Lỗi: {cabinet.offlineLockers}</span>
+                            <span className="text-green-500">Ổn định: {cabinet.onlineLockers}</span>
+                            <span className="text-red-500">Lỗi: {cabinet.offlineLockers}</span>
                           </div>
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden flex">
-                            <div 
-                              className="h-full bg-green-500" 
+                          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden flex">
+                            <div
+                              className="h-full bg-green-500"
                               style={{ width: `${(cabinet.onlineLockers / cabinet.totalLockers) * 100}%` }}
                             />
-                            <div 
-                              className="h-full bg-red-500" 
+                            <div
+                              className="h-full bg-red-500"
                               style={{ width: `${(cabinet.offlineLockers / cabinet.totalLockers) * 100}%` }}
                             />
                           </div>
                           {cabinet.openDoors > 0 && (
-                            <div className="flex items-center gap-1 text-[10px] text-orange-600 font-semibold">
+                            <div className="flex items-center gap-1 text-[10px] text-orange-500 font-semibold">
                               <DoorOpen className="w-3 h-3" />
                               {cabinet.openDoors} cửa đang mở
                             </div>
@@ -324,9 +324,9 @@ export default function ManageHardwarePage() {
             </Table>
           </div>
 
-          {/* Pagination Controls */}
+          {/* Pagination */}
           {pagination && pagination.total > params.limit! && (
-            <div className="flex items-center justify-between p-4 px-6 bg-white border-b">
+            <div className="flex items-center justify-between p-4 px-6 border-t">
               <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 Trang {pagination.page} / {Math.ceil(pagination.total / pagination.limit)}
               </span>

@@ -123,14 +123,11 @@ const AiSystemConfigPage = () => {
 
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-5">
+    <div className="container mx-auto py-6 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-lg text-primary">
-              <Cpu className="h-6 w-6" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight">Cấu hình Hệ thống AI</h1>
+            <h1 className="text-2xl font-bold tracking-tight">Cấu hình Hệ thống AI</h1>
           </div>
           <p className="text-muted-foreground mt-1">
             Điều chỉnh các thông số và ngưỡng nhận diện khuôn mặt, chống giả mạo của mô hình AI Lockerly.

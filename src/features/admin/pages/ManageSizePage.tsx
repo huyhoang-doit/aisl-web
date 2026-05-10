@@ -106,7 +106,6 @@ const ManageSizePage = () => {
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Ruler className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight">Quản lý kích thước</h1>
           </div>
           <p className="text-muted-foreground mt-2">
