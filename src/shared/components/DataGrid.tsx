@@ -198,7 +198,7 @@ export function DataGrid<T extends Record<string, any>>({
                     handleQuickFilterChange(quickFilter.key, value)
                   }
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className="w-[180px] text-muted-foreground">
                     <SelectValue
                       placeholder={quickFilter.placeholder || quickFilter.label}
                     />
@@ -330,8 +330,8 @@ export function DataGrid<T extends Record<string, any>>({
                         filterType === "date"
                           ? "date"
                           : filterType === "number"
-                          ? "number"
-                          : "text"
+                            ? "number"
+                            : "text"
                       }
                       placeholder={
                         column.filterPlaceholder || `Lọc theo ${column.header}`
@@ -383,22 +383,22 @@ export function DataGrid<T extends Record<string, any>>({
       {/* Grid */}
       {isLoading ? (
         <div
-            className={cn(
-              "grid gap-4",
-              getGridClass(gridCols.default),
-              gridCols.md && `md:${getGridClass(gridCols.md)}`,
-              gridCols.lg && `lg:${getGridClass(gridCols.lg)}`,
-              gridCols.xl && `xl:${getGridClass(gridCols.xl || gridCols.lg)}`
-            )}
+          className={cn(
+            "grid gap-4",
+            getGridClass(gridCols.default),
+            gridCols.md && `md:${getGridClass(gridCols.md)}`,
+            gridCols.lg && `lg:${getGridClass(gridCols.lg)}`,
+            gridCols.xl && `xl:${getGridClass(gridCols.xl || gridCols.lg)}`
+          )}
         >
           {Array.from({ length: 6 }).map((_, i) => (
-             <div key={i} className="flex flex-col space-y-3">
-               <Skeleton className="h-[125px] w-full rounded-xl bg-muted" />
-               <div className="space-y-2">
-                 <Skeleton className="h-4 w-[85%] bg-muted/60" />
-                 <Skeleton className="h-4 w-[60%] bg-muted/60" />
-               </div>
-             </div>
+            <div key={i} className="flex flex-col space-y-3">
+              <Skeleton className="h-[125px] w-full rounded-xl bg-muted" />
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-[85%] bg-muted/60" />
+                <Skeleton className="h-4 w-[60%] bg-muted/60" />
+              </div>
+            </div>
           ))}
         </div>
       ) : data.length === 0 ? (

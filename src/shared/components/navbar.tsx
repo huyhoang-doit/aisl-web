@@ -93,7 +93,7 @@ export function Navbar() {
           <PopoverContent className="w-80 p-0" align="end">
             <Tabs defaultValue="all" className="w-full">
               <div className="flex items-center justify-between px-4 py-2 border-b">
-                <h4 className="font-semibold text-sm">Thông báo</h4>
+                <h4 className="font-semibold text-sm">Thông báo nè</h4>
                 {unreadCount > 0 && (
                   <Button
                     variant="ghost"
@@ -261,9 +261,8 @@ function NotificationList({
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent cursor-pointer ${
-            !notification.read ? "bg-primary/5" : ""
-          }`}
+          className={`group flex items-start gap-3 px-4 py-3 transition-colors hover:bg-accent cursor-pointer ${!notification.read ? "bg-primary/5" : ""
+            }`}
           onClick={() => {
             if (!notification.read) {
               onMarkAsRead(notification.id);

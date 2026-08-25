@@ -30,7 +30,7 @@ export const notificationService = {
     if (params?.orderDirection) searchParams.set('orderDirection', params.orderDirection);
 
     const query = searchParams.toString();
-    const url = query ? `/users/notifications?${query}` : '/users/notifications';
+    const url = query ? `/users/notifications/admin?${query}` : '/users/notifications/admin';
     return api.get<any>(url).then((res): GetNotificationsResponse => res.data);
   },
 

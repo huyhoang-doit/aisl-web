@@ -99,10 +99,10 @@ const AdminDashboardPage = () => {
 
   const lockerPieData = lockerStats
     ? [
-        { name: "Sử dụng", value: lockerStats.occupiedLockers },
-        { name: "Trống", value: lockerStats.availableLockers },
-        { name: "Ngoại tuyến", value: lockerStats.offlineLockers },
-      ]
+      { name: "Sử dụng", value: lockerStats.occupiedLockers },
+      { name: "Trống", value: lockerStats.availableLockers },
+      { name: "Ngoại tuyến", value: lockerStats.offlineLockers },
+    ]
     : [];
 
   const revenueByDayData = revenueStats?.revenueByDay
@@ -110,7 +110,7 @@ const AdminDashboardPage = () => {
     : [];
 
   return (
-    <div className="p-4 sm:p-8 space-y-8 max-w-[1600px] mx-auto pb-20">
+    <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Tổng quan Hệ thống</h1>
@@ -432,13 +432,12 @@ const AdminDashboardPage = () => {
                               {cab.lockerStats?.map((locker: any) => (
                                 <div
                                   key={locker.lockerId}
-                                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-[10px] transition-all hover:scale-105 ${
-                                    locker.currentStatus === "OCCUPIED"
+                                  className={`flex flex-col items-center justify-center p-2 rounded-lg border text-[10px] transition-all hover:scale-105 ${locker.currentStatus === "OCCUPIED"
                                       ? "bg-blue-500/10 border-blue-500/30 text-blue-500"
                                       : locker.hwState === "OFFLINE"
-                                      ? "bg-red-500/10 border-red-500/30 text-red-500"
-                                      : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
-                                  }`}
+                                        ? "bg-red-500/10 border-red-500/30 text-red-500"
+                                        : "bg-emerald-500/10 border-emerald-500/30 text-emerald-500"
+                                    }`}
                                 >
                                   <span className="font-bold">{locker.lockerLabel}</span>
                                   <span className="opacity-70 scale-[0.8]">{locker.currentStatus}</span>
